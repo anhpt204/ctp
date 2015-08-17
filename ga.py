@@ -27,12 +27,12 @@ from deap import tools
 from problem import CTPProblem
 
 # load problem
-data_path = '/home/pta/projects/cvt/data_ctp/kroA-13-12-75-1.ctp'
+data_path = '/home/pta/projects/ctp/data_ctp/kroA-13-12-75-1.ctp'
 problem = CTPProblem()
 problem.load_data(data_path)
 
 # ignore depot
-IND_SIZE = problem.num_of_nodes + problem.num_of_obligatory_nodes - 1
+IND_SIZE = problem.num_of_nodes + problem.num_of_obligatory_nodes -1
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, typecode='i', fitness=creator.FitnessMin)
@@ -54,7 +54,7 @@ def split(tour):
     # V[j] = cost of shortest path from node 0 to node j
     V = []
     # predec[j] predecessor of tour[j] 
-    predec = []*(t+1)
+    predec = [-1]*(t+1)
     # initialize
     V.append(None)
     for _ in xrange(t):
@@ -63,7 +63,7 @@ def split(tour):
     V[0] = 0
     predec[0] = 0
     
-    for i in xrange(t):
+    for i in xrange(1, t):
         j = i
         load = 0
         node_i = tour[i]
@@ -74,26 +74,26 @@ def split(tour):
             load += problem.nodes[node_i].load
                         
             if i == j:
-                cost = problem.nodes[0].cost_dict[node_i] 
-                + problem.nodes[node_i].visited_cost
+                cost = problem.nodes[0].cost_dict[node_i] \
+                + problem.nodes[node_i].visited_cost \
                 + problem.nodes[node_i].cost_dict[0]
             
             else:
-                cost -= problem.nodes[tour[j-1]].cost_dict[0]
-                + problem.nodes[tour[j-1]].cost_dict[node_j]
-                + problem.nodes[node_j].visited_cost
+                cost = cost - problem.nodes[tour[j-1]].cost_dict[0] \
+                + problem.nodes[tour[j-1]].cost_dict[node_j] \
+                + problem.nodes[node_j].visited_cost \
                 + problem.nodes[node_j].cost_dict[0]
                 
             if cost <= problem.vehicle_capacity and load <= problem.max_nodes_per_route and V[i-1] + cost < V[j]:
                 V[j] = V[i-1] + cost
                 predec[j] = i-1
                 
-            i += 1
+            j += 1
             
-            if j > t or load > problem.max_nodes_per_route or cost > problem.vehicle_capacity:
+            if j >= t or load > problem.max_nodes_per_route or cost > problem.vehicle_capacity:
                 break
               
-        return V[t], predec
+    return V[t], predec
                 
                 
         
@@ -120,11 +120,10 @@ def eval(individual):
             break
         
     # split tour and return total cost
+    
+    best_cost, backtrack = split(tour)
         
-    distance = distance_map[individual[-1]][individual[0]]
-    for gene1, gene2 in zip(individual[0:-1], individual[1:]):
-        distance += distance_map[gene1][gene2]
-    return distance,
+    return best_cost,
 
 toolbox.register("mate", tools.cxPartialyMatched)
 toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.05)

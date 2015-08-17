@@ -19,7 +19,7 @@ class CTPNode():
         self.cost_dict = {}
         
         # fixed cost associated with visiting this node
-        self.visted_cost = visited_cost
+        self.visited_cost = visited_cost
         
         # a solution is feasible if this node is covered at least coverage_demand times
         self.coverage_demand = coverage_demand
@@ -55,6 +55,7 @@ class CTPProblem():
             id1, id2 = [int(x) for x in xs[:2]]
             distance = float(xs[-1])
             self.nodes[id1].cost_dict[id2] = distance
+            self.nodes[id2].cost_dict[id1] = distance
             
             i += 1
             line = lines[i]
