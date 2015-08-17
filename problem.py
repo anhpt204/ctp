@@ -74,6 +74,6 @@ class CTPProblem():
         return set(self.nodes[node_id].cover_list)
 
 if __name__ == '__main__':
-    data_path = '/home/pta/projects/cvt/data_ctp/kroA-13-12-75-1.ctp'
+    data_path = '/home/pta/projects/ctp/data_ctp/kroA-13-12-75-1.ctp'
     problem = CTPProblem()
     problem.load_data(data_path)
