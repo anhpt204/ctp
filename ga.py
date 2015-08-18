@@ -25,89 +25,46 @@ from deap import creator
 from deap import tools
 
 from problem import CTPProblem
+from util import split
+from os.path import join
 
 # load problem
-data_path = '/home/pta/projects/ctp/data_ctp/kroA-25-75-100-4.ctp'
+# data_path = '/home/pta/projects/ctp/data_ctp/kroA-13-12-75-4.ctp'
 problem = CTPProblem()
-problem.load_data(data_path)
-
-# ignore depot
-IND_SIZE = problem.num_of_nodes + problem.num_of_obligatory_nodes -1
-
+# problem.load_data(data_path)
+toolbox = base.Toolbox()
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, typecode='i', fitness=creator.FitnessMin)
 
-toolbox = base.Toolbox()
 
-# Attribute generator
-toolbox.register("indices", random.sample, range(1,IND_SIZE+1), IND_SIZE)
+def initialize():
+    # ignore depot
+    IND_SIZE = problem.num_of_nodes + len(problem.obligatory_nodes) -1
 
-# Structure initializers
-toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.indices)
-toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
-def split(tour):
-    '''
-    basic splitting algorithm 'tour splitting algorithms for vehicle routing problem' - Prins
-    '''
-    t = len(tour)
-    # V[j] = cost of shortest path from node 0 to node j
-    V = []
-    # predec[j] predecessor of tour[j] 
-    predec = [-1]*(t+1)
-    # initialize
-    V.append(None)
-    for _ in xrange(t):
-        V.append(10**10)
+
+    # Attribute generator
+    toolbox.register("indices", random.sample, range(1,IND_SIZE+1), IND_SIZE)
     
-    V[0] = 0
-    predec[0] = 0
-    
-    for i in xrange(1, t + 1):
-        j = i
-        load = 0
-        node_i = tour[i-1]
-        cost = 0
-            
-        while True:
-            node_j = tour[j-1]
-            load += problem.nodes[node_i].load
-                        
-            if i == j:
-                cost = problem.nodes[0].cost_dict[node_i] \
-                + problem.nodes[node_i].visited_cost \
-                + problem.nodes[node_i].cost_dict[0]
-            
-            else:
-                cost = cost - problem.nodes[tour[j-2]].cost_dict[0] \
-                + problem.nodes[tour[j-2]].cost_dict[node_j] \
-                + problem.nodes[node_j].visited_cost \
-                + problem.nodes[node_j].cost_dict[0]
-                
-            if cost <= problem.vehicle_capacity \
-            and load <= problem.max_nodes_per_route \
-            and V[i-1] + cost < V[j]:
-            
-                V[j] = V[i-1] + cost
-                predec[j] = i-1
-                
-            j += 1
-            
-            if j > t or load > problem.max_nodes_per_route or cost > problem.vehicle_capacity:
-                break
-              
-    return V[t], predec
-                
-                
-        
-        
+    # Structure initializers
+    toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.indices)
+    toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+                    
 # evaluate solution
 def eval(individual):
     
     # get tour
     covering_set = set()
     tour = []
-    for node_id in individual:
+    i = 0
+    while True:
+        node_id = individual[i]
+        i+=1
+        # check if node belong to obligatory nodes
+        if problem.obligatory_nodes.issuperset(set([node_id])):
+            tour.append(node_id)
+            continue
+        
         covered_customers = problem.get_set_of_customers_covered_by(node_id)
         
         if covered_customers.issubset(covering_set):
@@ -122,9 +79,13 @@ def eval(individual):
         if len(covering_set) == problem.num_of_customers:
             break
         
+    # append all remaining nodes in individual that also in obligatory nodes into tour
+    for node_id in individual[i:]:
+        if problem.obligatory_nodes.issuperset(set([node_id])):
+            tour.append(node_id)
     # split tour and return total cost
     
-    best_cost, backtrack = split(tour)
+    best_cost, backtrack = split(problem, tour)
         
     return best_cost,
 
@@ -182,10 +143,11 @@ toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.05)
 toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("evaluate", eval)
 
-def main():
-    random.seed(169)
 
-    pop = toolbox.population(n=300)
+def run(job=0):
+    random.seed(1000+job)
+
+    pop = toolbox.population(n=500)
 
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -194,10 +156,32 @@ def main():
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
     
-    algorithms.eaSimple(pop, toolbox, 0.7, 0.2, 40, stats=stats, 
-                        halloffame=hof)
+    algorithms.eaSimple(pop, toolbox, 0.7, 0.2, 200, stats=stats, 
+                        halloffame=hof, verbose=False)
     
-    return pop, stats, hof
+    print 'run ', job, ': ', hof[0].fitness.values[0]
 
+    return hof[0].fitness.values[0]
+
+import glob
 if __name__ == "__main__":
-    main()
+    # load problem
+    data_dir = '/home/pta/projects/ctp/data_ctp5/'
+    Jobs = 30
+    
+    files = glob.glob(data_dir + '*.ctp')
+    lines = []
+    
+    for file in files:
+#     problem = CTPProblem()
+        problem.load_data(join(data_dir, file))
+        initialize()
+        
+        best_x =[]
+        for job in xrange(Jobs):
+            best_cost = run(job)
+            best_x.append(best_cost)
+            
+        lines.append(file + " " + str(min(best_x)))
+
+    open('result.txt', 'w').writelines(lines)

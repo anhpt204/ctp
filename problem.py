@@ -32,7 +32,7 @@ class CTPProblem():
         self.nodes = []
         self.num_of_vehicles = 1
         self.max_nodes_per_route=0
-        self.num_of_obligatory_nodes = 0
+        self.obligatory_nodes = set()
         self.num_of_nodes = None 
         self.num_of_customers = None
         self.vehicle_capacity = vehicle_capacity
@@ -40,10 +40,17 @@ class CTPProblem():
     def load_data(self, data_path):
         lines = open(data_path, 'r').readlines()
         
-        self.num_of_nodes, self.num_of_customers, self.num_of_obligatory_nodes, self.max_nodes_per_route, best_cost = [int(x) for x in lines[0].split()]
+        xs = [int(x) for x in lines[0].split()]
+        self.num_of_nodes = xs[0]
+        self.num_of_customers = xs[1]
+        obligatory_node = xs[2]
+        self.max_nodes_per_route=xs[3]
+        if len(xs)>4:
+            best_cost = xs[4]
         
+        self.obligatory_nodes = set(range(obligatory_node))
         # initialize nodes
-        for i in xrange(self.num_of_nodes + self.num_of_obligatory_nodes):
+        for i in xrange(self.num_of_nodes + obligatory_node):
             node = CTPNode(id, visited_cost=0, coverage_demand=0)
             self.nodes.append(node)
             
