@@ -40,7 +40,7 @@ class CTPProblem():
     def load_data(self, data_path):
         lines = open(data_path, 'r').readlines()
         
-        self.num_of_nodes, self.num_of_customers, self.num_of_obligatory_nodes, self.max_nodes_per_route = [int(x) for x in lines[0].split()]
+        self.num_of_nodes, self.num_of_customers, self.num_of_obligatory_nodes, self.max_nodes_per_route, best_cost = [int(x) for x in lines[0].split()]
         
         # initialize nodes
         for i in xrange(self.num_of_nodes + self.num_of_obligatory_nodes):
