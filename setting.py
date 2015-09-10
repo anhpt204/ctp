@@ -1,0 +1,16 @@
+'''
+Created on Aug 21, 2015
+
+@author: pta
+'''
+JOBS = 5
+NUM_GEN = 200
+POPSIZE = 200
+PCROSS = 1.0
+PMUTATION = 0.0
+INDPB = 0.1
+PLOCALSEARCH = 1.0
+PLS4 = 0.1
+VERBOSE = False
+MAX_TRAILS = 1
+MAX_TRAILS_LS = 20

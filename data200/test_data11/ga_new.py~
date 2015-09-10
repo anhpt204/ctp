@@ -34,7 +34,7 @@ problem = CTPProblem()
 # problem.load_data(data_path)
 toolbox = base.Toolbox()
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-creator.create("Individual", array.array, typecode='i', fitness=creator.FitnessMin)
+creator.create("Individual", array.array, typecode='i', fitness=creator.FitnessMin, giant_tour=list, tours=list)
 
 
 def initialize():
@@ -50,48 +50,70 @@ def initialize():
     toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.indices)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
                     
+def get_giant_tours(individual):
+    '''
+    get giant tours of an individual
+    try MAX_TRAILS times
+    '''
+    giant_tours =[]
+    MAX_TRAILS = 20
+    for start_i in xrange(MAX_TRAILS):
+        # get tour
+        covering_set = set()
+        tour = []
+        i = start_i
+        while True:
+            # infeasible
+            if i >= len(individual):
+                return giant_tours
+            
+            node_id = individual[i]
+            i+=1
+            # check if node belong to obligatory nodes
+            if problem.obligatory_nodes.issuperset(set([node_id])):
+                tour.append(node_id)
+                continue
+            
+            covered_customers = problem.get_set_of_customers_covered_by(node_id)
+            
+            if covered_customers.issubset(covering_set):
+                continue
+            
+            # update tour
+            tour.append(node_id)
+            
+            # update covering set
+            covering_set = covering_set.union(covered_customers)
+            
+            if len(covering_set) == problem.num_of_customers:
+                break
+            
+            
+            
+        # append all remaining nodes in individual that also in obligatory nodes into tour
+        for node_id in individual[i:]:
+            if problem.obligatory_nodes.issuperset(set([node_id])):
+                tour.append(node_id)
+
+        giant_tours.append(tour)
+        
+    return giant_tours
 # evaluate solution
 def eval(individual):
     
-    # get tour
-    covering_set = set()
-    tour = []
-    i = 0
-    while True:
-        # infeasible
-        if i >= len(individual):
-            return 10**20,
-        
-        node_id = individual[i]
-        i+=1
-        # check if node belong to obligatory nodes
-        if problem.obligatory_nodes.issuperset(set([node_id])):
-            tour.append(node_id)
-            continue
-        
-        covered_customers = problem.get_set_of_customers_covered_by(node_id)
-        
-        if covered_customers.issubset(covering_set):
-            continue
-        
-        # update tour
-        tour.append(node_id)
-        
-        # update covering set
-        covering_set = covering_set.union(covered_customers)
-        
-        if len(covering_set) == problem.num_of_customers:
-            break
-        
-        
-        
-    # append all remaining nodes in individual that also in obligatory nodes into tour
-    for node_id in individual[i:]:
-        if problem.obligatory_nodes.issuperset(set([node_id])):
-            tour.append(node_id)
+    best_cost = 10**10
+    best_tour = None
+    # get giant tours of an individual
+    giant_tours = get_giant_tours(individual)
+    # get the best giant tour
+    for giant_tour in giant_tours:    
+        cost, backtrack = split(problem, giant_tour)
+        if cost < best_cost:
+            best_cost = cost
+            best_tour = giant_tour[:]
+
     # split tour and return total cost
-    
-    best_cost, backtrack = split(problem, tour)
+    individual.giant_tour = best_tour[:]
         
     return best_cost,
 
@@ -153,7 +175,7 @@ toolbox.register("evaluate", eval)
 def run(job=0):
     random.seed(1000+job)
 
-    pop = toolbox.population(n=100)
+    pop = toolbox.population(n=300)
 
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -162,23 +184,23 @@ def run(job=0):
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
     
-    algorithms.eaSimple(pop, toolbox, 0.7, 0.2, 500, stats=stats, 
+    algorithms.eaSimple(pop, toolbox, 0.6, 0.4, 200, stats=stats, 
                         halloffame=hof, verbose=False)
     
-    print 'run ', job, ': ', hof[0].fitness.values[0]
+    print 'run ', job, ': ', hof[0].fitness.values[0], ': ', problem.best_cost
 
     return hof[0].fitness.values[0]
 
 import glob, os, datetime
 if __name__ == "__main__":
     # load problem
-    data_dir = '/home/pta/projects/ctp/data_ctp1/'
-    Jobs = 20
+    data_dir = '/home/pta/projects/ctp/test_data1/'
+    Jobs = 10
     
     files = glob.glob(data_dir + '*.ctp')
     lines = []
     
-    files = [os.path.join(data_dir, 'kroB-25-25-50-1.ctp')]
+#     files = [os.path.join(data_dir, 'kroB-1-99-100-4.ctp')]
     
     for file in files:
         time1 = datetime.datetime.now()
@@ -196,4 +218,4 @@ if __name__ == "__main__":
         
         lines.append( file_name + " " + str(min(best_x)) + " " + str(problem.best_cost) + " " + str(time2-time1) + '\n')
 
-    open('result.txt', 'w').writelines(lines)
+    open('result1.txt', 'w').writelines(lines)
