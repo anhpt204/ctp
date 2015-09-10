@@ -399,11 +399,11 @@ def get_giant_tour(problem, individual):
     
     return giant_tour
 
-def calculate_tours_cost(problem, tours):
+def calculate_tours_cost(problem, tours, job):
     '''
     calculate cost of a solution with explain detail
     '''
-    f = open('cost_cal.txt', 'w')
+    f = open('cal_tours_cost.' + str(job), 'w')
     f.write(str(tours) +'\n')
     
     cost = 0

@@ -37,17 +37,17 @@ from mutations import mutLS, mutLS4
 
 # load problem
 # data_path = '/home/pta/projects/ctp/data_ctp/kroA-13-12-75-4.ctp'
-problem = CTPProblem()
+# problem = CTPProblem()
 # problem.load_data(data_path)
 toolbox = base.Toolbox()
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, typecode='i', fitness=creator.FitnessMin, giant_tour=list, tours=list)
 
-giant_tour_cost = {}
-n_same_giant_tour = 0
+# giant_tour_cost = {}
+# n_same_giant_tour = 0
 current_gen = 0
 
-def initialize():
+def initialize(problem):
     # ignore depot
     IND_SIZE = problem.num_of_nodes + len(problem.obligatory_nodes) -1
 
@@ -59,8 +59,15 @@ def initialize():
     # Structure initializers
     toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.indices)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+    toolbox.register("mate", PMX)#PMX)
+    toolbox.register("ls", mutLS, problem=problem)
+    toolbox.register("ls4", mutLS4, problem=problem)
+    toolbox.register("mutate", tools.mutShuffleIndexes, indpb=INDPB)
+    toolbox.register("select", tools.selTournament, tournsize=3)
+    toolbox.register("evaluate", eval, problem=problem)
+    
                     
-def get_giant_tours(individual):
+def get_giant_tours(problem, individual):
     '''
     get giant tours of an individual
     try MAX_TRAILS times
@@ -115,7 +122,7 @@ def get_giant_tours(individual):
         
     return giant_tours
 # evaluate solution
-def eval(individual):
+def eval(individual, problem):
     global n_same_giant_tour
     
     best_cost = 10**10
@@ -133,12 +140,12 @@ def eval(individual):
         cost = None
         backtrack=None
         
-        if giant_tour_cost.has_key(key):
-            n_same_giant_tour += 1
-            cost,backtrack = giant_tour_cost[key]
+        if problem.giant_tour_cost.has_key(key):
+            problem.n_same_giant_tour += 1
+            cost,backtrack = problem.giant_tour_cost[key]
         else:
             cost, backtrack = split(problem, giant_tour)
-            giant_tour_cost[key] =  (cost, backtrack)
+            problem.giant_tour_cost[key] =  (cost, backtrack)
             
         if cost < best_cost:
             best_cost = cost
@@ -152,14 +159,7 @@ def eval(individual):
     return best_cost,
 
 
-toolbox.register("mate", PMX)#PMX)
-toolbox.register("ls", mutLS, problem=problem)
-toolbox.register("ls4", mutLS4, problem=problem)
-toolbox.register("mutate", tools.mutShuffleIndexes, indpb=INDPB)
-toolbox.register("select", tools.selTournament, tournsize=3)
-toolbox.register("evaluate", eval)
-
-def evolve(population, toolbox, cxpb, mutpb, ngen, stats=None, sizeStats=None,
+def evolve(problem, population, toolbox, cxpb, mutpb, ngen, stats=None, sizeStats=None,
              halloffame=None, verbose=__debug__):
     global current_gen
     
@@ -223,7 +223,7 @@ def evolve(population, toolbox, cxpb, mutpb, ngen, stats=None, sizeStats=None,
     return population, logbook
 
 
-def run(job=0):
+def run(problem, job=0):
     random.seed(1002+job)
 
     pop = toolbox.population(n=POPSIZE)
@@ -238,26 +238,27 @@ def run(job=0):
     sizeStats = tools.Statistics(lambda ind: len(ind.giant_tour))
     sizeStats.register('size_avg', numpy.mean)
     
-    evolve(pop, toolbox, PCROSS, PMUTATION, NUM_GEN, stats=stats, sizeStats=sizeStats,
-                        halloffame=hof, verbose=VERBOSE)
+    evolve(problem=problem, population=pop, 
+           toolbox=toolbox, cxpb=PCROSS, mutpb=PMUTATION, 
+           ngen=NUM_GEN, stats=stats, sizeStats=sizeStats,halloffame=hof, verbose=VERBOSE)
     
-    print 'run ', job, ': ', hof[0].fitness.values[0], ': ', problem.best_cost, ': ', n_same_giant_tour
+    print 'run ', job, ': ', hof[0].fitness.values[0], ': ', problem.best_cost, ': ', problem.n_same_giant_tour
 
     print hof[0].giant_tour
     print hof[0].tours
-    calculate_tours_cost(problem, hof[0].tours)
+    calculate_tours_cost(problem, hof[0].tours, job)
     return hof[0].fitness.values[0]
 
 import glob, os, datetime
 if __name__ == "__main__":
     # load problem
-    data_dir = '/home/pta/projects/ctp/data_ctp/A/A24/'
+    data_dir = 'data_ctp/A/'
 #     Jobs = 10
     
     files = glob.glob(data_dir + '*.ctp')
     lines = []
     
-#     files = [os.path.join(data_dir, 'A2-10-50-150-6.ctp')]
+    files = [os.path.join(data_dir, 'A2-10-50-150-6.ctp')]
 #     files = [os.path.join(data_dir, 'A2-20-100-100-8.ctp')]
     
     
@@ -265,16 +266,21 @@ if __name__ == "__main__":
         time1 = datetime.datetime.now()
         file_name = os.path.basename(file)
         print file_name
-        problem.load_data(file)
-        initialize()
+        
+        problem = CTPProblem(data_path=file)
+        
+        initialize(problem=problem)
         
         best_x =[]
+        
         for job in xrange(JOBS):
-            best_cost = run(job)
+            
+            best_cost = run(problem=problem, job=job)
+            
             best_x.append(best_cost)
             
         time2 = datetime.datetime.now()
         
         lines.append( file_name + " " + str(min(best_x)) + " " + str(problem.best_cost) + " " + str(time2-time1) + '\n')
 
-    open('resultA24.txt', 'w').writelines(lines)
+    open('resultA_test.txt', 'w').writelines(lines)

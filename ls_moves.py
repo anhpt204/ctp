@@ -6,7 +6,8 @@ Created on Aug 24, 2015
 from math import fabs
 from copy import deepcopy
 import random
-from util import get_tour_cost, cover_all_customers, concat
+from util import get_tour_cost, cover_all_customers, concat, remove_node, split,\
+    extract_tours
 
 def validate_tour(tour, value):
     while True:
@@ -387,10 +388,24 @@ def move10(problem, individual):
                         
                 new_tour[node_idx] = old_node
                         
+            # if have improvement
             if best_tours:
-                new_ind.tours = best_tours                        
-                new_ind.giant_tour = concat(best_tours)
-                new_ind.fitness.values = old_fitness - old_tour_cost + best_tour_cost,
+                
+                giant_tour = concat(best_tours)
+                # try to remove node
+                better_giant_tour = remove_node(problem, giant_tour)
+                
+                if len(better_giant_tour) < len(giant_tour):
+                    cost, backtrack = split(problem, better_giant_tour)
+                    
+                    new_ind.giant_tour = better_giant_tour
+                    new_ind.tours = extract_tours(better_giant_tour, backtrack)
+                    new_ind.fitness.values = cost,
+                else:
+                    new_ind.giant_tour = giant_tour
+                    new_ind.tours = best_tours                                            
+                    new_ind.fitness.values = old_fitness - old_tour_cost + best_tour_cost,
+                    
                 for i in xrange(len(new_ind)):
                     if new_ind[i] == old_node:
                         new_ind[i] = node

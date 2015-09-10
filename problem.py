@@ -8,10 +8,12 @@ class CTPNode():
     '''
     problem definition is by paper "The generalized Covering Salesman Problem" - Bruce Golden
     '''
-    def __init__(self, id, visited_cost=0, coverage_demand=1, load=1):
+    def __init__(self, id, x=0, y=0,visited_cost=0, coverage_demand=1, load=1):
         # id of node
         self.id = id
         
+        self.x=x
+        self.y=y
         # list of nodes that covered by this node
         self.cover_list = []
         
@@ -28,7 +30,7 @@ class CTPNode():
         
         
 class CTPProblem():
-    def __init__(self, vehicle_capacity=100000):
+    def __init__(self, data_path, vehicle_capacity=100000):
         self.nodes = []
         self.num_of_vehicles = 1
         self.max_nodes_per_route=0
@@ -37,8 +39,12 @@ class CTPProblem():
         self.num_of_customers = None
         self.vehicle_capacity = vehicle_capacity
         self.best_cost = 0
+        self.giant_tour_cost={}
+        self.n_same_giant_tour = 0
         
-    def load_data(self, data_path):
+        self.__load_data(data_path)
+        
+    def __load_data(self, data_path):
         lines = open(data_path, 'r').readlines()
         
         xs = [int(x) for x in lines[0].split()]
@@ -55,7 +61,7 @@ class CTPProblem():
         # initialize nodes
         self.nodes = []
         for i in xrange(self.num_of_nodes + obligatory_node):
-            node = CTPNode(id, visited_cost=0, coverage_demand=0)
+            node = CTPNode(id=i, visited_cost=0, coverage_demand=0)
             self.nodes.append(node)
             
         # load cost matrix

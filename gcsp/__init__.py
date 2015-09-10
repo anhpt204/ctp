@@ -11,15 +11,8 @@ class GCSPProblem(CTPProblem):
         
         lines = open(data_path, 'r').readlines()
         
-        xs = [int(x) for x in lines[0].split()]
-        self.num_of_nodes = xs[0]
-        self.num_of_customers = xs[1]
-        obligatory_node = xs[2]
-        self.max_nodes_per_route=xs[3]
-        if len(xs)>4:
-            self.best_cost = xs[4]
-        else:
-            self.best_cost = 0
+        self.num_of_nodes = int(lines[0])
+        
         
         self.obligatory_nodes = set(range(obligatory_node))
         # initialize nodes
