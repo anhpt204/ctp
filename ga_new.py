@@ -18,6 +18,7 @@ import random
 import json
 
 import numpy
+import operator
 
 from deap import algorithms
 from deap import base
@@ -35,6 +36,7 @@ from crossovers import PMX
 from genetic import varAndLS
 from mutations import mutLS, mutLS4
 
+
 # load problem
 # data_path = '/home/pta/projects/ctp/data_ctp/kroA-13-12-75-4.ctp'
 # problem = CTPProblem()
@@ -47,14 +49,48 @@ creator.create("Individual", array.array, typecode='i', fitness=creator.FitnessM
 # n_same_giant_tour = 0
 current_gen = 0
 
+def pop_init(problem, k=3):
+    '''
+    khoi tao individual bang cach chon 1 trong k diem (chua co trong) gan no nhat
+    '''
+    ind_size = problem.num_of_nodes + len(problem.obligatory_nodes) - 1
+    # khoi tao bang 1 diem ngau nhien
+    ind = [random.randint(1, ind_size)]
+    ind_set = set(ind)
+    
+    while len(ind) < ind_size:
+        
+        # get the last node in ind
+        node = ind[-1]
+        
+        # lay tap cac node sap xep theo khoang cach toi node
+        distance_dict = problem.nodes[node].cost_dict
+        
+        sorted_distance = sorted(distance_dict.items(), key=operator.itemgetter(1))
+        
+        valid_neighbors=[]
+        for neighbor_node, cost in sorted_distance:
+            if neighbor_node!= 0 and not ind_set.issuperset(set([neighbor_node])):
+                valid_neighbors.append(neighbor_node)
+                
+            if len(valid_neighbors) == k:
+                break
+        # pick one node from valid neighbor nodes
+        next_node = random.sample(valid_neighbors, 1)[0]
+        
+        # update ind and ind_set
+        ind.append(next_node)
+        ind_set.add(next_node)
+        
+    return ind
+
 def initialize(problem):
-    # ignore depot
-    IND_SIZE = problem.num_of_nodes + len(problem.obligatory_nodes) -1
-
-
-
     # Attribute generator
-    toolbox.register("indices", random.sample, range(1,IND_SIZE+1), IND_SIZE)
+    IND_SIZE = problem.num_of_nodes + len(problem.obligatory_nodes) -1
+#     toolbox.register("indices", random.sample, range(1,IND_SIZE+1), IND_SIZE)
+    toolbox.register("indices", pop_init,problem=problem, k=3)
+    
+    
     
     # Structure initializers
     toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.indices)
@@ -224,7 +260,7 @@ def evolve(problem, population, toolbox, cxpb, mutpb, ngen, stats=None, sizeStat
 
 
 def run(problem, job=0):
-    random.seed(1002+job)
+    random.seed(1000+job)
 
     pop = toolbox.population(n=POPSIZE)
 
@@ -252,14 +288,15 @@ def run(problem, job=0):
 import glob, os, datetime
 if __name__ == "__main__":
     # load problem
-    data_dir = 'data_ctp/A/'
+    folder = 'D'
+    data_dir = 'data_ctp/' + folder + '/'
 #     Jobs = 10
     
     files = glob.glob(data_dir + '*.ctp')
     lines = []
     
-    files = [os.path.join(data_dir, 'A2-10-50-150-6.ctp')]
-#     files = [os.path.join(data_dir, 'A2-20-100-100-8.ctp')]
+#     files = [os.path.join(data_dir, 'C1-13-25-75-4.ctp')]
+#     files = [os.path.join(data_dir, 'A2-10-50-150-6.ctp')]
     
     
     for file in files:
@@ -283,4 +320,4 @@ if __name__ == "__main__":
         
         lines.append( file_name + " " + str(min(best_x)) + " " + str(problem.best_cost) + " " + str(time2-time1) + '\n')
 
-    open('resultA_test.txt', 'w').writelines(lines)
+    open(folder+'.out', 'w').writelines(lines)

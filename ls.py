@@ -97,7 +97,7 @@ def ls_move14(problem, individual, num_ls, gen):
         for o in operators:
             move_success, temp_tours = o(individual, tour_i, tour_j, i, j, u, v, x=None, y=None)
 
-            if move_success and is_valid_solution(temp_tours):
+            if move_success and is_valid_solution(problem, temp_tours):
 #               print tour_i, tour_j, i, j, temp_tours
                 cost = get_cost(problem, temp_tours)
                 # if improvement
@@ -108,12 +108,10 @@ def ls_move14(problem, individual, num_ls, gen):
                     break
                     
     # try LS4
-#     if not improvement:
-#         num_ls[gen][0] += 1
-#         ls4_improvement, new_ind = move10(problem, individual)
-#         if ls4_improvement:
-#             num_ls[gen][1] += 1
-#             return new_ind
+    if not improvement:
+        ls4_improvement, new_ind = move10(problem, individual)
+        if ls4_improvement:
+            return new_ind
         
     if improvement:
         individual.tours = best_tours[:]

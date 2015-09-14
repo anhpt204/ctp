@@ -23,11 +23,11 @@ def computeFitness(problem, individual):
         key = tuple(giant_tour)
         
         cost = None
-        if giant_tour_cost.has_key(key):
-            cost, backtrack = giant_tour_cost[key]
+        if problem.giant_tour_cost.has_key(key):
+            cost, backtrack = problem.giant_tour_cost[key]
         else:  
             cost, backtrack = split(problem, giant_tour)
-            giant_tour_cost[key] = (cost, backtrack)
+            problem.giant_tour_cost[key] = (cost, backtrack)
             
         if cost < best_cost:
             best_cost = cost
@@ -59,8 +59,8 @@ def varAndLS(population, toolbox, cxpb, mutpb, num_ls, gen):
             offspring[i], = toolbox.mutate(offspring[i])
             del offspring[i].fitness.values
     
-    lspb = float(gen)/(NUM_GEN*10)
-     
+    lspb = float(gen)/(NUM_GEN * 20)
+#     lspb = 1
     for i in range(len(offspring)):
         if random.random() < lspb:
             offspring[i], = toolbox.ls(individual=offspring[i], num_ls=num_ls, gen=gen)

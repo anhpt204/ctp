@@ -22,6 +22,8 @@ def split(problem, tour):
     '''
     basic splitting algorithm 'tour splitting algorithms for vehicle routing problem' - Prins
     '''
+#     print tour
+    
     t = len(tour)
     # V[j] = cost of shortest path from node 0 to node j
     V = []
@@ -59,8 +61,8 @@ def split(problem, tour):
                 + problem.nodes[node_j].cost_dict[0]
                 
             if cost <= problem.vehicle_capacity \
-            and load <= problem.max_nodes_per_route \
-            and V[i-1] + cost < V[j]:
+                and load <= problem.max_nodes_per_route \
+                and V[i-1] + cost < V[j]:
             
                 V[j] = V[i-1] + cost
                 predec[j] = i-1

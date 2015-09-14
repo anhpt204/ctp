@@ -3,6 +3,7 @@ Created on Aug 17, 2015
 
 @author: pta
 '''
+from os.path import basename
 
 class CTPNode():
     '''
@@ -45,6 +46,8 @@ class CTPProblem():
         self.__load_data(data_path)
         
     def __load_data(self, data_path):
+        self.name = basename(data_path)
+        
         lines = open(data_path, 'r').readlines()
         
         xs = [int(x) for x in lines[0].split()]
@@ -52,6 +55,8 @@ class CTPProblem():
         self.num_of_customers = xs[1]
         obligatory_node = xs[2]
         self.max_nodes_per_route=xs[3]
+        
+        
         if len(xs)>4:
             self.best_cost = xs[4]
         else:

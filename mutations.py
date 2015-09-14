@@ -3,7 +3,7 @@ Created on Sep 8, 2015
 
 @author: pta
 '''
-from ls import ls_prins
+from ls import ls_prins, ls_move14
 from genetic import computeFitness
 from ls_moves import move10
 
@@ -23,7 +23,7 @@ def mutLS(individual, problem, num_ls, gen):
         computeFitness(problem, individual)
     
     individual = ls_prins(problem, individual, num_ls, gen)
-#     individual = ls_move14(individual, num_ls, gen)
+#     individual = ls_move14(problem, individual, num_ls, gen)
     
     return individual,
 
@@ -32,9 +32,9 @@ def mutLS4(individual, problem, num_ls, gen):
         computeFitness(problem, individual)
         
     num_ls[gen][0] += 1
-    ls4_improvement, new_ind = move10(problem, individual)
+    improvement, new_ind = move10(problem, individual)
     
-    if ls4_improvement:
+    if improvement:
         num_ls[gen][1] += 1
         return new_ind,
     
