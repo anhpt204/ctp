@@ -30,6 +30,7 @@ class CTPNode():
         self.load = load
         
         
+        
 class CTPProblem():
     def __init__(self, data_path, vehicle_capacity=100000):
         self.nodes = []
@@ -42,6 +43,8 @@ class CTPProblem():
         self.best_cost = 0
         self.giant_tour_cost={}
         self.n_same_giant_tour = 0
+        
+        self.moves_freq = {}
         
         self.__load_data(data_path)
         

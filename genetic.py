@@ -60,7 +60,7 @@ def varAndLS(population, toolbox, cxpb, mutpb, num_ls, gen):
             del offspring[i].fitness.values
     
     lspb = float(gen)/(NUM_GEN * 20)
-#     lspb = 1
+#     lspb = 0
     for i in range(len(offspring)):
         if random.random() < lspb:
             offspring[i], = toolbox.ls(individual=offspring[i], num_ls=num_ls, gen=gen)

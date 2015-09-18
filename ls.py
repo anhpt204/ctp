@@ -31,6 +31,7 @@ def ls_prins(problem, individual, num_ls, gen):
                     v, y = tour2_tmp[j], tour2_tmp[j+1]
                     # move operators
                     for move in move_operators:
+                                                
                         move_success, temp_tours = move(individual, tour_i, tour_j, i, j, u, v, x, y)
                         
                         
@@ -42,6 +43,14 @@ def ls_prins(problem, individual, num_ls, gen):
                                 best_cost = cost
                                 best_tours = temp_tours[:]
                                 improvement = True
+                                
+                                # update move frequency
+                                
+                                if problem.moves_freq.has_key(move.__name__):
+                                    problem.moves_freq[move.__name__] += 1
+                                else:
+                                    problem.moves_freq[move.__name__] = 1
+                                
                                 break
                     
     # try LS4

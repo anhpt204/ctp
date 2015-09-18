@@ -88,7 +88,7 @@ def initialize(problem):
     # Attribute generator
     IND_SIZE = problem.num_of_nodes + len(problem.obligatory_nodes) -1
 #     toolbox.register("indices", random.sample, range(1,IND_SIZE+1), IND_SIZE)
-    toolbox.register("indices", pop_init,problem=problem, k=3)
+    toolbox.register("indices", pop_init,problem=problem, k=5)
     
     
     
@@ -96,6 +96,7 @@ def initialize(problem):
     toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.indices)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
     toolbox.register("mate", PMX)#PMX)
+#     tools.cxPartialyMatched(ind1, ind2)
     toolbox.register("ls", mutLS, problem=problem)
     toolbox.register("ls4", mutLS4, problem=problem)
     toolbox.register("mutate", tools.mutShuffleIndexes, indpb=INDPB)
@@ -290,6 +291,7 @@ if __name__ == "__main__":
     # load problem
     folder = 'D'
     data_dir = 'data_ctp/' + folder + '/'
+    print data_dir
 #     Jobs = 10
     
     files = glob.glob(data_dir + '*.ctp')
@@ -320,4 +322,6 @@ if __name__ == "__main__":
         
         lines.append( file_name + " " + str(min(best_x)) + " " + str(problem.best_cost) + " " + str(time2-time1) + '\n')
 
+        print problem.moves_freq
+        
     open(folder+'.out', 'w').writelines(lines)
