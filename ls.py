@@ -57,6 +57,11 @@ def ls_prins(problem, individual, num_ls, gen):
     if not improvement:
         ls4_improvement, new_ind = move10(problem, individual)
         if ls4_improvement:
+            if problem.moves_freq.has_key('move10'):
+                problem.moves_freq['move10'] += 1
+            else:
+                problem.moves_freq['move10'] = 1
+                
             return new_ind
     
     if improvement:

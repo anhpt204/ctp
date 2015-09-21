@@ -4,7 +4,7 @@ Created on Aug 21, 2015
 @author: pta
 '''
 JOBS = 1
-NUM_GEN = 200
+NUM_GEN = 100
 POPSIZE = 200
 PCROSS = 1.0
 PMUTATION = 0.0

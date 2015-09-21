@@ -35,6 +35,7 @@ from deap.algorithms import varAnd
 from crossovers import PMX
 from genetic import varAndLS
 from mutations import mutLS, mutLS4
+from datetime import timedelta
 
 
 # load problem
@@ -281,15 +282,16 @@ def run(problem, job=0):
     
     print 'run ', job, ': ', hof[0].fitness.values[0], ': ', problem.best_cost, ': ', problem.n_same_giant_tour
 
-    print hof[0].giant_tour
-    print hof[0].tours
-    calculate_tours_cost(problem, hof[0].tours, job)
-    return hof[0].fitness.values[0]
+#     print hof[0].giant_tour
+#     print hof[0].tours
+#     calculate_tours_cost(problem, hof[0].tours, job)
+
+    return hof[0]
 
 import glob, os, datetime
 if __name__ == "__main__":
     # load problem
-    folder = 'D'
+    folder = 'A'
     data_dir = 'data_ctp/' + folder + '/'
     print data_dir
 #     Jobs = 10
@@ -299,7 +301,7 @@ if __name__ == "__main__":
     
 #     files = [os.path.join(data_dir, 'C1-13-25-75-4.ctp')]
 #     files = [os.path.join(data_dir, 'A2-10-50-150-6.ctp')]
-    
+    moves_freq = {}
     
     for file in files:
         time1 = datetime.datetime.now()
@@ -310,18 +312,42 @@ if __name__ == "__main__":
         
         initialize(problem=problem)
         
-        best_x =[]
+        best_ind = None
         
         for job in xrange(JOBS):
             
-            best_cost = run(problem=problem, job=job)
+            ind = run(problem=problem, job=job)
             
-            best_x.append(best_cost)
-            
+            if best_ind==None or ind.fitness.values[0] < best_ind.fitness.values[0]:
+                best_ind = ind
+                        
         time2 = datetime.datetime.now()
         
-        lines.append( file_name + " " + str(min(best_x)) + " " + str(problem.best_cost) + " " + str(time2-time1) + '\n')
-
-        print problem.moves_freq
+        # instance_name, best_solution, our solution, size, num_vehicle, time, giant_tour, tours
+        d = time2 - time1
+        print d.seconds
         
-    open(folder+'.out', 'w').writelines(lines)
+        lines.append('%s %.2f %.2f %d %d %d %s %s\n' %(file_name, 
+                                                 problem.best_cost,
+                                                 best_ind.fitness.values[0], 
+                                                 len(best_ind.giant_tour), 
+                                                 len(best_ind.tours),
+                                                 d.seconds, 
+                                                 str(best_ind.giant_tour),
+                                                 str(best_ind.tours)
+                                                 ))
+
+#         print problem.moves_freq
+        for k,v in problem.moves_freq.items():
+            if moves_freq.has_key(k):
+                moves_freq[k] += v
+            else:
+                moves_freq[k] = v
+                
+       
+    moves_freq = sorted(moves_freq.items(), key=operator.itemgetter(1))
+     
+    f = open(folder+'.out', 'w')
+    f.writelines(lines)
+    
+    f.write(str(moves_freq))
