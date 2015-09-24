@@ -46,9 +46,9 @@ class CTPProblem():
         
         self.moves_freq = {}
         
-        self.__load_data(data_path)
+        self.load_data(data_path)
         
-    def __load_data(self, data_path):
+    def load_data(self, data_path):
         self.name = basename(data_path)
         
         lines = open(data_path, 'r').readlines()

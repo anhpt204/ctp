@@ -36,6 +36,7 @@ from crossovers import PMX
 from genetic import varAndLS
 from mutations import mutLS, mutLS4
 from datetime import timedelta
+import gcsp
 
 
 # load problem
@@ -291,8 +292,8 @@ def run(problem, job=0):
 import glob, os, datetime
 if __name__ == "__main__":
     # load problem
-    folder = 'A'
-    data_dir = 'data_ctp/' + folder + '/'
+    folder = 'g'
+    data_dir = 'data/' + folder + '/'
     print data_dir
 #     Jobs = 10
     
@@ -308,7 +309,9 @@ if __name__ == "__main__":
         file_name = os.path.basename(file)
         print file_name
         
-        problem = CTPProblem(data_path=file)
+#         problem = CTPProblem(data_path=file)
+        
+        problem = gcsp.GCSPProblem(data_path=file)
         
         initialize(problem=problem)
         
