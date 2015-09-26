@@ -12,7 +12,7 @@ from deap import creator
 from deap import tools
 
 from problem import CTPProblem
-from util import split, extract_tours, get_cost, concat, get_all_solutions,\
+from util import split, extract_tours, get_solution_cost, concat, get_all_solutions,\
     get_giant_tour
 from os.path import join
 

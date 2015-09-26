@@ -26,8 +26,6 @@ from deap import creator
 from deap import tools
 
 from problem import CTPProblem
-from util import split, get_all_solutions, get_giant_tour, extract_tours,\
-    calculate_tours_cost
 from os.path import join
 
 from setting import *
@@ -160,6 +158,8 @@ def get_giant_tours(problem, individual):
         giant_tours.append(tour)
         
     return giant_tours
+
+
 # evaluate solution
 def eval(individual, problem):
     global n_same_giant_tour
@@ -170,7 +170,7 @@ def eval(individual, problem):
     # get giant tours of an individual
 #     giant_tours = get_giant_tours(individual)
 #     giant_tours = get_all_solutions(problem, individual, current_gen)
-    giant_tour = get_giant_tour(problem, individual)
+    giant_tour = problem.get_giant_tour(individual)
     giant_tours = [giant_tour] # :D
     # get the best giant tour
     for giant_tour in giant_tours:    
@@ -183,7 +183,7 @@ def eval(individual, problem):
             problem.n_same_giant_tour += 1
             cost,backtrack = problem.giant_tour_cost[key]
         else:
-            cost, backtrack = split(problem, giant_tour)
+            cost, backtrack = problem.split(giant_tour)
             problem.giant_tour_cost[key] =  (cost, backtrack)
             
         if cost < best_cost:
@@ -193,7 +193,7 @@ def eval(individual, problem):
 
     # split tour and return total cost
     individual.giant_tour = best_tour[:]
-    individual.tours = extract_tours(best_tour, best_backtrack)
+    individual.tours = problem.extract_tours(best_tour, best_backtrack)
         
     return best_cost,
 
@@ -292,7 +292,7 @@ def run(problem, job=0):
 import glob, os, datetime
 if __name__ == "__main__":
     # load problem
-    folder = 'g'
+    folder = 'test'
     data_dir = 'data/' + folder + '/'
     print data_dir
 #     Jobs = 10

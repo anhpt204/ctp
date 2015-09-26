@@ -5,7 +5,6 @@ Created on Sep 8, 2015
 '''
 
 from ls_moves import *
-from util import is_valid_solution, get_cost
 from setting import MAX_TRAILS_LS
 
 # local search
@@ -35,9 +34,9 @@ def ls_prins(problem, individual, num_ls, gen):
                         move_success, temp_tours = move(individual, tour_i, tour_j, i, j, u, v, x, y)
                         
                         
-                        if move_success and is_valid_solution(problem, temp_tours):
+                        if move_success and problem.isFeasibleSolution(temp_tours):
 #                             print tour_i, tour_j, i, j, temp_tours
-                            cost = get_cost(problem, temp_tours)
+                            cost = problem.get_solution_cost(temp_tours)
                             # if improvement
                             if cost < best_cost:
                                 best_cost = cost
@@ -67,7 +66,7 @@ def ls_prins(problem, individual, num_ls, gen):
     if improvement:
         individual.tours = best_tours[:]
         old_giant_tour = individual.giant_tour
-        new_giant_tour = concat(best_tours)
+        new_giant_tour = problem.concat(best_tours)
         changes = {}
         for k, v in zip(old_giant_tour, new_giant_tour):
             changes[k] = v       
@@ -111,9 +110,9 @@ def ls_move14(problem, individual, num_ls, gen):
         for o in operators:
             move_success, temp_tours = o(individual, tour_i, tour_j, i, j, u, v, x=None, y=None)
 
-            if move_success and is_valid_solution(problem, temp_tours):
+            if move_success and problem.isFeasibleSolution(temp_tours):
 #               print tour_i, tour_j, i, j, temp_tours
-                cost = get_cost(problem, temp_tours)
+                cost = problem.get_solution_cost(temp_tours)
                 # if improvement
                 if cost < best_cost:
                     best_cost = cost
@@ -130,7 +129,7 @@ def ls_move14(problem, individual, num_ls, gen):
     if improvement:
         individual.tours = best_tours[:]
         old_giant_tour = individual.giant_tour
-        new_giant_tour = concat(best_tours)
+        new_giant_tour = problem.concat(best_tours)
         changes = {}
         for k, v in zip(old_giant_tour, new_giant_tour):
             changes[k] = v       

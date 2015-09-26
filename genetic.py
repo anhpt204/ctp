@@ -17,7 +17,7 @@ def computeFitness(problem, individual):
     best_backtrack = None
     # get giant tours of an individual
 #     giant_tours = get_all_solutions(problem, individual)
-    giant_tours = [get_giant_tour(problem, individual)]
+    giant_tours = [problem.get_giant_tour(individual)]
     # get the best giant tour
     for giant_tour in giant_tours:  
         key = tuple(giant_tour)
@@ -26,7 +26,7 @@ def computeFitness(problem, individual):
         if problem.giant_tour_cost.has_key(key):
             cost, backtrack = problem.giant_tour_cost[key]
         else:  
-            cost, backtrack = split(problem, giant_tour)
+            cost, backtrack = problem.split(giant_tour)
             problem.giant_tour_cost[key] = (cost, backtrack)
             
         if cost < best_cost:
@@ -35,7 +35,7 @@ def computeFitness(problem, individual):
             best_backtrack = backtrack[:]
                     
     # split tour and return total cost
-    tours = extract_tours(best_tour, best_backtrack)
+    tours = problem.extract_tours(best_tour, best_backtrack)
     
     individual.tours = tours
 

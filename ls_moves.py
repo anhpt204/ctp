@@ -6,8 +6,6 @@ Created on Aug 24, 2015
 from math import fabs
 from copy import deepcopy
 import random
-from util import get_tour_cost, cover_all_customers, concat, remove_node, split,\
-    extract_tours
 
 def validate_tour(tour, value):
     while True:
@@ -359,7 +357,7 @@ def move10(problem, individual):
         
         new_tour = new_tours[tour_idx]
         
-        best_tour_cost = get_tour_cost(problem, new_tour)
+        best_tour_cost = problem.cal_tour_cost(new_tour)
         old_tour_cost = best_tour_cost
 
         for node_idx in xrange(len(new_tour)):
@@ -375,10 +373,10 @@ def move10(problem, individual):
                 new_tour[node_idx] = node
                         
                 # check if this covering all customers
-                if cover_all_customers(problem, new_tours):
+                if problem.isFeasibleTours(new_tours):
                     
                     #check cost improvement
-                    new_tour_cost = get_tour_cost(problem, new_tour)
+                    new_tour_cost = problem.cal_tour_cost(new_tour)
                     
                     # if improvement, return success
                     if new_tour_cost < best_tour_cost:
@@ -391,15 +389,15 @@ def move10(problem, individual):
             # if have improvement
             if best_tours:
                 
-                giant_tour = concat(best_tours)
+                giant_tour = problem.concat(best_tours)
                 # try to remove node
-                better_giant_tour = remove_node(problem, giant_tour)
+                better_giant_tour = problem.remove_node(giant_tour)
                 
                 if len(better_giant_tour) < len(giant_tour):
-                    cost, backtrack = split(problem, better_giant_tour)
+                    cost, backtrack = problem.split(better_giant_tour)
                     
                     new_ind.giant_tour = better_giant_tour
-                    new_ind.tours = extract_tours(better_giant_tour, backtrack)
+                    new_ind.tours = problem.extract_tours(better_giant_tour, backtrack)
                     new_ind.fitness.values = cost,
                 else:
                     new_ind.giant_tour = giant_tour
