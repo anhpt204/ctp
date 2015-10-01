@@ -100,7 +100,7 @@ class CTPProblem():
         '''
         return set(self.nodes[node_id].cover_list)
 
-    def isFeasibleGiantTour(self, giant_tour):
+    def is_giant_tour_satisfy_covering_constraint(self, giant_tour):
         
         # get covering set of all remaining nodes:
         covering_set=set()
@@ -117,7 +117,7 @@ class CTPProblem():
         
         return False
 
-    def isFeasibleTours(self, tours):
+    def is_tours_satisfy_covering_constraint(self, tours):
         
         # get covering set of all remaining nodes:
         covering_set=set()
@@ -261,15 +261,16 @@ class CTPProblem():
             if self.obligatory_nodes.issuperset(set([node])):
                 continue
             # get covering set of all remaining nodes:
-            covering_set=set()
-            for other_node in giant_tour:
-                if other_node != node and not self.obligatory_nodes.issuperset(set([other_node])):
-                    covering_set.update(self.get_set_of_customers_covered_by(other_node))
+            
+#             covering_set=set()
+#             for other_node in giant_tour:
+#                 if other_node != node and not self.obligatory_nodes.issuperset(set([other_node])):
+#                     covering_set.update(self.get_set_of_customers_covered_by(other_node))
+            new_giant_tour = deepcopy(giant_tour)
+            new_giant_tour.remove(node)
                     
-            if len(covering_set) == self.num_of_customers:
+            if self.is_giant_tour_satisfy_covering_constraint(new_giant_tour):
                 have_redundant_node = True
-                new_giant_tour = deepcopy(giant_tour)
-                new_giant_tour.remove(node)
                 return self.remove_node(new_giant_tour)
             
         if not have_redundant_node:

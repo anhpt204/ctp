@@ -3,11 +3,11 @@ Created on Aug 21, 2015
 
 @author: pta
 '''
-JOBS = 1
-NUM_GEN = 100
+JOBS = 10
+NUM_GEN = 200
 POPSIZE = 200
-PCROSS = 1.0
-PMUTATION = 0.0
+PCROSS = 0.6
+PMUTATION = 0.3
 INDPB = 0.1
 PLOCALSEARCH = 1.0
 PLS4 = 0.1

@@ -373,7 +373,7 @@ def move10(problem, individual):
                 new_tour[node_idx] = node
                         
                 # check if this covering all customers
-                if problem.isFeasibleTours(new_tours):
+                if problem.is_tours_satisfy_covering_constraint(new_tours):
                     
                     #check cost improvement
                     new_tour_cost = problem.cal_tour_cost(new_tour)

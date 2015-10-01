@@ -113,7 +113,7 @@ def get_all_solutions(problem, individual, gen):
     new_giant_tours = []
 
     for giant_tour in giant_tours:
-        new_giant_tours.append(remove_node(problem, giant_tour))
+        new_giant_tours.append(problem.remove_node(giant_tour))
     
     return new_giant_tours
         

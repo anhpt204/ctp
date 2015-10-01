@@ -117,7 +117,7 @@ def gen_ctp_data_generalized(conf, data_file):
         lines.append(line)
  
         for max_vertices in max_vertices_per_route:
-            problem_name ='A1-%d-%d-%d.ctp' %(len_v, len_w, max_vertices)
+            problem_name ='D-%d-%d-%d.ctp' %(len_v, len_w, max_vertices)
  
  
             out = open('/home/pta/git/ctp/data/'+problem_name, 'wb')
@@ -222,6 +222,7 @@ if __name__ == '__main__':
     
 #     for job in (1,2,3,4,5):
 #         gen_ctp_data_generalized(job)
-    data_file='/home/pta/git/ctp/data/kroA100.tsp'
-    gen_ctp_data_generalized([(50,50)], data_file)
+    data_file='/home/pta/git/ctp/tsplib/kroD100.tsp'
+    conf=((50,50), (25,75))
+    gen_ctp_data_generalized(conf, data_file)
     print 'DONE'

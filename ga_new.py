@@ -87,7 +87,9 @@ def pop_init(problem, k=3):
 def initialize(problem):
     # Attribute generator
     IND_SIZE = problem.num_of_nodes + len(problem.obligatory_nodes) -1
+    
 #     toolbox.register("indices", random.sample, range(1,IND_SIZE+1), IND_SIZE)
+    
     toolbox.register("indices", pop_init,problem=problem, k=5)
     
     
@@ -292,7 +294,7 @@ def run(problem, job=0):
 import glob, os, datetime
 if __name__ == "__main__":
     # load problem
-    folder = 'test'
+    folder = 'A'
     data_dir = 'data/' + folder + '/'
     print data_dir
 #     Jobs = 10
@@ -300,8 +302,8 @@ if __name__ == "__main__":
     files = glob.glob(data_dir + '*.ctp')
     lines = []
     
-#     files = [os.path.join(data_dir, 'C1-13-25-75-4.ctp')]
-#     files = [os.path.join(data_dir, 'A2-10-50-150-6.ctp')]
+    files = [os.path.join(data_dir, 'A-75-75-4.ctp')]
+#     files = [os.path.join(data_dir, 'A-50-50-6.ctp')]
     moves_freq = {}
     
     for file in files:
@@ -313,6 +315,12 @@ if __name__ == "__main__":
         
         problem = gcsp.GCSPProblem(data_path=file)
         
+        # calculate solution cost
+#         tours = [[72,67,28,24], [5,48,52,18]]
+#         cost = problem.get_solution_cost(tours)
+#         print cost
+#         break
+    
         initialize(problem=problem)
         
         best_ind = None
