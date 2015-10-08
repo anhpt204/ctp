@@ -47,6 +47,8 @@ class CTPProblem():
         
         self.moves_freq = {}
         
+        self.nodes_covering_customer={}
+        
         self.load_data(data_path)
         
     def load_data(self, data_path):
@@ -58,6 +60,7 @@ class CTPProblem():
         self.num_of_nodes = xs[0]
         self.num_of_customers = xs[1]
         obligatory_node = xs[2]
+        
         self.max_nodes_per_route=xs[3]
         
         
@@ -66,7 +69,12 @@ class CTPProblem():
         else:
             self.best_cost = 0
         
-        self.obligatory_nodes = set(range(obligatory_node))
+        self.obligatory_nodes = set(range(1,obligatory_node))
+        
+        # init    
+        for l in xrange(self.num_of_customers):
+            self.nodes_covering_customer[l]=set()
+
         # initialize nodes
         self.nodes = []
         for i in xrange(self.num_of_nodes + obligatory_node):
@@ -93,6 +101,7 @@ class CTPProblem():
             for i in xrange(self.num_of_customers):
                 if xs[i+1] == 1:
                     self.nodes[xs[0]].cover_list.append(i)
+                    self.nodes_covering_customer[i].update([xs[0]])
                     
     def get_set_of_customers_covered_by(self, node_id):
         '''
@@ -110,9 +119,9 @@ class CTPProblem():
             if self.obligatory_nodes.issuperset(set([node])):
                 continue
         
-            covering_set.update(problem.get_set_of_customers_covered_by(node))
+            covering_set.update(self.get_set_of_customers_covered_by(node))
                 
-        if len(covering_set) == problem.num_of_customers:
+        if len(covering_set) == self.num_of_customers:
             return True
         
         return False
@@ -255,25 +264,28 @@ class CTPProblem():
         '''
         remove a redundant node from a giant tour
         '''
-        have_redundant_node = False
+        best_cost = 10**10
+        best_node=None
+        
         for node in giant_tour:
             # if it is a node in obligatory nodes, then jump to a next node
             if self.obligatory_nodes.issuperset(set([node])):
                 continue
-            # get covering set of all remaining nodes:
-            
-#             covering_set=set()
-#             for other_node in giant_tour:
-#                 if other_node != node and not self.obligatory_nodes.issuperset(set([other_node])):
-#                     covering_set.update(self.get_set_of_customers_covered_by(other_node))
             new_giant_tour = deepcopy(giant_tour)
             new_giant_tour.remove(node)
                     
             if self.is_giant_tour_satisfy_covering_constraint(new_giant_tour):
-                have_redundant_node = True
-                return self.remove_node(new_giant_tour)
-            
-        if not have_redundant_node:
+                cost, backtrack = self.split(new_giant_tour)
+                
+                if cost < best_cost:
+                    best_cost=cost
+                    best_node=node
+
+        if best_node:
+            new_giant_tour=deepcopy(giant_tour)
+            new_giant_tour.remove(best_node)
+            return self.remove_node(new_giant_tour)
+        else:
             return giant_tour
                 
             

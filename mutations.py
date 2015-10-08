@@ -35,7 +35,7 @@ def mutShuffleIndexesCTP(individual, indpb):
     return individual,
 
 
-def mutLS(individual, problem, num_ls, gen):
+def mutLS(individual, problem, gen):
     """
     Local Search
     
@@ -50,7 +50,33 @@ def mutLS(individual, problem, num_ls, gen):
     if not individual.fitness.valid:
         computeFitness(problem, individual)
     
-    individual = ls_prins(problem, individual, num_ls, gen)
+    individual = ls_prins(problem, individual, gen,)
+#     individual = ls_move14(problem, individual, num_ls, gen)
+    
+    return individual,
+
+def mutLSVRP(individual, problem, gen):
+    """
+    Local Search
+    
+    :param individual: Individual to be mutated.
+    :param indpb: Independent probability for each attribute to be exchanged to
+                  another position.
+    :returns: A tuple of one individual.
+    
+    This function uses the :func:`~random.random` and :func:`~random.randint`
+    functions from the python base :mod:`random` module.
+    """
+    if not individual.fitness.valid:
+        cost, backtrack = problem.split(individual)
+                
+        # split tour and return total cost
+        tour = [node for node in individual]
+        individual.tours = problem.extract_tours(tour, backtrack)
+        individual.fitness.values = cost, 
+        
+    
+    individual = ls_prins(problem, individual, gen)
 #     individual = ls_move14(problem, individual, num_ls, gen)
     
     return individual,

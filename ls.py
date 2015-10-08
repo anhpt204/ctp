@@ -8,12 +8,13 @@ from ls_moves import *
 from setting import MAX_TRAILS_LS
 
 # local search
-def ls_prins(problem, individual, num_ls, gen):
+def ls_prins(problem, individual, gen):
     '''
     A Simple and Effective Evolutionary Algorithm for the Vehicle Routing Problem, Prins, 2001
     '''
     move_operators = [move1, move2, move3, move4, move5, move6, move7, move8, move9]
-
+#     move_operators=[move1, move8, move9]
+    
     tours_len = len(individual.tours)
     tours = individual.tours
     best_cost = individual.fitness.values[0]
@@ -51,7 +52,12 @@ def ls_prins(problem, individual, num_ls, gen):
                                     problem.moves_freq[move.__name__] = 1
                                 
                                 break
-                    
+                if improvement:
+                    break
+            if improvement:
+                break
+        if improvement:
+            break
     # try LS4
     if not improvement:
         ls4_improvement, new_ind = move10(problem, individual)
@@ -60,7 +66,7 @@ def ls_prins(problem, individual, num_ls, gen):
                 problem.moves_freq['move10'] += 1
             else:
                 problem.moves_freq['move10'] = 1
-                
+                 
             return new_ind
     
     if improvement:

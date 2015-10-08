@@ -60,10 +60,10 @@ def varAndLS(population, toolbox, cxpb, mutpb, num_ls, gen):
             del offspring[i].fitness.values
     
 #     lspb = float(gen)/(NUM_GEN * 20)
-# #     lspb = 0
+# # #     lspb = 0
 #     for i in range(len(offspring)):
 #         if random.random() < lspb:
-#             offspring[i], = toolbox.ls(individual=offspring[i], num_ls=num_ls, gen=gen)
+#             offspring[i], = toolbox.ls(individual=offspring[i], gen=gen)
             
 #     for i in range(len(offspring)):
 #         if random.random() < lspb:
@@ -71,6 +71,62 @@ def varAndLS(population, toolbox, cxpb, mutpb, num_ls, gen):
     
     return offspring
 
+def varAndSCP(population, toolbox, cxpb, mutpb, gen):
+    
+    offspring = [toolbox.clone(ind) for ind in population]
+    
+    # Apply crossover and mutation on the offspring
+    for i in range(1, len(offspring), 2):
+        if random.random() < cxpb:
+            offspring[i-1], offspring[i] = toolbox.mate(offspring[i-1], offspring[i])
+            del offspring[i-1].fitness.values, offspring[i].fitness.values
+    
+    for i in range(len(offspring)):
+        if random.random() < mutpb:
+            offspring[i], = toolbox.mutate(offspring[i])
+            del offspring[i].fitness.values
+    
+#     lspb = float(gen)/(NUM_GEN * 20)
+# #     lspb = 0s
+#     for i in range(len(offspring)):
+#         if random.random() < lspb:
+#             offspring[i], = toolbox.ls(individual=offspring[i], num_ls=num_ls, gen=gen)
+            
+#     for i in range(len(offspring)):
+#         if random.random() < lspb:
+#             offspring[i], = toolbox.ls4(individual=offspring[i], num_ls=num_ls, gen=gen)
+    for i in range(len(offspring)):
+        nodes = [j+1 for j in xrange(len(offspring[i])) if offspring[i][j]==1]
+        offspring[i].giant_tour = nodes
+        
+    return offspring
+
+def varAndVRP(population, toolbox, cxpb, mutpb, gen):
+    
+    offspring = [toolbox.clone(ind) for ind in population]
+    # Apply crossover and mutation on the offspring
+    for i in range(0, len(offspring)):
+        if random.random() < cxpb:
+            p1,p2 = random.sample(population, 2)
+            offspring[i] = toolbox.mate(p1, p2)
+            del offspring[i].fitness.values
+    
+    for i in range(len(offspring)):
+        if random.random() < mutpb:
+            offspring[i], = toolbox.mutate(offspring[i])
+            del offspring[i].fitness.values
+    
+#     lspb = float(gen)/100
+    lspb = 0.5
+    for i in range(len(offspring)):
+        if random.random() < lspb:
+            offspring[i], = toolbox.ls(individual=offspring[i], gen=gen)
+            
+#     for i in range(len(offspring)):
+#         if random.random() < lspb:
+#             offspring[i], = toolbox.ls4(individual=offspring[i], num_ls=num_ls, gen=gen)
+    
+    return offspring
 
 def varAndPTA(population, toolbox, cxpb, mutpb, lspb, lspb4, num_ls, gen):
     """

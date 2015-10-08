@@ -241,6 +241,12 @@ def evolve(problem, population, toolbox, cxpb, mutpb, ngen, stats=None, sizeStat
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
         
+        # local search for 10% best individual
+        offspring = sorted(offspring, key=lambda x: x.fitness.values[0])
+        n = int(0.1 * len(offspring))
+        for i in xrange(n):
+            offspring[i], = toolbox.ls(individual=offspring[i], gen=gen)
+
         # Update the hall of fame with the generated individuals
         if halloffame is not None:
             halloffame.update(offspring)
@@ -302,7 +308,7 @@ if __name__ == "__main__":
     files = glob.glob(data_dir + '*.ctp')
     lines = []
     
-    files = [os.path.join(data_dir, 'A-75-75-4.ctp')]
+    files = [os.path.join(data_dir, 'A-75-75-8.ctp')]
 #     files = [os.path.join(data_dir, 'A-50-50-6.ctp')]
     moves_freq = {}
     

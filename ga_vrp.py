@@ -30,14 +30,18 @@ from os.path import join
 
 from setting import *
 from deap.algorithms import varAnd
-from crossovers import PMX
-from genetic import varAndLS
-from mutations import mutLS, mutLS4
+from crossovers import PMX, vrpPMX
+from genetic import varAndLS, varAndVRP
+from mutations import mutLS, mutLS4, mutLSVRP
 from datetime import timedelta
 import gcsp
+from copy import deepcopy
 
 
 class GA_VRP:
+    '''
+    GA for Vehicle Routing Problem
+    '''
     
     def __init__(self, problem, nodes):
         '''
@@ -52,9 +56,11 @@ class GA_VRP:
         self.problem = problem
         self.nodes = nodes
         
-        self.POPSIZE=100
-        self.NUMGEN=50
+        self.POPSIZE=10
+        self.NUMGEN=30
         self.INDSIZE = len(nodes)
+        self.VERBOSE=False
+        self.init_pop={}
         
         self.initialize()
 
@@ -62,7 +68,13 @@ class GA_VRP:
         '''
         khoi tao individuals = hoan vi cua cac node trong nodes
         '''            
-        return random.sample(self.nodes, self.INDSIZE)
+        ind= random.sample(self.nodes, self.INDSIZE)
+        key=tuple(ind)
+        while self.init_pop.has_key(key):
+            ind= random.sample(self.nodes, self.INDSIZE)
+            
+        self.init_pop[key]=1
+        return ind
     
     def initialize(self):
         
@@ -73,9 +85,9 @@ class GA_VRP:
         # Structure initializers
         self.toolbox.register("individual", tools.initIterate, creator.Individual, self.toolbox.indices)
         self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
-        self.toolbox.register("mate", PMX)#PMX)
+        self.toolbox.register("mate", vrpPMX)#PMX)
     #     tools.cxPartialyMatched(ind1, ind2)
-#         self.toolbox.register("ls", mutLS, problem=problem)
+        self.toolbox.register("ls", mutLSVRP, problem=self.problem)
 #         self.toolbox.register("ls4", mutLS4, problem=problem)
         self.toolbox.register("mutate", tools.mutShuffleIndexes, indpb=INDPB)
         self.toolbox.register("select", tools.selTournament, tournsize=3)
@@ -87,7 +99,7 @@ class GA_VRP:
                 
         # split tour and return total cost
         tour = [node for node in individual]
-        individual.tours = problem.extract_tours(tour, backtrack)
+        individual.tours = self.problem.extract_tours(tour, backtrack)
             
         return cost,
     
@@ -115,7 +127,7 @@ class GA_VRP:
         
         if verbose:
             print logbook.stream
-        
+        best_ind=None
         # Begin the generational process
         for gen in range(1, ngen+1):
             current_gen = gen
@@ -123,7 +135,7 @@ class GA_VRP:
             offspring = toolbox.select(population, len(population))
             
             # Vary the pool of individuals
-            offspring = varAnd(offspring, self.toolbox, cxpb, mutpb)
+            offspring = varAndVRP(offspring, self.toolbox, cxpb, mutpb, gen)
             
             # Evaluate the individuals with an invalid fitness
             invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
@@ -131,9 +143,6 @@ class GA_VRP:
             for ind, fit in zip(invalid_ind, fitnesses):
                 ind.fitness.values = fit
             
-            # Update the hall of fame with the generated individuals
-            if halloffame is not None:
-                halloffame.update(offspring)
                 
             # Replace the current population by the offspring
             population[:] = offspring
@@ -141,8 +150,19 @@ class GA_VRP:
              # elitism
             t = random.randint(0, len(population)-1)
     #         t = 0
-            population[t] = halloffame[0]
+            if best_ind:
+                population[t] = best_ind
+
+            # Update the hall of fame with the generated individuals
+            if halloffame is not None:
+                halloffame.update(population)
             
+            min_cost=10**100
+            for ind in population:
+                if ind.fitness.values[0] < min_cost:
+                    min_cost = ind.fitness.values[0]
+                    best_ind=deepcopy(ind)
+                    
             # Append the current generation statistics to the logbook
             record = stats.compile(population) if stats else {}
 #             record.update(sizeStats.compile(population) if sizeStats else {})
@@ -171,15 +191,15 @@ class GA_VRP:
         
         self.evolve(population=pop, 
                toolbox=self.toolbox, cxpb=PCROSS, mutpb=PMUTATION, 
-               ngen=NUM_GEN, stats=stats, halloffame=hof, verbose=VERBOSE)
+               ngen=self.NUMGEN, stats=stats, halloffame=hof, verbose=self.VERBOSE)
         
-        print 'run ', job, ': ', hof[0].fitness.values[0], ': ', problem.best_cost, ': ', problem.n_same_giant_tour
+#         print 'run ', job, ': ', hof[0].fitness.values[0], ': ', problem.best_cost, ': ', problem.n_same_giant_tour
     
     #     print hof[0].giant_tour
     #     print hof[0].tours
     #     calculate_tours_cost(problem, hof[0].tours, job)
     
-        return hof[0]
+        return hof[0].fitness.values[0], hof[0].tours
 
 import glob, os, datetime
 if __name__ == "__main__":
@@ -210,6 +230,6 @@ if __name__ == "__main__":
 #         cost = problem.get_solution_cost(tours)
 #         print cost
 #         break
-        nodes = [2,3,4,5]
+        nodes = [2,3,4,5,8,9,6]
         ga = GA_VRP(problem, nodes)
         ga.run(0)

@@ -4,6 +4,7 @@ Created on Sep 8, 2015
 @author: pta
 '''
 import random
+from copy import deepcopy
 
 def PMX(ind1, ind2):
     
@@ -44,6 +45,34 @@ def PMX(ind1, ind2):
     
     return ind1, ind2
 
+def vrpPMX(ind1, ind2):
+    '''
+    PMX for VRP with solution is subset of nodes
+    '''
+    size=min(len(ind1), len(ind2))
+    if size < 3:
+        return ind1
+    
+    a,b=random.sample(xrange(size-1), 2)
+    if a > b:
+        a, b = b, a
+    b = b+1
+    
+    # build mapping
+    point_mapping = {}
+    for i in xrange(a, b):
+        point_mapping[ind1[i]]=ind2[i]                   
+        
+        # copy matched segment from ind1 to ind2
+        ind2[i] = ind1[i]
+        
+    for i in xrange(len(ind2)):
+        if i < a or i >= b:
+            while point_mapping.has_key(ind2[i]):
+                ind2[i] = point_mapping[ind2[i]]
+
+    return ind2
+
 def OX(ind1, ind2):
     size = min(len(ind1), len(ind2))
     a, b = random.sample(xrange(size), 2)
@@ -71,5 +100,25 @@ def OX(ind1, ind2):
     # Swap the content between a and b (included)
     for i in range(a, b + 1):
         ind1[i], ind2[i] = ind2[i], ind1[i]
+    
+    return ind1, ind2
+
+def scpOnePointCX(ind1, ind2):
+    size = min(len(ind1), len(ind2))
+    a = 0
+    b=size-1
+    
+    for i in xrange(size):
+        if ind1[i] != ind2[i]:
+            a = i
+            break
+    for i in xrange(size-1, a, -1):
+        if ind1[i] != ind2[i]:
+            b = i
+            break
+            
+    cxpoint = random.randint(a, b)
+    
+    ind1[cxpoint:], ind2[cxpoint:] = ind2[cxpoint:], ind1[cxpoint:]
     
     return ind1, ind2
