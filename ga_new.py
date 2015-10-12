@@ -53,7 +53,7 @@ def pop_init(problem, k=3):
     '''
     khoi tao individual bang cach chon 1 trong k diem (chua co trong) gan no nhat
     '''
-    ind_size = problem.num_of_nodes + len(problem.obligatory_nodes) - 1
+    ind_size = problem.num_of_nodes + len(problem.obligatory_nodes)
     # khoi tao bang 1 diem ngau nhien
     ind = [random.randint(1, ind_size)]
     ind_set = set(ind)
@@ -86,7 +86,7 @@ def pop_init(problem, k=3):
 
 def initialize(problem):
     # Attribute generator
-    IND_SIZE = problem.num_of_nodes + len(problem.obligatory_nodes) -1
+    IND_SIZE = problem.num_of_nodes + len(problem.obligatory_nodes)
     
 #     toolbox.register("indices", random.sample, range(1,IND_SIZE+1), IND_SIZE)
     
@@ -246,6 +246,10 @@ def evolve(problem, population, toolbox, cxpb, mutpb, ngen, stats=None, sizeStat
         n = int(0.1 * len(offspring))
         for i in xrange(n):
             offspring[i], = toolbox.ls(individual=offspring[i], gen=gen)
+            
+        rand_inds = random.sample(xrange(n, len(offspring)), n)
+        for i in rand_inds:
+            offspring[i], = toolbox.ls(individual=offspring[i], gen=gen)
 
         # Update the hall of fame with the generated individuals
         if halloffame is not None:
@@ -301,15 +305,15 @@ import glob, os, datetime
 if __name__ == "__main__":
     # load problem
     folder = 'A'
-    data_dir = 'data/' + folder + '/'
+    data_dir = 'data_ctp/' + folder + '/'
     print data_dir
 #     Jobs = 10
     
     files = glob.glob(data_dir + '*.ctp')
     lines = []
     
-    files = [os.path.join(data_dir, 'A-75-75-8.ctp')]
-#     files = [os.path.join(data_dir, 'A-50-50-6.ctp')]
+#     files = [os.path.join(data_dir, 'A-75-75-8.ctp')]
+    files = [os.path.join(data_dir, 'A2-20-100-100-4.ctp')]
     moves_freq = {}
     
     for file in files:
@@ -317,9 +321,9 @@ if __name__ == "__main__":
         file_name = os.path.basename(file)
         print file_name
         
-#         problem = CTPProblem(data_path=file)
+        problem = CTPProblem(data_path=file)
         
-        problem = gcsp.GCSPProblem(data_path=file)
+#         problem = gcsp.GCSPProblem(data_path=file)
         
         # calculate solution cost
 #         tours = [[72,67,28,24], [5,48,52,18]]

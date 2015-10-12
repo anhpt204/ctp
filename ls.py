@@ -52,12 +52,12 @@ def ls_prins(problem, individual, gen):
                                     problem.moves_freq[move.__name__] = 1
                                 
                                 break
-                if improvement:
-                    break
-            if improvement:
-                break
-        if improvement:
-            break
+#                 if improvement:
+#                     break
+#             if improvement:
+#                 break
+#         if improvement:
+#             break
     # try LS4
     if not improvement:
         ls4_improvement, new_ind = move10(problem, individual)
