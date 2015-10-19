@@ -243,13 +243,13 @@ def evolve(problem, population, toolbox, cxpb, mutpb, ngen, stats=None, sizeStat
         
         # local search for 10% best individual
         offspring = sorted(offspring, key=lambda x: x.fitness.values[0])
-        n = int(0.1 * len(offspring))
+        n = int(1.0 * len(offspring))
         for i in xrange(n):
             offspring[i], = toolbox.ls(individual=offspring[i], gen=gen)
             
-        rand_inds = random.sample(xrange(n, len(offspring)), n)
-        for i in rand_inds:
-            offspring[i], = toolbox.ls(individual=offspring[i], gen=gen)
+#         rand_inds = random.sample(xrange(n, len(offspring)), n)
+#         for i in rand_inds:
+#             offspring[i], = toolbox.ls(individual=offspring[i], gen=gen)
 
         # Update the hall of fame with the generated individuals
         if halloffame is not None:
@@ -304,7 +304,7 @@ def run(problem, job=0):
 import glob, os, datetime
 if __name__ == "__main__":
     # load problem
-    folder = 'A'
+    folder = 'K'
     data_dir = 'data_ctp/' + folder + '/'
     print data_dir
 #     Jobs = 10
