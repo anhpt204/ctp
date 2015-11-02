@@ -56,10 +56,10 @@ class GA_VRP:
         self.problem = problem
         self.nodes = nodes
         
-        self.POPSIZE=10
-        self.NUMGEN=30
+        self.POPSIZE=20
+        self.NUMGEN=20
         self.INDSIZE = len(nodes)
-        self.VERBOSE=False
+        self.VERBOSE=True
         self.init_pop={}
         
         self.initialize()
@@ -89,7 +89,7 @@ class GA_VRP:
     #     tools.cxPartialyMatched(ind1, ind2)
         self.toolbox.register("ls", mutLSVRP, problem=self.problem)
 #         self.toolbox.register("ls4", mutLS4, problem=problem)
-        self.toolbox.register("mutate", tools.mutShuffleIndexes, indpb=INDPB)
+#         self.toolbox.register("mutate", tools.mutShuffleIndexes, indpb=INDPB)
         self.toolbox.register("select", tools.selTournament, tournsize=3)
         self.toolbox.register("evaluate", self.eval)
                                     

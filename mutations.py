@@ -5,7 +5,7 @@ Created on Sep 8, 2015
 '''
 import random
 
-from ls import ls_prins, ls_move14
+from ls import ls_prins, ls_move14, ls_prins_vrp
 from genetic import computeFitness
 from ls_moves import move10
 
@@ -67,6 +67,7 @@ def mutLSVRP(individual, problem, gen):
     This function uses the :func:`~random.random` and :func:`~random.randint`
     functions from the python base :mod:`random` module.
     """
+#     print 'in: ', individual
     if not individual.fitness.valid:
         cost, backtrack = problem.split(individual)
                 
@@ -76,8 +77,11 @@ def mutLSVRP(individual, problem, gen):
         individual.fitness.values = cost, 
         
     
-    individual = ls_prins(problem, individual, gen)
+#     print individual
+    individual = ls_prins_vrp(problem, individual, gen)
+
 #     individual = ls_move14(problem, individual, num_ls, gen)
+#     print 'out: ', individual
     
     return individual,
 

@@ -147,10 +147,17 @@ class CTPProblem():
         '''
         check constraints of a solution (tours)
         '''
+        solution_len = 0
+        set_nodes = set()
         # check tour length
         for tour in tours:
+            solution_len += len(tour)
+            set_nodes.update(set(tour))
             if len(tour) > self.max_nodes_per_route:
                 return False
+            
+        if len(set_nodes) != solution_len:
+            return False
         return True
     
     def split(self, tour):

@@ -61,6 +61,9 @@ def vrpPMX(ind1, ind2):
     # build mapping
     point_mapping = {}
     for i in xrange(a, b):
+        if(ind1[i] == ind2[i]):
+            continue
+        
         point_mapping[ind1[i]]=ind2[i]                   
         
         # copy matched segment from ind1 to ind2

@@ -347,7 +347,9 @@ def move10(problem, individual):
     
     # get all nodes that are not in tours
     nodes_in_tours = set(individual.giant_tour)
-    nodes_not_in_tours = set(individual).difference(nodes_in_tours)
+    nodes = range(1, len(problem.nodes))
+    
+    nodes_not_in_tours = set(nodes).difference(nodes_in_tours)
 
     # make a new tours
     new_tours = deepcopy(individual.tours[:])      
@@ -393,6 +395,7 @@ def move10(problem, individual):
                 # try to remove node
                 better_giant_tour = problem.remove_node(giant_tour)
                 
+                # if have redundance node, re-calculate cost
                 if len(better_giant_tour) < len(giant_tour):
                     cost, backtrack = problem.split(better_giant_tour)
                     
@@ -416,3 +419,80 @@ def move10(problem, individual):
                 
     return False, None
         
+def move10_vrp(problem, individual):
+    '''
+    replace a node in a tour with another node outside of giant tour
+    '''
+    new_ind = deepcopy(individual)
+    
+    old_fitness = individual.fitness.values[0]
+    
+    # get all nodes that are not in tours
+    nodes_in_tours = set(individual.giant_tour)
+    nodes = range(1, len(problem.nodes))
+    
+    nodes_not_in_tours = set(nodes).difference(nodes_in_tours)
+
+    # make a new tours
+    new_tours = deepcopy(individual.tours[:])      
+                
+    for tour_idx in xrange(len(individual.tours)):
+#         old_tour = individual.tours[tour_idx]
+        
+        new_tour = new_tours[tour_idx]
+        
+        best_tour_cost = problem.cal_tour_cost(new_tour)
+        old_tour_cost = best_tour_cost
+
+        for node_idx in xrange(len(new_tour)):
+            
+            old_node = new_tour[node_idx]
+            
+            if problem.obligatory_nodes.issuperset(set([old_node])):             
+                continue
+            
+            best_tours = None
+            
+            for node in nodes_not_in_tours:
+                new_tour[node_idx] = node
+                        
+                # check if this covering all customers
+                if problem.is_tours_satisfy_covering_constraint(new_tours) and problem.isFeasibleSolution(new_tours):
+                    
+                    #check cost improvement
+                    new_tour_cost = problem.cal_tour_cost(new_tour)
+                    
+                    # if improvement, return success
+                    if new_tour_cost < best_tour_cost:
+                        best_tour_cost = new_tour_cost
+                        best_tours = deepcopy(new_tours)
+                        break
+                        
+                new_tour[node_idx] = old_node
+                        
+            # if have improvement
+            if best_tours:
+                
+                giant_tour = problem.concat(best_tours)
+                # try to remove node
+                better_giant_tour = problem.remove_node(giant_tour)
+                
+                # if have redundance node, re-calculate cost
+                if len(better_giant_tour) < len(giant_tour):
+                    cost, backtrack = problem.split(better_giant_tour)
+                    
+                    new_ind.giant_tour = better_giant_tour
+                    new_ind.tours = problem.extract_tours(better_giant_tour, backtrack)
+                    new_ind.fitness.values = cost,
+                else:
+                    new_ind.giant_tour = giant_tour
+                    new_ind.tours = best_tours                                            
+                    new_ind.fitness.values = old_fitness - old_tour_cost + best_tour_cost,
+                    
+                for i in xrange(len(new_ind)):
+                    new_ind[i]=giant_tour[i]
+                    
+                return True, new_ind
+            
+                
+    return False, None

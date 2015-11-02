@@ -107,19 +107,21 @@ def varAndVRP(population, toolbox, cxpb, mutpb, gen):
     # Apply crossover and mutation on the offspring
     for i in range(0, len(offspring)):
         if random.random() < cxpb:
-            p1,p2 = random.sample(population, 2)
+            p1,p2 = random.sample(offspring, 2)
             offspring[i] = toolbox.mate(p1, p2)
+#             print offspring[i]
             del offspring[i].fitness.values
     
-    for i in range(len(offspring)):
-        if random.random() < mutpb:
-            offspring[i], = toolbox.mutate(offspring[i])
-            del offspring[i].fitness.values
+#     for i in range(len(offspring)):
+#         if random.random() < mutpb:
+#             offspring[i], = toolbox.mutate(offspring[i])
+#             del offspring[i].fitness.values
     
 #     lspb = float(gen)/100
     lspb = 0.5
     for i in range(len(offspring)):
         if random.random() < lspb:
+#             print offspring[i]
             offspring[i], = toolbox.ls(individual=offspring[i], gen=gen)
             
 #     for i in range(len(offspring)):
