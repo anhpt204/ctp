@@ -73,7 +73,7 @@ def vrpPMX(ind1, ind2):
         if i < a or i >= b:
             while point_mapping.has_key(ind2[i]):
                 ind2[i] = point_mapping[ind2[i]]
-
+                
     return ind2
 
 def OX(ind1, ind2):
@@ -125,3 +125,37 @@ def scpOnePointCX(ind1, ind2):
     ind1[cxpoint:], ind2[cxpoint:] = ind2[cxpoint:], ind1[cxpoint:]
     
     return ind1, ind2
+
+def vrpOnePointCX(ind1, ind2):
+    size = min(len(ind1), len(ind2))
+    a = 0
+    b=size-1
+    
+    for i in xrange(size):
+        if ind1[i] != ind2[i]:
+            a = i
+            break
+    for i in xrange(size-1, a, -1):
+        if ind1[i] != ind2[i]:
+            b = i
+            break
+            
+    cxpoint = random.randint(a, b)
+    
+    ind1[cxpoint:], ind2[cxpoint:] = ind2[cxpoint:], ind1[cxpoint:]
+    
+    node_dict = {}
+    for i in xrange(len(ind1)):
+        if not node_dict.has_key(ind1[i]):
+            node_dict[ind1[i]] = 1
+        else:
+            ind1[i] = 0
+            
+    while True:
+        try:
+            ind1.remove(0)
+        except:
+            break
+        
+            
+    return ind1

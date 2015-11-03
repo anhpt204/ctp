@@ -30,7 +30,7 @@ from os.path import join
 
 from setting import *
 from deap.algorithms import varAnd
-from crossovers import PMX, vrpPMX
+from crossovers import PMX, vrpPMX, scpOnePointCX, vrpOnePointCX
 from genetic import varAndLS, varAndVRP
 from mutations import mutLS, mutLS4, mutLSVRP
 from datetime import timedelta
@@ -64,28 +64,57 @@ class GA_VRP:
         
         self.initialize()
 
-    def pop_init(self):
+    def ind_init(self):
         '''
         khoi tao individuals = hoan vi cua cac node trong nodes
         '''            
-        ind= random.sample(self.nodes, self.INDSIZE)
-        key=tuple(ind)
-        while self.init_pop.has_key(key):
-            ind= random.sample(self.nodes, self.INDSIZE)
+#         ind= random.sample(self.nodes, self.INDSIZE)
+    
+        # replace a node in nodes with another node
+        len_T = len(self.problem.obligatory_nodes)
+        
+        l = 0
+        while l < 100:
+            l += 1
+            ind = self.toolbox.clone(self.nodes)
+            idx = random.choice(xrange(len_T, len(ind)))
             
-        self.init_pop[key]=1
-        return ind
+            covering_set = set()
+            for i in xrange(len(ind)):
+                if i != idx:
+                    covering_set.update(self.problem.get_set_of_customers_covered_by(ind[i]))
+            # get nodes not in ind
+            found = False
+            for node_j in self.problem.nodes[len(self.problem.obligatory_nodes):]:
+                c = covering_set.union(self.problem.get_set_of_customers_covered_by(node_j.id))
+                if len(c) == self.problem.num_of_customers: # satisfy covering constraint
+                    ind[idx] = node_j.id
+                    
+                    if len(ind) > len(set(ind)):
+                        continue
+                    
+                    key=tuple(ind)
+                    if not self.init_pop.has_key(key):
+                        self.init_pop[key]=1
+                        found = True
+                        break
+            if found:
+                break
+        if found:
+            return random.sample(ind, len(ind))
+        else:
+            return random.sample(self.nodes, self.INDSIZE)
     
     def initialize(self):
         
-        self.toolbox.register("indices", self.pop_init)
+        self.toolbox.register("indices", self.ind_init)
         
         
         
         # Structure initializers
         self.toolbox.register("individual", tools.initIterate, creator.Individual, self.toolbox.indices)
         self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
-        self.toolbox.register("mate", vrpPMX)#PMX)
+        self.toolbox.register("mate", vrpOnePointCX)#PMX)
     #     tools.cxPartialyMatched(ind1, ind2)
         self.toolbox.register("ls", mutLSVRP, problem=self.problem)
 #         self.toolbox.register("ls4", mutLS4, problem=problem)
@@ -95,6 +124,8 @@ class GA_VRP:
                                     
     # evaluate solution
     def eval(self, individual):
+#         print individual
+        
         cost, backtrack = self.problem.split(individual)
                 
         # split tour and return total cost

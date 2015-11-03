@@ -49,7 +49,7 @@ creator.create("Individual", array.array, typecode='i', fitness=creator.FitnessM
 # n_same_giant_tour = 0
 current_gen = 0
 
-def pop_init(problem, k=3):
+def ind_init(problem, k=3):
     '''
     khoi tao individual bang cach chon 1 trong k diem (chua co trong) gan no nhat
     '''
@@ -90,7 +90,7 @@ def initialize(problem):
     
 #     toolbox.register("indices", random.sample, range(1,IND_SIZE+1), IND_SIZE)
     
-    toolbox.register("indices", pop_init,problem=problem, k=5)
+    toolbox.register("indices", ind_init,problem=problem, k=5)
     
     
     
@@ -304,7 +304,7 @@ def run(problem, job=0):
 import glob, os, datetime
 if __name__ == "__main__":
     # load problem
-    folder = 'K'
+    folder = 'A'
     data_dir = 'data_ctp/' + folder + '/'
     print data_dir
 #     Jobs = 10
@@ -312,7 +312,7 @@ if __name__ == "__main__":
     files = glob.glob(data_dir + '*.ctp')
     lines = []
     
-#     files = [os.path.join(data_dir, 'A-75-75-8.ctp')]
+#     files = [os.path.join(data_dir, 'A1-1-25-75-6.ctp')]
     files = [os.path.join(data_dir, 'A2-20-100-100-4.ctp')]
     moves_freq = {}
     
@@ -326,10 +326,12 @@ if __name__ == "__main__":
 #         problem = gcsp.GCSPProblem(data_path=file)
         
         # calculate solution cost
-#         tours = [[72,67,28,24], [5,48,52,18]]
-#         cost = problem.get_solution_cost(tours)
-#         print cost
-#         break
+        tours = [[2, 99, 13, 18], [16, 7, 85, 4], [19, 12, 14], [15, 10, 9, 3], [6, 8, 17, 11], [22, 1, 5]]
+
+        cost = problem.get_solution_cost(tours)
+        print problem.is_tours_satisfy_covering_constraint(tours)
+        print cost
+        break
     
         initialize(problem=problem)
         

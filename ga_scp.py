@@ -153,7 +153,7 @@ class GA_SCP:
         
         
         
-    def pop_init(self):
+    def ind_init(self):
         '''
         khoi tao individuals = hoan vi cua cac node trong nodes
         '''            
@@ -191,7 +191,7 @@ class GA_SCP:
     
     def initialize(self):
         
-#         self.toolbox.register("indices", self.pop_init)
+#         self.toolbox.register("indices", self.ind_init)
         
         self.toolbox.register("indices", self.pop_gcsp_init)
         

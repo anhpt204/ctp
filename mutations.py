@@ -55,6 +55,54 @@ def mutLS(individual, problem, gen):
     
     return individual,
 
+def repair(problem, ind):
+    # check if it contains all node in T
+    ind_set = set(ind)
+    tmp = ind_set.intersection(problem.obligatory_nodes)
+    if len(tmp) < len(problem.obligatory_nodes):
+        ns = problem.obligatory_nodes.difference(tmp)
+        for n in ns:
+            ind.insert(random.randint(0, len(ind)), n)
+            
+    # check covering
+    covering_set = set()
+    for n in ind:
+        if problem.obligatory_nodes.issuperset(set([n])):
+            continue
+        covering_set.update(problem.get_set_of_customers_covered_by(n))
+        
+    tmp = set(range(problem.num_of_customers))
+    tmp = tmp.difference(covering_set)
+    
+    if len(tmp) == 0:
+        return problem.remove_node(ind)
+    
+    # insert nodes to satisfy covering constraint
+    ind_set = set(ind)
+    out_nodes = set(range(1, len(problem.nodes)))
+    out_nodes.difference_update(ind_set)
+    
+    out_nodes = list(out_nodes)
+    
+    while len(covering_set) < problem.num_of_customers:
+        best_node = out_nodes[0]
+        best_covering_len = len(tmp.intersection(problem.get_set_of_customers_covered_by(best_node)))
+        for node in out_nodes[1:]:
+            covering_len = len(problem.get_set_of_customers_covered_by(node).intersection(tmp))
+            if covering_len > best_covering_len:
+                best_covering_len = covering_len
+                best_node =  node
+                
+        covering_set.update(problem.get_set_of_customers_covered_by(best_node))
+        
+        ind.insert(random.randint(0, len(ind)), best_node)
+        
+        tmp = set(range(problem.num_of_customers))
+        tmp = tmp.difference(covering_set)
+        out_nodes.remove(best_node)
+        
+    return ind
+
 def mutLSVRP(individual, problem, gen):
     """
     Local Search
@@ -68,7 +116,10 @@ def mutLSVRP(individual, problem, gen):
     functions from the python base :mod:`random` module.
     """
 #     print 'in: ', individual
+    individual = repair(problem, individual)
+    
     if not individual.fitness.valid:
+        
         cost, backtrack = problem.split(individual)
                 
         # split tour and return total cost
@@ -76,7 +127,7 @@ def mutLSVRP(individual, problem, gen):
         individual.tours = problem.extract_tours(tour, backtrack)
         individual.fitness.values = cost, 
         
-    
+#     print individual
 #     print individual
     individual = ls_prins_vrp(problem, individual, gen)
 

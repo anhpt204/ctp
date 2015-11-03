@@ -115,10 +115,17 @@ def ls_prins_vrp(problem, individual, gen):
                     v, y = tour2_tmp[j], tour2_tmp[j+1]
                     # move operators
                     for move in move_operators:
-                                                
+#                         if(not set(individual).issuperset(problem.obligatory_nodes)):
+#                             print move.__name__
+#                         print individual.tours
                         move_success, temp_tours = move(individual, tour_i, tour_j, i, j, u, v, x, y)
+#                         print temp_tours
+
+#                         giant_tour = problem.concat(temp_tours)
                         
-                        
+#                         if(not set(giant_tour).issuperset(problem.obligatory_nodes)):
+#                             print move.__name__
+                            
                         if move_success and problem.isFeasibleSolution(temp_tours):
 #                             print tour_i, tour_j, i, j, temp_tours
                             cost = problem.get_solution_cost(temp_tours)
@@ -150,7 +157,7 @@ def ls_prins_vrp(problem, individual, gen):
                 problem.moves_freq['move10'] += 1
             else:
                 problem.moves_freq['move10'] = 1
-                 
+                  
 #             print 'ls4: ', new_ind
             return new_ind
     
@@ -159,8 +166,13 @@ def ls_prins_vrp(problem, individual, gen):
         individual.tours = best_tours[:]
         old_giant_tour = individual.giant_tour
         new_giant_tour = problem.concat(best_tours)
+        
+            
         for i in xrange(len(individual)):
             individual[i]=new_giant_tour[i]
+
+#         if not set(individual).issuperset(problem.obligatory_nodes):
+#             print new_giant_tour
         
         individual.giant_tour = new_giant_tour
         individual.fitness.values = best_cost,

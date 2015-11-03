@@ -32,6 +32,10 @@ def move1(individual, tour_i, tour_j, i, j, u, v, x, y):
     @param y: is the successor of v
     '''
     temp_tours = deepcopy(individual.tours)
+
+    if u == v == 0:
+        return False, temp_tours 
+
     tour_i_tmp = [0] + temp_tours[tour_i] + [0]
 
     tour_j_tmp = [0] + temp_tours[tour_j] + [0]

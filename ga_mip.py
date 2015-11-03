@@ -30,6 +30,8 @@ def run():
         
         best_cost = 10**10
         best_solution=None
+        
+#         lines = lines[:2]
         print len(lines)
         for i in xrange(1, len(lines),2):
             print i, 
@@ -42,7 +44,9 @@ def run():
             if cost < best_cost:
                 best_cost = cost
                 best_solution = tours
-
+            
+            break
+        
         print best_cost, best_solution            
         break
             
