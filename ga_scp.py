@@ -60,8 +60,9 @@ class GA_SCP:
         self.INDSIZE = self.problem.num_of_nodes + len(self.problem.obligatory_nodes)
         self.cxP=0.6
         self.mutP=1.0/self.INDSIZE
+        self.init_popsize=0
         
-        self.initialize()
+        self.initialize(problem.name)
         
     def pop_ctp_init(self):
         '''
@@ -193,11 +194,26 @@ class GA_SCP:
         return binary_ind
         
     
-    def initialize(self):
+    def init_mip(self):
+        '''
+        Khoi tao SCP tu MIP
+        '''
+        nodes = self.lines[2*self.init_popsize+1].split()
+        nodes = [int(v) for v in nodes]
+        
+        binary_ind = [0]*self.INDSIZE
+        for v in nodes:
+            binary_ind[v-1]=1
+            
+        self.init_popsize +=1
+        return binary_ind
+        
+        
+    def initialize(self, problem_name):
         
 #         self.toolbox.register("indices", self.ind_init)
         
-        self.toolbox.register("indices", self.pop_gcsp_init)
+        self.toolbox.register("indices", self.init_mip)
         
         
         # Structure initializers
@@ -210,6 +226,10 @@ class GA_SCP:
         self.toolbox.register("mutate", tools.mutFlipBit, indpb=self.mutP)
         self.toolbox.register("select", tools.selTournament, tournsize=3)
         self.toolbox.register("evaluate", self.eval)
+        
+        mip_data_dir = 'SubSet'
+        self.lines = open(join(mip_data_dir, problem_name),'r').readlines()
+
                                     
     # evaluate solution
     def eval(self, individual):
@@ -360,7 +380,7 @@ class GA_SCP:
         
         self.evolve(population=pop, 
                toolbox=self.toolbox, cxpb=self.cxP, mutpb=1.0, 
-               ngen=NUM_GEN, stats=stats, halloffame=hof, verbose=VERBOSE)
+               ngen=self.NUMGEN, stats=stats, halloffame=hof, verbose=VERBOSE)
         
         print 'run ', job, ': ', hof[0].fitness.values[0], ': ', problem.best_cost, ': ', problem.n_same_giant_tour
     
