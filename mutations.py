@@ -56,8 +56,21 @@ def mutLS(individual, problem, gen):
     return individual,
 
 def repair(problem, ind):
+#     print 'in: ', ind
     # check if it contains all node in T
     ind_set = set(ind)
+    # make sure each node appear only one time
+    new_ind=[]
+    if len(ind_set) < len(ind):
+        node_dict={}
+        for node in ind:
+            if not node_dict.has_key(node):
+                node_dict[node]=1
+                new_ind.append(node)
+        del ind[len(new_ind):]
+        for i in xrange(len(ind)):
+            ind[i] = new_ind[i]
+        
     tmp = ind_set.intersection(problem.obligatory_nodes)
     if len(tmp) < len(problem.obligatory_nodes):
         ns = problem.obligatory_nodes.difference(tmp)
@@ -80,8 +93,9 @@ def repair(problem, ind):
     # insert nodes to satisfy covering constraint
     ind_set = set(ind)
     out_nodes = set(range(1, len(problem.nodes)))
-    out_nodes.difference_update(ind_set)
-    
+    out_nodes = out_nodes.difference(ind_set)
+#     if out_nodes == None:
+#         print 't'
     out_nodes = list(out_nodes)
     
     while len(covering_set) < problem.num_of_customers:
@@ -115,8 +129,12 @@ def mutLSVRP(individual, problem, gen):
     This function uses the :func:`~random.random` and :func:`~random.randint`
     functions from the python base :mod:`random` module.
     """
-#     print 'in: ', individual
+#     if len(individual) != len(set(individual)):
+#         print 'in: ', individual
+
     individual = repair(problem, individual)
+    
+    
     
     if not individual.fitness.valid:
         

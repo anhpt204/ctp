@@ -143,12 +143,12 @@ def ls_prins_vrp(problem, individual, gen):
                                     problem.moves_freq[move.__name__] = 1
                                 
                                 break
-#                 if improvement:
-#                     break
-#             if improvement:
-#                 break
-#         if improvement:
-#             break
+                if improvement:
+                    break
+            if improvement:
+                break
+        if improvement:
+            break
     # try LS4
     if not improvement:
         ls4_improvement, new_ind = move10_vrp(problem, individual)
@@ -167,7 +167,7 @@ def ls_prins_vrp(problem, individual, gen):
         old_giant_tour = individual.giant_tour
         new_giant_tour = problem.concat(best_tours)
         
-            
+        del individual[len(new_giant_tour):]
         for i in xrange(len(individual)):
             individual[i]=new_giant_tour[i]
 

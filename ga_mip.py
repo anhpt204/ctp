@@ -17,7 +17,10 @@ problems = glob.glob(join(initial_solution_dir, '*.ctp'))
 
 problems = [basename(p) for p in problems]
 
-problems = ['A2-20-100-100-4.ctp']
+problems = [
+            'A1-1-25-75-6.ctp',
+#             'A2-20-100-100-4.ctp'
+            ]
 def run():
     for problem_name in problems:
         
@@ -45,7 +48,8 @@ def run():
                 best_cost = cost
                 best_solution = tours
             
-            break
+            if i == 11:
+                break
         
         print best_cost, best_solution            
         break

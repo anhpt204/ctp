@@ -59,7 +59,7 @@ class GA_VRP:
         self.POPSIZE=20
         self.NUMGEN=20
         self.INDSIZE = len(nodes)
-        self.VERBOSE=True
+        self.VERBOSE=False
         self.init_pop={}
         
         self.initialize()
@@ -77,19 +77,28 @@ class GA_VRP:
         while l < 100:
             l += 1
             ind = self.toolbox.clone(self.nodes)
-            idx = random.choice(xrange(len_T, len(ind)))
+            # choice a node in individual that not in T
+            idx = random.choice(range(len(ind)))
+            while ind[idx] < len_T:
+                idx = random.choice(range(len(ind)))
             
             covering_set = set()
             for i in xrange(len(ind)):
                 if i != idx:
                     covering_set.update(self.problem.get_set_of_customers_covered_by(ind[i]))
-            # get nodes not in ind
+            
             found = False
-            for node_j in self.problem.nodes[len(self.problem.obligatory_nodes):]:
+            for node_j in self.problem.nodes:
+                # if node_j in T
+                if node_j < len_T:
+                    continue
+                
                 c = covering_set.union(self.problem.get_set_of_customers_covered_by(node_j.id))
+                
                 if len(c) == self.problem.num_of_customers: # satisfy covering constraint
                     ind[idx] = node_j.id
-                    
+                
+                    # if have the same node    
                     if len(ind) > len(set(ind)):
                         continue
                     

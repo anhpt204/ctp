@@ -492,7 +492,9 @@ def move10_vrp(problem, individual):
                     new_ind.giant_tour = giant_tour
                     new_ind.tours = best_tours                                            
                     new_ind.fitness.values = old_fitness - old_tour_cost + best_tour_cost,
-                    
+                
+                if len(new_ind) > len(giant_tour):
+                    del new_ind[len(giant_tour):]
                 for i in xrange(len(new_ind)):
                     new_ind[i]=giant_tour[i]
                     

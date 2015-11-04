@@ -4,9 +4,9 @@ Created on Aug 21, 2015
 @author: pta
 '''
 JOBS = 5
-NUM_GEN = 50
-POPSIZE = 50
-PCROSS = 1.0
+NUM_GEN = 30
+POPSIZE = 10
+PCROSS = 0.1
 PMUTATION = 0.0
 INDPB = 0.2
 PLOCALSEARCH = 1.0

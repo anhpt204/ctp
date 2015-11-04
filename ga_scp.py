@@ -57,7 +57,7 @@ class GA_SCP:
         
         self.POPSIZE=20
         self.NUMGEN=5
-        self.INDSIZE = self.problem.num_of_nodes-1
+        self.INDSIZE = self.problem.num_of_nodes + len(self.problem.obligatory_nodes)
         self.cxP=0.6
         self.mutP=1.0/self.INDSIZE
         
@@ -186,6 +186,10 @@ class GA_SCP:
         binary_ind = [0]*self.INDSIZE
         for i in ind:
             binary_ind[i-1]=1
+            
+        for i in xrange(len(self.problem.obligatory_nodes)):
+            binary_ind[i] = 1
+            
         return binary_ind
         
     
@@ -211,6 +215,8 @@ class GA_SCP:
     def eval(self, individual):
         nodes = [i+1 for i in xrange(self.INDSIZE) if individual[i]==1]
         
+        nodes = random.sample(nodes, len(nodes))
+#         print nodes
         vrp_solver = GA_VRP(self.problem, nodes)
         cost, tours = vrp_solver.run()
                             
@@ -260,6 +266,9 @@ class GA_SCP:
             
         for i in S:
             new_ind[i-1]=1
+            
+        for i in xrange(len(self.problem.obligatory_nodes)):
+            new_ind[i]=1
             
         return new_ind
         
@@ -329,7 +338,7 @@ class GA_SCP:
             if verbose:
                 print logbook.stream        
     
-            print halloffame[0].tours
+#             print halloffame[0].tours
             
         return population, logbook
     
@@ -365,14 +374,14 @@ import glob, os, datetime
 if __name__ == "__main__":
     # load problem
     folder = 'A'
-    data_dir = 'data/' + folder + '/'
+    data_dir = 'data_ctp/' + folder + '/'
     print data_dir
 #     Jobs = 10
     
     files = glob.glob(data_dir + '*.ctp')
     lines = []
     
-    files = [os.path.join(data_dir, 'A-75-75-4.ctp')]
+    files = [os.path.join(data_dir, 'A2-20-100-100-4.ctp')]
 #     files = [os.path.join(data_dir, 'A-50-50-6.ctp')]
     moves_freq = {}
     
@@ -381,9 +390,9 @@ if __name__ == "__main__":
         file_name = os.path.basename(file)
         print file_name
         
-#         problem = CTPProblem(data_path=file)
+        problem = CTPProblem(data_path=file)
         
-        problem = gcsp.GCSPProblem(data_path=file)
+#         problem = gcsp.GCSPProblem(data_path=file)
         
         # calculate solution cost
 #         tours = [[72,67,28,24], [5,48,52,18]]
@@ -391,4 +400,6 @@ if __name__ == "__main__":
 #         print cost
 #         break
         ga = GA_SCP(problem)
-        ga.run(0)
+        solution = ga.run(0)
+        
+        print solution
