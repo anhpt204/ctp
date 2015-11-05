@@ -56,8 +56,8 @@ class GA_VRP:
         self.problem = problem
         self.nodes = nodes
         
-        self.POPSIZE=20
-        self.NUMGEN=20
+        self.POPSIZE=10
+        self.NUMGEN=50
         self.INDSIZE = len(nodes)
         self.VERBOSE=False
         self.init_pop={}

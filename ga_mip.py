@@ -9,6 +9,7 @@ from ga_vrp import GA_VRP
 from os.path import join, basename
 import glob
 from problem import CTPProblem
+import random
 
 problems_data_dir = 'data_ctp'
 initial_solution_dir = 'SubSet'
@@ -18,8 +19,8 @@ problems = glob.glob(join(initial_solution_dir, '*.ctp'))
 problems = [basename(p) for p in problems]
 
 problems = [
-            'A1-1-25-75-6.ctp',
-#             'A2-20-100-100-4.ctp'
+#             'A1-1-25-75-6.ctp',
+            'A2-20-100-100-5.ctp'
             ]
 def run():
     for problem_name in problems:
@@ -35,9 +36,12 @@ def run():
         best_solution=None
         
 #         lines = lines[:2]
+        n = len(lines)
+        lines = [lines[i] for i in xrange(1, n, 2)]
         print len(lines)
-        for i in xrange(1, len(lines),2):
-            print i, 
+#         lines = random.sample(lines, 20)
+        for i in xrange(len(lines)):
+#             print i, 
             init_sol = [int(v) for v in lines[i].split()]
             
             vrp_solver = GA_VRP(problem=problem, nodes=init_sol)
@@ -48,10 +52,12 @@ def run():
                 best_cost = cost
                 best_solution = tours
             
-            if i == 11:
-                break
+#             if i == 11:
+#                 break
         
-        print best_cost, best_solution            
+            print i, cost, tours
+            
+        print 'best so far: ', best_cost, best_solution            
         break
             
 
