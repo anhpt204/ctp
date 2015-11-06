@@ -10,6 +10,7 @@ from os.path import join, basename
 import glob
 from problem import CTPProblem
 import random
+from ls import ls_prins_vrp
 
 problems_data_dir = 'data_ctp'
 initial_solution_dir = 'SubSet'
@@ -46,18 +47,26 @@ def run():
             
             vrp_solver = GA_VRP(problem=problem, nodes=init_sol)
             
-            cost, tours = vrp_solver.run(0)
+            cost, ind = vrp_solver.run(0)
             
+            print 'cost: ', cost
+            print 'local search on best ind'        
+            ind = ls_prins_vrp(problem=problem, individual=ind,gen=0)
+            cost = ind.fitness.values[0]
+            print 'cost after LS: ', cost         
+
             if cost < best_cost:
                 best_cost = cost
-                best_solution = tours
+                best_solution = ind
             
 #             if i == 11:
 #                 break
         
-            print i, cost, tours
+            print i, cost, ind
             
+        
         print 'best so far: ', best_cost, best_solution            
+            
         break
             
 

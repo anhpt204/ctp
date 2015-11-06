@@ -32,7 +32,7 @@ from setting import *
 from deap.algorithms import varAnd
 from crossovers import PMX, vrpPMX, scpOnePointCX, vrpOnePointCX
 from genetic import varAndLS, varAndVRP
-from mutations import mutLS, mutLS4, mutLSVRP
+from mutations import mutLS, mutLS4, mutLSVRP, repair
 from datetime import timedelta
 import gcsp
 from copy import deepcopy
@@ -57,9 +57,11 @@ class GA_VRP:
         self.nodes = nodes
         
         self.POPSIZE=20
-        self.NUMGEN=50
+        self.NUMGEN=100
         self.INDSIZE = len(nodes)
-        self.VERBOSE=True
+        self.VERBOSE=False
+        self.PMUTATION = 0.3
+        self.PCROSS = 0.6
         self.init_pop={}
         
         self.initialize()
@@ -123,11 +125,13 @@ class GA_VRP:
         # Structure initializers
         self.toolbox.register("individual", tools.initIterate, creator.Individual, self.toolbox.indices)
         self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
-        self.toolbox.register("mate", vrpOnePointCX)#PMX)
+        self.toolbox.register("mate", vrpPMX)#PMX)
     #     tools.cxPartialyMatched(ind1, ind2)
-        self.toolbox.register("ls", mutLSVRP, problem=self.problem)
+#         self.toolbox.register("ls", mutLSVRP, problem=self.problem)
 #         self.toolbox.register("ls4", mutLS4, problem=problem)
-#         self.toolbox.register("mutate", tools.mutShuffleIndexes, indpb=INDPB)
+        self.toolbox.register("mutate", tools.mutShuffleIndexes, indpb=INDPB)
+        self.toolbox.register("pop_repair", repair, self.problem)
+        
         self.toolbox.register("select", tools.selTournament, tournsize=3)
         self.toolbox.register("evaluate", self.eval)
                                     
@@ -176,7 +180,8 @@ class GA_VRP:
             
             # Vary the pool of individuals
             offspring = varAndVRP(offspring, self.toolbox, cxpb, mutpb, gen)
-            
+            #repairing
+            offspring = toolbox.map(toolbox.pop_repair, offspring) 
             # Evaluate the individuals with an invalid fitness
             invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
             fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
@@ -230,7 +235,7 @@ class GA_VRP:
 #         sizeStats.register('size_avg', numpy.mean)
         
         self.evolve(population=pop, 
-               toolbox=self.toolbox, cxpb=PCROSS, mutpb=PMUTATION, 
+               toolbox=self.toolbox, cxpb=self.PCROSS, mutpb=self.PMUTATION, 
                ngen=self.NUMGEN, stats=stats, halloffame=hof, verbose=self.VERBOSE)
         
 #         print 'run ', job, ': ', hof[0].fitness.values[0], ': ', problem.best_cost, ': ', problem.n_same_giant_tour
@@ -239,7 +244,7 @@ class GA_VRP:
     #     print hof[0].tours
     #     calculate_tours_cost(problem, hof[0].tours, job)
     
-        return hof[0].fitness.values[0], hof[0].tours
+        return hof[0].fitness.values[0], hof[0]
 
 import glob, os, datetime
 if __name__ == "__main__":

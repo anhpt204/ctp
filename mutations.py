@@ -57,6 +57,9 @@ def mutLS(individual, problem, gen):
     return individual,
 
 def repair(problem, ind):
+    '''
+    repair an individual to become a feasible solution
+    '''
 #     print 'in: ', ind
     # check if it contains all node in T
     ind_set = set(ind)

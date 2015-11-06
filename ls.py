@@ -142,13 +142,13 @@ def ls_prins_vrp(problem, individual, gen):
                                 else:
                                     problem.moves_freq[move.__name__] = 1
                                 
-                                break
-                if improvement:
-                    break
-            if improvement:
-                break
-        if improvement:
-            break
+#                                 break
+#                 if improvement:
+#                     break
+#             if improvement:
+#                 break
+#         if improvement:
+#             break
     # try LS4
     if not improvement:
         ls4_improvement, new_ind = move10_vrp(problem, individual)
