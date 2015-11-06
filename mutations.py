@@ -5,9 +5,10 @@ Created on Sep 8, 2015
 '''
 import random
 
-from ls import ls_prins, ls_move14, ls_prins_vrp
+from ls import ls_prins, ls_move14, ls_prins_vrp, removeShortRoute,\
+    vrpRelocation, swap
 from genetic import computeFitness
-from ls_moves import move10
+from ls_moves import move10, move10_vrp
 
 def mutShuffleIndexesCTP(individual, indpb):
     """Shuffle the attributes of the input individual and return the mutant.
@@ -147,12 +148,24 @@ def mutLSVRP(individual, problem, gen):
         
 #     print individual
 #     print individual
-    individual = ls_prins_vrp(problem, individual, gen)
-
+#     individual = ls_prins_vrp(problem, individual, gen)
+    for i in xrange(10):
+        individual = removeShortRoute(problem, individual)
+        individual = vrpRelocation(problem=problem, individual=individual)
+        individual = swap(problem=problem, individual=individual)
+    
+    ls4_improvement, individual = move10_vrp(problem, individual)
 #     individual = ls_move14(problem, individual, num_ls, gen)
 #     print 'out: ', individual
     
+    new_giant_tour = problem.concat(individual.tours)
+    del individual[len(new_giant_tour):]
+    for i in xrange(len(individual)):
+        individual[i]=new_giant_tour[i]
+
+    
     return individual,
+
 
 def mutLS4(individual, problem, num_ls, gen):
     if not individual.fitness.valid:

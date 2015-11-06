@@ -423,6 +423,8 @@ def move10(problem, individual):
                 
     return False, None
         
+                    
+    
 def move10_vrp(problem, individual):
     '''
     replace a node in a tour with another node outside of giant tour
@@ -501,4 +503,4 @@ def move10_vrp(problem, individual):
                 return True, new_ind
             
                 
-    return False, None
+    return False, individual

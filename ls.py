@@ -240,3 +240,205 @@ def ls_move14(problem, individual, num_ls, gen):
         individual.fitness.values = best_cost,
     
     return individual 
+
+def vrpRelocation(problem, individual):
+    '''
+    relocate a node to another tour in solution
+    '''
+    new_ind = deepcopy(individual)
+    old_fitness = individual.fitness.values[0]
+    new_tours = deepcopy(individual.tours)
+    tour_len = len(individual.tours)
+    
+    best_dest_tour_idx = None
+    best_dest_node_idx = None
+    best_src_tour_idx = None
+    best_src_node_idx = None
+    best_cost = old_fitness
+    
+    # for each tour as a destination tour
+    for dest_tour_idx in xrange(tour_len):
+        # if we can add a node into this tour
+        if len(individual.tours[dest_tour_idx]) < problem.max_nodes_per_route:
+            # add depot into tour to make it easier for re-calculating solution cost
+            dest_tour = [0] + individual.tours[dest_tour_idx] + [0]
+            # with each tour as a source tour
+            for src_tour_idx in xrange(tour_len):
+                # if source tour is difference destination tour 
+                if dest_tour_idx != src_tour_idx:
+                    src_tour = [0] + individual.tours[src_tour_idx] + [0]
+                    # try to insert a node from source tour to destination tour
+                    for dest_node_idx in xrange(1,len(dest_tour)):
+                        dest_node = dest_tour[dest_node_idx]
+                        for src_node_idx in xrange(1,len(src_tour)-1):
+                            src_node = src_tour[src_node_idx]
+
+#                             print src_node, src_tour
+#                             print dest_node, dest_tour
+                            # re-calculate solution cost
+                            new_cost = old_fitness - problem.nodes[dest_tour[dest_node_idx-1]].cost_dict[dest_node] \
+                            + problem.nodes[dest_tour[dest_node_idx-1]].cost_dict[src_node] + problem.nodes[src_node].cost_dict[dest_node] \
+                            # for source tour
+                            - (problem.nodes[src_tour[src_node_idx-1]].cost_dict[src_node] + problem.nodes[src_node].cost_dict[src_tour[src_node_idx+1]])
+                            # if route is empty
+                            if len(src_tour) > 3:
+                                new_cost += problem.nodes[src_tour[src_node_idx-1]].cost_dict[src_tour[src_node_idx+1]]
+                            # if better
+                            if new_cost<best_cost:
+                                best_cost = new_cost
+                                best_src_tour_idx = src_tour_idx
+                                best_src_node_idx = src_node_idx-1
+                                best_dest_tour_idx = dest_tour_idx
+                                best_dest_node_idx = dest_node_idx-1
+                                
+    if best_dest_tour_idx:
+        node_relocated = new_tours[best_src_tour_idx][best_src_node_idx]
+        new_tours[best_src_tour_idx].remove(node_relocated)
+        new_tours[best_dest_tour_idx].insert(best_dest_node_idx, node_relocated)
+        
+        new_ind.tours = new_tours
+        new_ind.fitness.values = best_cost,
+        
+    return new_ind
+
+def swap(problem, individual):
+    '''
+    swap two nodes, 
+    return best improvement
+    '''
+    new_ind = deepcopy(individual)
+    old_fitness = individual.fitness.values[0]
+    new_tours = deepcopy(individual.tours)
+    tour_len = len(individual.tours)
+    
+    best_dest_tour_idx = None
+    best_dest_node_idx = None
+    best_src_tour_idx = None
+    best_src_node_idx = None
+    best_cost = old_fitness
+
+    # for each source and destionation tour
+    for src_tour_idx in xrange(tour_len):
+        for dest_tour_idx in xrange(tour_len):
+            src_tour = [0] + new_tours[src_tour_idx] + [0]
+            dest_tour = [0] + new_tours[dest_tour_idx] + [0]
+            
+            if src_tour_idx == dest_tour_idx:
+                continue
+            
+            # try to swap two nodes, one from source tour, another from destination tour
+            for src_node_idx in xrange(1, len(src_tour)-1):
+                for dest_node_idx in xrange(1,len(dest_tour)-1):
+                    src_node = src_tour[src_node_idx]
+                    dest_node = dest_tour[dest_node_idx]
+
+#                     print src_node, src_tour
+#                     print dest_node, dest_tour
+                    
+                    # calculate cost if swap these two nodes
+                    new_cost = old_fitness  - (problem.nodes[src_tour[src_node_idx-1]].cost_dict[src_node] 
+                                              + problem.nodes[src_node].cost_dict[src_tour[src_node_idx+1]]) 
+                    
+                    new_cost += (problem.nodes[src_tour[src_node_idx-1]].cost_dict[dest_node]
+                                              + problem.nodes[dest_node].cost_dict[src_tour[src_node_idx+1]])
+                    
+                    new_cost -= (problem.nodes[dest_tour[dest_node_idx-1]].cost_dict[dest_node]
+                                               + problem.nodes[dest_node].cost_dict[dest_tour[dest_node_idx+1]])
+                    
+                    new_cost += (problem.nodes[dest_tour[dest_node_idx-1]].cost_dict[src_node]
+                                               + problem.nodes[src_node].cost_dict[dest_tour[dest_node_idx+1]])
+                                            
+                                            
+                    # if improvement
+                    if new_cost < best_cost:
+                        best_cost = new_cost
+                        best_src_tour_idx = src_tour_idx
+                        best_src_node_idx = src_node_idx-1
+                        best_dest_tour_idx = dest_tour_idx
+                        best_dest_node_idx = dest_node_idx-1
+    # if find a better
+    if best_dest_tour_idx:
+        # swap
+        tmp_node = new_tours[best_src_tour_idx][best_src_node_idx]
+        new_tours[best_src_tour_idx][best_src_node_idx] = new_tours[best_dest_tour_idx][best_dest_node_idx]
+        new_tours[best_dest_tour_idx][best_dest_node_idx] = tmp_node
+        
+        new_ind.tours = new_tours
+        new_ind.fitness.values = best_cost,
+        
+    return new_ind
+                        
+                    
+def removeShortRoute(problem, individual):
+    '''
+    remove short route by combining two short route subjec to maximum number
+    nodes on a route constraint
+    
+    return the first improvement
+    '''            
+    new_ind = deepcopy(individual)
+    old_fitness = individual.fitness.values[0]
+    new_tours = deepcopy(individual.tours)
+    tour_len = len(individual.tours)
+    
+    best_dest_tour_idx = None
+    best_dest_node_idx = None
+    best_src_tour_idx = None
+    best_src_node_idx = None
+    best_cost = old_fitness
+
+    for tour1_idx in xrange(tour_len):
+        # check if len of tour1 is smaller than max_node_per_tour
+        if len(new_tours[tour1_idx]) < problem.max_nodes_per_route:
+            tour1 = new_tours[tour1_idx]
+            for tour2_idx in xrange(tour_len):
+                if tour1_idx != tour2_idx \
+                    and len(new_tours[tour1_idx]) + len(new_tours[tour2_idx]) < problem.max_nodes_per_route:
+                    # combine two tour
+                    tour2 = new_tours[tour2_idx]
+                    # try 4 cases
+                    # first case 0-0
+                    cost = old_fitness - (problem.nodes[tour1[0]].cost_dict[0]
+                                          + problem.nodes[0].cost_dict[tour2[0]]) \
+                                        + problem.nodes[tour1[0]].cost_dict[tour2[0]]
+                    # make a new tour
+                    new_tour = [v for v in tour1]
+                    new_tour.reverse()
+                    new_tour = new_tour + tour2
+                    # second 0-(-1)
+                    tmp_cost = old_fitness - (problem.nodes[tour1[0]].cost_dict[0]
+                                          + problem.nodes[0].cost_dict[tour2[-1]]) \
+                                        + problem.nodes[tour1[0]].cost_dict[tour2[-1]]
+                    if tmp_cost < cost:
+                        cost = tmp_cost
+                        new_tour = tour2 + tour1
+                        
+                    # third -1 -0
+                    tmp_cost = old_fitness - (problem.nodes[tour1[-1]].cost_dict[0]
+                                          + problem.nodes[0].cost_dict[tour2[0]]) \
+                                        + problem.nodes[tour1[-1]].cost_dict[tour2[0]]
+                    if tmp_cost < cost:
+                        cost = tmp_cost
+                        new_tour = tour1 + tour2
+                        
+                    # third -1 -1
+                    tmp_cost = old_fitness - (problem.nodes[tour1[-1]].cost_dict[0]
+                                          + problem.nodes[0].cost_dict[tour2[-1]]) \
+                                        + problem.nodes[tour1[-1]].cost_dict[tour2[-1]]
+                    if tmp_cost < cost:
+                        cost = tmp_cost
+                        new_tour = deepcopy(tour2)
+                        new_tour.reverse()
+                        new_tour = tour1 + new_tour
+                        
+                    if cost < best_cost:
+                        # edit tour 1
+                        new_ind.tours[tour1_idx] = new_tour
+                        # and delete tour 2
+                        del new_ind.tours[tour2_idx]
+                        
+                        new_ind.fitness.values = cost,
+                        
+                        return new_ind
+                
+    return new_ind

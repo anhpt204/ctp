@@ -128,8 +128,12 @@ def varAndVRP(population, toolbox, cxpb, mutpb, gen):
     lspb = 1.0
     for i in range(len(offspring)):
         if random.random() < lspb:
+            ind = deepcopy(offspring[i])
 #             print offspring[i]
             offspring[i], = toolbox.ls(individual=offspring[i], gen=gen)
+            
+            if offspring[i] == None:
+                print ind
             
 #     for i in range(len(offspring)):
 #         if random.random() < lspb:
