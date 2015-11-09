@@ -127,9 +127,9 @@ class GA_VRP:
         self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
         self.toolbox.register("mate", vrpPMX)#PMX)
     #     tools.cxPartialyMatched(ind1, ind2)
-#         self.toolbox.register("ls", mutLSVRP, problem=self.problem)
+        self.toolbox.register("ls", mutLSVRP, problem=self.problem)
 #         self.toolbox.register("ls4", mutLS4, problem=problem)
-        self.toolbox.register("mutate", tools.mutShuffleIndexes, indpb=INDPB)
+#         self.toolbox.register("mutate", tools.mutShuffleIndexes, indpb=INDPB)
         self.toolbox.register("pop_repair", repair, self.problem)
         
         self.toolbox.register("select", tools.selTournament, tournsize=3)

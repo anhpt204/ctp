@@ -55,7 +55,7 @@ class GA_SCP:
         current_gen = 0
         self.problem = problem
         
-        self.POPSIZE=20
+        self.POPSIZE=350
         self.NUMGEN=20
         self.INDSIZE = self.problem.num_of_nodes + len(self.problem.obligatory_nodes)
         self.cxP=0.6
@@ -408,9 +408,9 @@ if __name__ == "__main__":
 #             os.path.join(data_dir, 'A1-1-25-75-6.ctp'),
 #             os.path.join(data_dir, 'A1-1-25-75-8.ctp'),
 
-            os.path.join(data_dir, 'A2-20-100-100-4.ctp'),
+#             os.path.join(data_dir, 'A2-20-100-100-4.ctp'),
 #              os.path.join(data_dir, 'A2-20-100-100-5.ctp'),
-#              os.path.join(data_dir, 'A2-20-100-100-6.ctp'),
+            os.path.join(data_dir, 'A2-20-100-100-6.ctp'),
 #              os.path.join(data_dir, 'A2-20-100-100-8.ctp'),
 #              os.path.join(data_dir, 'B2-20-100-100-4.ctp'),
 #              os.path.join(data_dir, 'B2-20-100-100-5.ctp'),

@@ -386,10 +386,18 @@ def move10(problem, individual):
                     
                     # if improvement, return success
                     if new_tour_cost < best_tour_cost:
+                        
+                        # try replace two nodes around this node
+                        sucss, new_new_tour, new_new_tour_cost = ls_next_node(problem, new_tour, new_tour_cost, node_idx, nodes_not_in_tours)
+                        if sucss:
+                            new_tour = new_new_tour
+                            new_tour_cost = new_new_tour_cost
+                            
                         best_tour_cost = new_tour_cost
                         best_tours = deepcopy(new_tours)
                         break
-                        
+                    
+                # back to old node for next try
                 new_tour[node_idx] = old_node
                         
             # if have improvement
@@ -424,7 +432,36 @@ def move10(problem, individual):
     return False, None
         
                     
-    
+def ls_next_node(problem, tour, tour_cost, node_idx, nodes_not_in_tours):
+    '''
+    try replace two node before and after node_idx with new node
+    '''
+    full_tour = [0] + tour + [0]
+    full_node_idx = node_idx + 1
+    for new_node in nodes_not_in_tours:
+        # try to replace node_idx-1 with new_node
+        new_tour_cost = tour_cost - (problem.nodes[full_tour[full_node_idx-2]].cost_dict[full_tour[full_node_idx-1]]
+                                     + problem.nodes[full_tour[full_node_idx-1]].cost_dict[full_tour[full_node_idx]])
+        new_tour_cost += (problem.nodes[full_tour[full_node_idx-2]].cost_dict[new_node]
+                          + problem.nodes[new_node].cost_dict[full_tour[full_node_idx]])
+        
+        if new_tour_cost < tour_cost:
+            tour[node_idx-1] = new_node
+            return True, tour, new_tour_cost
+        
+        # try to replace node_idx+1 with new_node
+        new_tour_cost = tour_cost - (problem.nodes[full_tour[full_node_idx+2]].cost_dict[full_tour[full_node_idx+1]]
+                                     + problem.nodes[full_tour[full_node_idx+1]].cost_dict[full_tour[full_node_idx]])
+        new_tour_cost += (problem.nodes[full_tour[full_node_idx+2]].cost_dict[new_node]
+                          + problem.nodes[new_node].cost_dict[full_tour[full_node_idx]])
+        
+        if new_tour_cost < tour_cost:
+            tour[node_idx+1] = new_node
+            return True, tour, new_tour_cost
+        
+    return False, tour, tour_cost
+        
+            
 def move10_vrp(problem, individual):
     '''
     replace a node in a tour with another node outside of giant tour
@@ -470,6 +507,13 @@ def move10_vrp(problem, individual):
                     
                     # if improvement, return success
                     if new_tour_cost < best_tour_cost:
+                        # try replace two nodes around this node
+                        nodes_not_in_tours.
+                        sucss, new_new_tour, new_new_tour_cost = ls_next_node(problem, new_tour, new_tour_cost, node_idx, nodes_not_in_tours)
+                        if sucss:
+                            new_tour = new_new_tour
+                            new_tour_cost = new_new_tour_cost
+
                         best_tour_cost = new_tour_cost
                         best_tours = deepcopy(new_tours)
                         break

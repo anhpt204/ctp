@@ -118,19 +118,19 @@ def varAndVRP(population, toolbox, cxpb, mutpb, gen):
 #             print offspring[i]
             
             
-    for i in range(len(offspring)):
-        if random.random() < mutpb:
-            offspring[i], = toolbox.mutate(offspring[i])
-            del offspring[i].fitness.values
+#     for i in range(len(offspring)):
+#         if random.random() < mutpb:
+#             offspring[i], = toolbox.mutate(offspring[i])
+#             del offspring[i].fitness.values
     
 #     lspb = float(gen)/100
 #     print 'mutation...'
-#     lspb = 1.0
-#     for i in range(len(offspring)):
-#         if random.random() < lspb:
-#             ind = deepcopy(offspring[i])
-# #             print offspring[i]
-#             offspring[i], = toolbox.ls(individual=offspring[i], gen=gen)
+    lspb = 1.0
+    for i in range(len(offspring)):
+        if random.random() < lspb:
+            ind = deepcopy(offspring[i])
+#             print offspring[i]
+            offspring[i], = toolbox.ls(individual=offspring[i], gen=gen)
 #             
 #             if offspring[i] == None:
 #                 print ind
