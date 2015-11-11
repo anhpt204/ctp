@@ -437,27 +437,33 @@ def ls_next_node(problem, tour, tour_cost, node_idx, nodes_not_in_tours):
     try replace two node before and after node_idx with new node
     '''
     full_tour = [0] + tour + [0]
+    nodes_not_in_tours.difference_update(set(tour))
+#     print full_tour
+#     print nodes_not_in_tours
     full_node_idx = node_idx + 1
     for new_node in nodes_not_in_tours:
         # try to replace node_idx-1 with new_node
-        new_tour_cost = tour_cost - (problem.nodes[full_tour[full_node_idx-2]].cost_dict[full_tour[full_node_idx-1]]
+        if node_idx != 0:
+#             print full_node_idx, full_tour[full_node_idx-2], full_tour[full_node_idx-1], full_tour[full_node_idx]
+            new_tour_cost = tour_cost - (problem.nodes[full_tour[full_node_idx-2]].cost_dict[full_tour[full_node_idx-1]]
                                      + problem.nodes[full_tour[full_node_idx-1]].cost_dict[full_tour[full_node_idx]])
-        new_tour_cost += (problem.nodes[full_tour[full_node_idx-2]].cost_dict[new_node]
+            new_tour_cost += (problem.nodes[full_tour[full_node_idx-2]].cost_dict[new_node]
                           + problem.nodes[new_node].cost_dict[full_tour[full_node_idx]])
         
-        if new_tour_cost < tour_cost:
-            tour[node_idx-1] = new_node
-            return True, tour, new_tour_cost
+            if new_tour_cost < tour_cost:
+                tour[node_idx-1] = new_node
+                return True, tour, new_tour_cost
         
         # try to replace node_idx+1 with new_node
-        new_tour_cost = tour_cost - (problem.nodes[full_tour[full_node_idx+2]].cost_dict[full_tour[full_node_idx+1]]
+        if node_idx != len(tour)-1:
+            new_tour_cost = tour_cost - (problem.nodes[full_tour[full_node_idx+2]].cost_dict[full_tour[full_node_idx+1]]
                                      + problem.nodes[full_tour[full_node_idx+1]].cost_dict[full_tour[full_node_idx]])
-        new_tour_cost += (problem.nodes[full_tour[full_node_idx+2]].cost_dict[new_node]
+            new_tour_cost += (problem.nodes[full_tour[full_node_idx+2]].cost_dict[new_node]
                           + problem.nodes[new_node].cost_dict[full_tour[full_node_idx]])
         
-        if new_tour_cost < tour_cost:
-            tour[node_idx+1] = new_node
-            return True, tour, new_tour_cost
+            if new_tour_cost < tour_cost:
+                tour[node_idx+1] = new_node
+                return True, tour, new_tour_cost
         
     return False, tour, tour_cost
         
@@ -471,7 +477,7 @@ def move10_vrp(problem, individual):
     old_fitness = individual.fitness.values[0]
     
     # get all nodes that are not in tours
-    nodes_in_tours = set(individual.giant_tour)
+    nodes_in_tours = set(individual)
     nodes = range(1, len(problem.nodes))
     
     nodes_not_in_tours = set(nodes).difference(nodes_in_tours)
@@ -497,6 +503,7 @@ def move10_vrp(problem, individual):
             best_tours = None
             
             for node in nodes_not_in_tours:
+                
                 new_tour[node_idx] = node
                         
                 # check if this covering all customers
@@ -508,11 +515,14 @@ def move10_vrp(problem, individual):
                     # if improvement, return success
                     if new_tour_cost < best_tour_cost:
                         # try replace two nodes around this node
-                        nodes_not_in_tours.
-                        sucss, new_new_tour, new_new_tour_cost = ls_next_node(problem, new_tour, new_tour_cost, node_idx, nodes_not_in_tours)
-                        if sucss:
-                            new_tour = new_new_tour
-                            new_tour_cost = new_new_tour_cost
+#                         print old_node, node
+#                         new_nodes_not_in_tours = nodes_not_in_tours.union([old_node])
+#                         new_nodes_not_in_tours.discard(node)
+#                         
+#                         sucss, new_new_tour, new_new_tour_cost = ls_next_node(problem, new_tour, new_tour_cost, node_idx, new_nodes_not_in_tours)
+#                         if sucss:
+#                             new_tour = new_new_tour
+#                             new_tour_cost = new_new_tour_cost
 
                         best_tour_cost = new_tour_cost
                         best_tours = deepcopy(new_tours)

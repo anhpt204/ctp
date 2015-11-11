@@ -40,7 +40,7 @@ def run():
         n = len(lines)
         lines = [lines[i] for i in xrange(1, n, 2)]
         print len(lines)
-#         lines = random.sample(lines, 20)
+        lines = random.sample(lines, 20)
         for i in xrange(len(lines)):
 #             print i, 
             init_sol = [int(v) for v in lines[i].split()]
