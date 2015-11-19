@@ -36,6 +36,7 @@ from mutations import mutLS, mutLS4, mutLSVRP
 from datetime import timedelta
 import gcsp
 from ga_vrp import GA_VRP
+from hoang import ELS
 
 
 class GA_SCP:
@@ -55,7 +56,7 @@ class GA_SCP:
         current_gen = 0
         self.problem = problem
         
-        self.POPSIZE=350
+        self.POPSIZE=300
         self.NUMGEN=20
         self.INDSIZE = self.problem.num_of_nodes + len(self.problem.obligatory_nodes)
         self.cxP=0.6
@@ -63,6 +64,9 @@ class GA_SCP:
         self.init_popsize=0
         
         self.initialize(problem.name)
+        
+        # for testing only
+        self.best_cost = 10**10
         
     def pop_ctp_init(self):
         '''
@@ -235,15 +239,24 @@ class GA_SCP:
     def eval(self, individual):
         nodes = [i+1 for i in xrange(self.INDSIZE) if individual[i]==1]
         
-        nodes = random.sample(nodes, len(nodes))
-#         print nodes
-        vrp_solver = GA_VRP(self.problem, nodes)
-        cost, tours = vrp_solver.run()
-                            
-        individual.giant_tour=nodes
-        individual.tours = tours
+#         nodes = random.sample(nodes, len(nodes))
         
-        return cost,
+        cost, backtrack = problem.split(nodes)
+        tours = problem.extract_tours(nodes, backtrack)
+#         print nodes
+#         vrp_solver = GA_VRP(self.problem, nodes)
+#         cost, tours = vrp_solver.run()
+
+        new_giant_tour, new_tours, new_cost = ELS(self.problem, nodes, tours, cost)
+                            
+        if new_cost < self.best_cost:
+            self.best_cost = new_cost
+#        print new_cost, self.best_cost
+        
+        individual.giant_tour=new_giant_tour
+        individual.tours = new_tours
+        
+        return new_cost,
     
     def repair_ind(self, ind):
         w=[0]*self.problem.num_of_customers
@@ -366,7 +379,9 @@ class GA_SCP:
     def run(self, job=0):
         random.seed(1000+job)
     
-        pop = self.toolbox.population(n=self.POPSIZE)
+        POPSIZE= 200 #len(self.lines)/2
+        
+        pop = self.toolbox.population(n=POPSIZE)
     
         hof = tools.HallOfFame(1)
         stats = tools.Statistics(lambda ind: ind.fitness.values)

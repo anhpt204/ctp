@@ -5,8 +5,7 @@ Created on Sep 8, 2015
 '''
 import random
 
-from ls import ls_prins, ls_move14, ls_prins_vrp, removeShortRoute,\
-    vrpRelocation, swap
+from ls import ls_prins, ls_move14, ls_prins_vrp
 from genetic import computeFitness
 from ls_moves import move10, move10_vrp
 

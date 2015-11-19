@@ -11,6 +11,7 @@ import glob
 from problem import CTPProblem
 import random
 from ls import ls_prins_vrp
+from hoang import ELS
 
 problems_data_dir = 'data_ctp'
 initial_solution_dir = 'SubSet'
@@ -45,15 +46,17 @@ def run():
 #             print i, 
             init_sol = [int(v) for v in lines[i].split()]
             
-            vrp_solver = GA_VRP(problem=problem, nodes=init_sol)
-            
+            # GA
+            vrp_solver = GA_VRP(problem=problem, nodes=init_sol)            
             cost, ind = vrp_solver.run(0)
+            # Hoang
+#             ind = ELS()
             
             print 'cost: ', cost
-            print 'local search on best ind'        
-            ind = ls_prins_vrp(problem=problem, individual=ind,gen=0)
-            cost = ind.fitness.values[0]
-            print 'cost after LS: ', cost         
+#             print 'local search on best ind'        
+#             ind = ls_prins_vrp(problem=problem, individual=ind,gen=0)
+#             cost = ind.fitness.values[0]
+#             print 'cost after LS: ', cost         
 
             if cost < best_cost:
                 best_cost = cost
