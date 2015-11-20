@@ -52,7 +52,7 @@ class GA_GT:
         '''
         self.toolbox = base.Toolbox()
         creator.create("FitnessMin1", base.Fitness, weights=(-1.0,))
-        creator.create("Individual1", array.array, typecode='i', fitness=creator.FitnessMin1, tours=list)
+        creator.create("Individual", array.array, typecode='i', fitness=creator.FitnessMin1, tours=list)
         
         current_gen = 0
         self.problem = problem
@@ -217,9 +217,9 @@ class GA_GT:
         
         
         # Structure initializers
-        self.toolbox.register("individual", tools.initIterate, creator.Individual1, self.toolbox.indices)
+        self.toolbox.register("individual", tools.initIterate, creator.Individual, self.toolbox.indices)
         self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
-        self.toolbox.register("mate", tools.cxESTwoPoint)
+        self.toolbox.register("mate", tools.cxTwoPoint)
 #         tools.cxPartialyMatched(ind1, ind2)
 #         self.toolbox.register("ls", mutLSVRP, problem=problem)
 #         self.toolbox.register("ls4", mutLS4, problem=problem)
@@ -239,28 +239,44 @@ class GA_GT:
             cost, backtrack = problem.split(giant_tour)
             individual.fitness.values = cost,
             individual.tours = problem.extract_tours(giant_tour, backtrack)
-            
+        
+#         return individual.fitness.values[0],
+    
         new_giant_tour, new_tours, new_cost = ELS(self.problem, giant_tour, individual.tours, individual.fitness.values[0])
-                            
+                               
         if new_cost < self.best_cost:
             self.best_cost = new_cost
         print new_cost, self.best_cost
-        
+          
         individual.tours = new_tours
-        
+          
         N = len(new_giant_tour)
         if N < len(individual):
             del individual[len(new_giant_tour):]
-            
+              
         assert len(individual)==N, 'len individual is not equal N'
         for i in xrange(N):
             individual[i]=new_giant_tour[i]
-        
+          
         return new_cost,
     
     def repair_ind(self, ind):
-
+                
         giant_tour = [i for i in ind]
+        
+        # remove dupblicate node in giant tour
+        nodes_set = set(giant_tour)
+        if len(nodes_set) < len(giant_tour):
+            new_giant_tour = []
+            for node in giant_tour:
+                if nodes_set.issuperset(set([node])):
+                    new_giant_tour.append(node)
+                    nodes_set.discard(node)
+            
+            giant_tour = new_giant_tour
+            
+#         print giant_tour
+        
         if not self.problem.is_giant_tour_satisfy_covering_constraint(giant_tour):
             # try until find feasible giant tour
             while True:
@@ -287,9 +303,18 @@ class GA_GT:
                 # if is feasible giant tour then break while loop
                 if problem.is_giant_tour_satisfy_covering_constraint(giant_tour):
                     break
+#         print giant_tour
         # remove redundent nodes
         giant_tour = problem.remove_node(giant_tour)
 
+        # insert nodes in T
+        nodes_set = set(giant_tour)
+        self.problem.obligatory_nodes
+        obligatory_nodes_not_in_giant_tour = self.problem.obligatory_nodes.difference(nodes_set)
+        for node in list(obligatory_nodes_not_in_giant_tour):
+            idx = random.randint(0, len(giant_tour))
+            giant_tour.insert(idx, node)
+            
         # update individual
         new_ind = deepcopy(ind)
         
