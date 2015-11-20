@@ -492,7 +492,15 @@ if __name__ == "__main__":
 #         cost = problem.get_solution_cost(tours)
 #         print cost
 #         break
-        ga = GA_GT(problem)
-        solution = ga.run(0)
+        best_solution = None
+        best_cost = 10**10
         
-        print solution
+        for job in xrange(JOBS):
+            ga = GA_GT(problem)
+            solution = ga.run(0)
+            
+            if solution.fitness.values[0] < best_cost:
+                best_cost = solution.fitness.values[0]
+                best_solution = deepcopy(solution)
+                
+        print best_cost, best_solution
