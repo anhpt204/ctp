@@ -459,17 +459,18 @@ class GA_GT:
                             
             # Replace the current population by the offspring
             population[:] = offspring
+
+            # Update the hall of fame with the generated individuals
+            if halloffame is not None:
+                halloffame.update(population)
             
              # elitism
 #             t = random.randint(0, len(population)-1)
     #         t = 0
-            idxs = []
-            if random.random() < 0.5:
-                idxs = random.sample(range(len(population)), 5)
             
-            for t in idxs:
+            for t in xrange(len(halloffame)):
                 # apply ELS for the best individual
-                new_ind = deepcopy(population[t])
+                new_ind = deepcopy(halloffame[t])
                 giant_tour = [node for node in new_ind]
                 new_giant_tour, new_tours, new_cost = ELS(self.problem, giant_tour, new_ind.tours, new_ind.fitness.values[0])
                                     
@@ -479,13 +480,12 @@ class GA_GT:
                         new_ind.append(node)
                     new_ind.fitness.values = new_cost,
                     new_ind.tours = new_tours
-    
-                population[t] = new_ind
+                
+#                 halloffame[t] = new_ind
+                idx = random.randint(0, len(population)-1)
+                population[idx] = new_ind
             
-            # Update the hall of fame with the generated individuals
-            if halloffame is not None:
-                halloffame.update(population)
-
+            halloffame.update(population)
             # Append the current generation statistics to the logbook
             record = stats.compile(population) if stats else {}
 #             record.update(sizeStats.compile(population) if sizeStats else {})
@@ -505,7 +505,7 @@ class GA_GT:
         
         pop = self.toolbox.population(n=self.POPSIZE)
     
-        hof = tools.HallOfFame(1)
+        hof = tools.HallOfFame(5)
         stats = tools.Statistics(lambda ind: ind.fitness.values)
         stats.register("avg", numpy.mean)
         stats.register("std", numpy.std)
@@ -547,8 +547,8 @@ if __name__ == "__main__":
 
 #             os.path.join(data_dir, 'A2-20-100-100-4.ctp'),
 #              os.path.join(data_dir, 'A2-20-100-100-5.ctp'),
-            os.path.join(data_dir, 'A2-20-100-100-6.ctp'),
-#              os.path.join(data_dir, 'A2-20-100-100-8.ctp'),
+#             os.path.join(data_dir, 'A2-20-100-100-6.ctp'),
+            os.path.join(data_dir, 'A2-20-100-100-8.ctp'),
 #              os.path.join(data_dir, 'B2-20-100-100-4.ctp'),
 #              os.path.join(data_dir, 'B2-20-100-100-5.ctp'),
 #              os.path.join(data_dir, 'B2-20-100-100-6.ctp'),
