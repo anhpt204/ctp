@@ -32,7 +32,7 @@ from setting import *
 from deap.algorithms import varAnd
 from crossovers import PMX, vrpPMX, scpOnePointCX
 from genetic import varAndLS, varAndVRP, varAndSCP
-from mutations import mutLS, mutLS4, mutLSVRP
+from mutations import mutLS, mutLS4, mutLSVRP, mutShaking
 from datetime import timedelta
 import gcsp
 from ga_vrp import GA_VRP
@@ -61,7 +61,7 @@ class GA_GT:
         self.NUMGEN=20
         self.INDSIZE = self.problem.num_of_nodes + len(self.problem.obligatory_nodes)
         self.cxP=0.6
-        self.mutP=1.0/self.INDSIZE
+        self.mutP=0.3
         self.init_popsize=0
         
         self.initialize(problem.name)
@@ -223,7 +223,7 @@ class GA_GT:
 #         tools.cxPartialyMatched(ind1, ind2)
 #         self.toolbox.register("ls", mutLSVRP, problem=problem)
 #         self.toolbox.register("ls4", mutLS4, problem=problem)
-        self.toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.1)
+        self.toolbox.register("mutate", mutShaking, problem=self.problem, k=3)
         self.toolbox.register("select", tools.selTournament, tournsize=3)
         self.toolbox.register("evaluate", self.eval)
         
@@ -243,21 +243,21 @@ class GA_GT:
 #         return individual.fitness.values[0],
     
         new_giant_tour, new_tours, new_cost = ELS(self.problem, giant_tour, individual.tours, individual.fitness.values[0])
-                               
+                                
         if new_cost < self.best_cost:
             self.best_cost = new_cost
         print new_cost, self.best_cost
-          
+           
         individual.tours = new_tours
-          
+           
         N = len(new_giant_tour)
         if N < len(individual):
             del individual[len(new_giant_tour):]
-              
+               
         assert len(individual)==N, 'len individual is not equal N'
         for i in xrange(N):
             individual[i]=new_giant_tour[i]
-          
+           
         return new_cost,
     
     def repair_ind(self, ind):
@@ -323,7 +323,7 @@ class GA_GT:
             new_ind.append(node)
         
         cost, backtrack = problem.split(giant_tour)
-        new_ind.fitness.values = cost,
+#         new_ind.fitness.values = cost,
         new_ind.tours = problem.extract_tours(giant_tour, backtrack)
                                                 
         return new_ind
@@ -339,13 +339,17 @@ class GA_GT:
                 del offspring[i-1].fitness.values, offspring[i].fitness.values
                 
                 # repair
-                offspring[i-1] = self.repair_ind(offspring[i-1])
-                offspring[i] = self.repair_ind(offspring[i])
+#                 offspring[i-1] = self.repair_ind(offspring[i-1])
+#                 offspring[i] = self.repair_ind(offspring[i])
         
-#         for i in range(len(offspring)):
-#             if random.random() < self.mutP:
-#                 offspring[i], = self.toolbox.mutate(offspring[i])
-#                 del offspring[i].fitness.values
+        for i in range(len(offspring)):
+            if random.random() < self.mutP:
+                offspring[i] = self.toolbox.mutate(offspring[i])
+                del offspring[i].fitness.values
+                
+        for i in range(len(offspring)):
+            if not offspring[i].fitness.valid:
+                offspring[i] = self.repair_ind(offspring[i])
         
             
         return offspring

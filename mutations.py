@@ -181,3 +181,19 @@ def mutLS4(individual, problem, num_ls, gen):
         return new_ind,
     
     return individual,
+
+def mutShaking(individual, problem, k):
+    '''
+    remove k node and try to insert new nodes to make feasible giant tour
+    '''
+    candidate_removed_nodes = [node for node in individual if not problem.obligatory_nodes.issuperset(set([node]))]
+    
+    if k > len(candidate_removed_nodes):
+        k = len(candidate_removed_nodes)/2
+        
+    removed_nodes = random.sample(candidate_removed_nodes, k)
+    
+    for node in removed_nodes:
+        individual.remove(node)
+        
+    return individual
