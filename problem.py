@@ -108,6 +108,16 @@ class CTPProblem():
         get a set of customers that covered by a node (node_id)
         '''
         return set(self.nodes[node_id].cover_list)
+    
+    def get_set_of_customers_covered_by_giant_tour(self, giant_tour):
+        '''
+        get a set of customers that covered by a node (node_id)
+        '''
+        covering_set = set()
+        for node in giant_tour:
+            covering_set.update(set(self.nodes[node].cover_list))
+            
+        return covering_set
 
     def is_giant_tour_satisfy_covering_constraint(self, giant_tour):
         

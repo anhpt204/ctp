@@ -16,7 +16,7 @@ def ELS(problem, giant_tour, tours, cost):
     best_tours, best_cost = LS1(problem, giant_tour, tours, cost)
     best_giant_tour = problem.concat(best_tours)
     new_tours = deepcopy(tours)
-    
+    new_giant_tour = deepcopy(best_giant_tour)
     while True:
         for i in xrange(N):
             f_min = 10**10
@@ -24,6 +24,7 @@ def ELS(problem, giant_tour, tours, cost):
             tours_min = None
             for j in xrange(N):
                 new_giant_tour = problem.concat(new_tours)
+
                 N = len(new_giant_tour)
 #                 assert len(new_giant_tour) == N, 'giant tour after concat has diffence length with individual'
                     
@@ -59,9 +60,13 @@ def ELS(problem, giant_tour, tours, cost):
                 
         new_tours, new_cost = LS4(problem, best_giant_tour, best_tours, best_cost)
         
+        
         if new_cost >= best_cost:
             return best_giant_tour, best_tours, best_cost
-    
+#         else:
+#             new_giant_tour = problem.concat(new_tours)
+#             return new_giant_tour, new_tours, new_cost
+#         return best_giant_tour
 
 if __name__ == '__main__':
     pass

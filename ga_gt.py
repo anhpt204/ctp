@@ -37,11 +37,12 @@ from datetime import timedelta
 import gcsp
 from ga_vrp import GA_VRP
 from hoang import ELS
+from copy import deepcopy
 
 
-class GA_SCP:
+class GA_GT:
     '''
-    GA for Set Covering Problem
+    GA for CTP with individual = giant tour
     '''
     
     def __init__(self, problem):
@@ -51,7 +52,7 @@ class GA_SCP:
         '''
         self.toolbox = base.Toolbox()
         creator.create("FitnessMin1", base.Fitness, weights=(-1.0,))
-        creator.create("Individual1", array.array, typecode='i', fitness=creator.FitnessMin1, giant_tour=list, tours=list)
+        creator.create("Individual1", array.array, typecode='i', fitness=creator.FitnessMin1, tours=list)
         
         current_gen = 0
         self.problem = problem
@@ -190,14 +191,12 @@ class GA_SCP:
                 for i in self.problem.get_set_of_customers_covered_by(j):
                     w[i] = w[i]-1
         
-        binary_ind = [0]*self.INDSIZE
-        for i in ind:
-            binary_ind[i-1]=1
-            
+                    
         for i in xrange(len(self.problem.obligatory_nodes)):
-            binary_ind[i] = 1
+            index = random.randint(0, len(ind)-1)
+            ind.insert(index, i+1)
             
-        return binary_ind
+        return ind
         
     
     def init_mip(self):
@@ -207,12 +206,7 @@ class GA_SCP:
         nodes = self.lines[2*self.init_popsize+1].split()
         nodes = [int(v) for v in nodes]
         
-        binary_ind = [0]*self.INDSIZE
-        for v in nodes:
-            binary_ind[v-1]=1
-            
-        self.init_popsize +=1
-        return binary_ind
+        return nodes
         
         
     def initialize(self, problem_name):
@@ -225,11 +219,11 @@ class GA_SCP:
         # Structure initializers
         self.toolbox.register("individual", tools.initIterate, creator.Individual1, self.toolbox.indices)
         self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
-        self.toolbox.register("mate", scpOnePointCX)#PMX)
+        self.toolbox.register("mate", tools.cxESTwoPoint)
 #         tools.cxPartialyMatched(ind1, ind2)
 #         self.toolbox.register("ls", mutLSVRP, problem=problem)
 #         self.toolbox.register("ls4", mutLS4, problem=problem)
-        self.toolbox.register("mutate", tools.mutFlipBit, indpb=0.1)
+        self.toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.1)
         self.toolbox.register("select", tools.selTournament, tournsize=3)
         self.toolbox.register("evaluate", self.eval)
         
@@ -239,80 +233,98 @@ class GA_SCP:
                                     
     # evaluate solution
     def eval(self, individual):
-        nodes = [i+1 for i in xrange(self.INDSIZE) if individual[i]==1]
-        
-#         nodes = random.sample(nodes, len(nodes))
-        
-        cost, backtrack = problem.split(nodes)
-        tours = problem.extract_tours(nodes, backtrack)
-#         print nodes
-#         vrp_solver = GA_VRP(self.problem, nodes)
-#         cost, tours = vrp_solver.run()
-
-        new_giant_tour, new_tours, new_cost = ELS(self.problem, nodes, tours, cost)
+        giant_tour = [node for node in individual]
+                
+        if not individual.fitness.valid:
+            cost, backtrack = problem.split(giant_tour)
+            individual.fitness.values = cost,
+            individual.tours = problem.extract_tours(giant_tour, backtrack)
+            
+        new_giant_tour, new_tours, new_cost = ELS(self.problem, giant_tour, individual.tours, individual.fitness.values[0])
                             
         if new_cost < self.best_cost:
             self.best_cost = new_cost
         print new_cost, self.best_cost
         
-        individual.giant_tour=new_giant_tour
         individual.tours = new_tours
         
-        for i in xrange(self.INDSIZE):
-            individual[i]=0
-        for i in new_giant_tour:
-            individual[i-1] = 1
+        N = len(new_giant_tour)
+        if N < len(individual):
+            del individual[len(new_giant_tour)]
+            
+        assert len(individual)==N, 'len individual is not equal N'
+        for i in xrange(N):
+            individual[i]=new_giant_tour[i]
         
         return new_cost,
     
     def repair_ind(self, ind):
-        w=[0]*self.problem.num_of_customers
-        
-        S = ind.giant_tour
-        
-        for i in xrange(self.problem.num_of_customers):
-            w[i] = len(set(ind.giant_tour).intersection(self.problem.nodes_covering_customer[i]))
-            
-        U=[i for i in xrange(self.problem.num_of_customers) if w[i]==0]
-        
-        for i in U:
-            # get nodes that cover customer i
-            nodes = self.problem.nodes_covering_customer[i]
-            # randomly select one
-            j = random.choice(tuple(nodes))
-            for t in self.problem.get_set_of_customers_covered_by(j):
-                w[t] += 1
+
+        giant_tour = [i for i in ind]
+        if not self.problem.is_giant_tour_satisfy_covering_constraint(giant_tour):
+            # try until find feasible giant tour
+            while True:
+                nodes_in_giant_tour = set(giant_tour)
+                nodes_not_in_giant_tour = set(range(1, len(problem.nodes))).difference(nodes_in_giant_tour)
                 
-            S.append(j)
-        
-        # remove redundant node
-        S = sorted(S)
-        
-        for j in S:
-            temp = True
-            for i in self.problem.get_set_of_customers_covered_by(j):
-                if w[i] < 2:
-                    temp = False
+                nodes_not_in_giant_tour = list(nodes_not_in_giant_tour)
+                
+                covering_set = problem.get_set_of_customers_covered_by_giant_tour(giant_tour)
+                
+                max_node = nodes_not_in_giant_tour[0]
+                new_covering_set = covering_set.union(problem.get_set_of_customers_covered_by(max_node))
+                max_covered = len(new_covering_set)
+                for node in nodes_not_in_giant_tour[1:]:
+                    new_covering_set = covering_set.union(problem.get_set_of_customers_covered_by(node))
+                    if len(new_covering_set) > max_covered:
+                        max_covered = len(new_covering_set)
+                        max_node = node
+                        
+                # insert max_node into giant tour at random position
+                idx = random.randint(0, len(giant_tour))
+                giant_tour.insert(idx, max_node)
+                
+                # if is feasible giant tour then break while loop
+                if problem.is_giant_tour_satisfy_covering_constraint(giant_tour):
                     break
-            if temp:
-                S.remove(j)
-#                 print j
-                for i in self.problem.get_set_of_customers_covered_by(j):
-                    w[i] = w[i]-1
-            
-        new_ind=self.toolbox.clone(ind)    
-        for i in xrange(self.INDSIZE):
-            new_ind[i]=0
-            
-        for i in S:
-            new_ind[i-1]=1
-            
-        for i in xrange(len(self.problem.obligatory_nodes)):
-            new_ind[i]=1
-            
+        # remove redundent nodes
+        giant_tour = problem.remove_node(giant_tour)
+
+        # update individual
+        new_ind = deepcopy(ind)
+        
+        del new_ind[:]
+        for node in giant_tour:
+            new_ind.append(node)
+        
+        cost, backtrack = problem.split(giant_tour)
+        new_ind.fitness.values = cost,
+        new_ind.tours = problem.extract_tours(giant_tour, backtrack)
+                                                
         return new_ind
         
+    def varAndPTA(self, population):
         
+        offspring = [self.toolbox.clone(ind) for ind in population]
+        
+        # Apply crossover and mutation on the offspring
+        for i in range(1, len(offspring), 2):
+            if random.random() < self.cxP:
+                offspring[i-1], offspring[i] = self.toolbox.mate(offspring[i-1], offspring[i])
+                del offspring[i-1].fitness.values, offspring[i].fitness.values
+                
+                # repair
+                offspring[i-1] = self.repair_ind(offspring[i-1])
+                offspring[i] = self.repair_ind(offspring[i])
+        
+#         for i in range(len(offspring)):
+#             if random.random() < self.mutP:
+#                 offspring[i], = self.toolbox.mutate(offspring[i])
+#                 del offspring[i].fitness.values
+        
+            
+        return offspring
+            
         
     def evolve(self, population, toolbox, cxpb, mutpb, ngen, stats=None, sizeStats=None,
                  halloffame=None, verbose=__debug__):
@@ -345,13 +357,8 @@ class GA_SCP:
             offspring = toolbox.select(population, len(population))
             
             # Vary the pool of individuals
-            offspring = varAndSCP(offspring, self.toolbox, cxpb, mutpb, gen)
-            
-            # repairing
-            for i in xrange(len(offspring)):
-                offspring[i]=self.repair_ind(offspring[i])
-            
-            
+            offspring = self.varAndPTA(offspring)
+                        
             # Evaluate the individuals with an invalid fitness
             invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
             fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
@@ -456,7 +463,7 @@ if __name__ == "__main__":
 #         cost = problem.get_solution_cost(tours)
 #         print cost
 #         break
-        ga = GA_SCP(problem)
+        ga = GA_GT(problem)
         solution = ga.run(0)
         
         print solution

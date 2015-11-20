@@ -443,7 +443,7 @@ def ls_next_node(problem, tour, tour_cost, node_idx, nodes_not_in_tours):
     full_node_idx = node_idx + 1
     for new_node in nodes_not_in_tours:
         # try to replace node_idx-1 with new_node
-        if node_idx != 0 and problem.obligatory_nodes.issuperset([tour[node_idx-1]]):
+        if node_idx != 0 and not problem.obligatory_nodes.issuperset([tour[node_idx-1]]):
 #             print full_node_idx, full_tour[full_node_idx-2], full_tour[full_node_idx-1], full_tour[full_node_idx]
             new_tour_cost = tour_cost - (problem.nodes[full_tour[full_node_idx-2]].cost_dict[full_tour[full_node_idx-1]]
                                      + problem.nodes[full_tour[full_node_idx-1]].cost_dict[full_tour[full_node_idx]])
@@ -455,7 +455,7 @@ def ls_next_node(problem, tour, tour_cost, node_idx, nodes_not_in_tours):
                 return True, tour, new_tour_cost
         
         # try to replace node_idx+1 with new_node
-        if node_idx != len(tour)-1 and problem.obligatory_nodes.issuperset([tour[node_idx+1]]):
+        if node_idx != len(tour)-1 and not problem.obligatory_nodes.issuperset([tour[node_idx+1]]):
             new_tour_cost = tour_cost - (problem.nodes[full_tour[full_node_idx+2]].cost_dict[full_tour[full_node_idx+1]]
                                      + problem.nodes[full_tour[full_node_idx+1]].cost_dict[full_tour[full_node_idx]])
             new_tour_cost += (problem.nodes[full_tour[full_node_idx+2]].cost_dict[new_node]
