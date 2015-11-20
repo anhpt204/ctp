@@ -63,8 +63,11 @@ def ELS(problem, giant_tour, tours, cost):
         
         if new_cost >= best_cost:
             return best_giant_tour, best_tours, best_cost
-#         else:
-#             new_giant_tour = problem.concat(new_tours)
+        else:
+            best_giant_tour = problem.concat(new_tours)
+            best_cost = new_cost
+            best_tours = new_tours
+            
 #             return new_giant_tour, new_tours, new_cost
 #         return best_giant_tour
 

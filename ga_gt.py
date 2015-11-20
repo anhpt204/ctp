@@ -250,7 +250,7 @@ class GA_GT:
         
         N = len(new_giant_tour)
         if N < len(individual):
-            del individual[len(new_giant_tour)]
+            del individual[len(new_giant_tour):]
             
         assert len(individual)==N, 'len individual is not equal N'
         for i in xrange(N):
