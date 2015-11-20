@@ -531,7 +531,7 @@ import glob, os, datetime
 if __name__ == "__main__":
     # load problem
     folder = 'A'
-    data_dir = 'data_ctp/' + folder + '/'
+    data_dir = 'data_ctp/' # + folder + '/'
     print data_dir
 #     Jobs = 10
     
@@ -540,20 +540,20 @@ if __name__ == "__main__":
     
     files = [
              
-#             os.path.join(data_dir, 'A1-1-25-75-4.ctp'),
-#             os.path.join(data_dir, 'A1-1-25-75-5.ctp'),
-#             os.path.join(data_dir, 'A1-1-25-75-6.ctp'),
-#             os.path.join(data_dir, 'A1-1-25-75-8.ctp'),
-
-#             os.path.join(data_dir, 'A2-20-100-100-4.ctp'),
-#              os.path.join(data_dir, 'A2-20-100-100-5.ctp'),
-#             os.path.join(data_dir, 'A2-20-100-100-6.ctp'),
+            os.path.join(data_dir, 'A1-1-25-75-4.ctp'),
+            os.path.join(data_dir, 'A1-1-25-75-5.ctp'),
+            os.path.join(data_dir, 'A1-1-25-75-6.ctp'),
+            os.path.join(data_dir, 'A1-1-25-75-8.ctp'),
+ 
+            os.path.join(data_dir, 'A2-20-100-100-4.ctp'),
+            os.path.join(data_dir, 'A2-20-100-100-5.ctp'),
+            os.path.join(data_dir, 'A2-20-100-100-6.ctp'),
             os.path.join(data_dir, 'A2-20-100-100-8.ctp'),
-#              os.path.join(data_dir, 'B2-20-100-100-4.ctp'),
-#              os.path.join(data_dir, 'B2-20-100-100-5.ctp'),
-#              os.path.join(data_dir, 'B2-20-100-100-6.ctp'),
-#              os.path.join(data_dir, 'B2-20-100-100-8.ctp'),
-             ]
+            os.path.join(data_dir, 'B2-20-100-100-4.ctp'),
+            os.path.join(data_dir, 'B2-20-100-100-5.ctp'),
+            os.path.join(data_dir, 'B2-20-100-100-6.ctp'),
+            os.path.join(data_dir, 'B2-20-100-100-8.ctp'),
+            ]
 #     files = [os.path.join(data_dir, 'A-50-50-6.ctp')]
     moves_freq = {}
     
@@ -582,4 +582,17 @@ if __name__ == "__main__":
                 best_cost = solution.fitness.values[0]
                 best_solution = deepcopy(solution)
                 
+        lines.append('%s %.2f %.2f %d %d %s %s\n' %(file_name, 
+                                                 problem.best_cost,
+                                                 best_solution.fitness.values[0], 
+                                                 len(best_solution), 
+                                                 len(best_solution.tours),
+#                                                  d.seconds, 
+                                                 str(best_solution),
+                                                 str(best_solution.tours)
+                                                 ))
+
         print best_cost, best_solution
+        
+    f = open('ga_gt.out', 'w')
+    f.writelines(lines)
