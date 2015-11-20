@@ -18,7 +18,7 @@ def validate_tour(tour, value):
     else:
         return tour
         
-def move1(individual, tour_i, tour_j, i, j, u, v, x, y):
+def move1(tours, tour_i, tour_j, i, j, u, v, x, y):
     '''
     move 1: if u is a client node, move u after v
     @param individual: individual for move opterator
@@ -31,7 +31,7 @@ def move1(individual, tour_i, tour_j, i, j, u, v, x, y):
     @param x: is the successor of u
     @param y: is the successor of v
     '''
-    temp_tours = deepcopy(individual.tours)
+    temp_tours = deepcopy(tours)
 
     if u == v == 0:
         return False, temp_tours 
@@ -60,7 +60,7 @@ def move1(individual, tour_i, tour_j, i, j, u, v, x, y):
     
     return move_success,temp_tours
 
-def move2(individual, tour_i, tour_j, i, j, u, v, x, y):
+def move2(tours, tour_i, tour_j, i, j, u, v, x, y):
     '''
     move 2: if u and x are client nodes, move (u,x) after v
     @param individual: individual for move opterator
@@ -73,7 +73,7 @@ def move2(individual, tour_i, tour_j, i, j, u, v, x, y):
     @param x: is the successor of u
     @param y: is the successor of v
     '''
-    temp_tours = deepcopy(individual.tours)
+    temp_tours = deepcopy(tours)
     tour_i_tmp = [0] + temp_tours[tour_i] + [0]
     
     tour_j_tmp = [0] + temp_tours[tour_j] + [0]
@@ -99,7 +99,7 @@ def move2(individual, tour_i, tour_j, i, j, u, v, x, y):
 
     return move_success, temp_tours
 
-def move3(individual, tour_i, tour_j, i, j, u, v, x, y):
+def move3(tours, tour_i, tour_j, i, j, u, v, x, y):
     '''
     move 3: if u and x are client nodes, move (x,u) after v
     @param individual: individual for move opterator
@@ -112,7 +112,7 @@ def move3(individual, tour_i, tour_j, i, j, u, v, x, y):
     @param x: is the successor of u
     @param y: is the successor of v
     '''
-    temp_tours = deepcopy(individual.tours)
+    temp_tours = deepcopy(tours)
     tour_i_tmp = [0] + temp_tours[tour_i] + [0]
     
     tour_j_tmp = [0] + temp_tours[tour_j] + [0]
@@ -138,7 +138,7 @@ def move3(individual, tour_i, tour_j, i, j, u, v, x, y):
     
     return move_success, temp_tours
 
-def move4(individual, tour_i, tour_j, i, j, u, v, x, y):
+def move4(tours, tour_i, tour_j, i, j, u, v, x, y):
     '''
     move 4: if u and v are client nodes, permute u and v
     @param individual: individual for move opterator
@@ -151,7 +151,7 @@ def move4(individual, tour_i, tour_j, i, j, u, v, x, y):
     @param x: is the successor of u
     @param y: is the successor of v
     '''
-    temp_tours = deepcopy(individual.tours)
+    temp_tours = deepcopy(tours)
     tour_i_tmp = [0] + temp_tours[tour_i] + [0]
 
     tour_j_tmp = [0] + temp_tours[tour_j] + [0]
@@ -172,7 +172,7 @@ def move4(individual, tour_i, tour_j, i, j, u, v, x, y):
 
     return move_success, temp_tours
 
-def move5(individual, tour_i, tour_j, i, j, u, v, x, y):
+def move5(tours, tour_i, tour_j, i, j, u, v, x, y):
     '''
     move 5: if u, x and v are client nodes, permute (u,x) with v
     @param individual: individual for move opterator
@@ -185,7 +185,7 @@ def move5(individual, tour_i, tour_j, i, j, u, v, x, y):
     @param x: is the successor of u
     @param y: is the successor of v
     '''
-    temp_tours = deepcopy(individual.tours)
+    temp_tours = deepcopy(tours)
     tour_i_tmp = [0] + temp_tours[tour_i] + [0]
     
     tour_j_tmp = [0] + temp_tours[tour_j] + [0]
@@ -213,7 +213,7 @@ def move5(individual, tour_i, tour_j, i, j, u, v, x, y):
 
     return move_success, temp_tours
 
-def move6(individual, tour_i, tour_j, i, j, u, v, x, y):
+def move6(tours, tour_i, tour_j, i, j, u, v, x, y):
     '''
     move 6: if u,x and v,yf are client nodes, permute (u,x) with (v,y)
     @param individual: individual for move opterator
@@ -226,7 +226,7 @@ def move6(individual, tour_i, tour_j, i, j, u, v, x, y):
     @param x: is the successor of u
     @param y: is the successor of v
     '''
-    temp_tours = deepcopy(individual.tours)
+    temp_tours = deepcopy(tours)
     tour_i_tmp = [0] + temp_tours[tour_i] + [0]
     
     tour_j_tmp = [0] + temp_tours[tour_j] + [0]
@@ -250,7 +250,7 @@ def move6(individual, tour_i, tour_j, i, j, u, v, x, y):
 
     return move_success, temp_tours
 
-def move7(individual, tour_i, tour_j, i, j, u, v, x, y):
+def move7(tours, tour_i, tour_j, i, j, u, v, x, y):
     '''
     move 7: if (u,x) and (v,y) are are non adjacent in the same trip, replace them by (u,v) and (x,y)
     @param individual: individual for move opterator
@@ -263,7 +263,7 @@ def move7(individual, tour_i, tour_j, i, j, u, v, x, y):
     @param x: is the successor of u
     @param y: is the successor of v
     '''
-    temp_tours = deepcopy(individual.tours)
+    temp_tours = deepcopy(tours)
     tour_i_tmp = [0] + temp_tours[tour_i] + [0]
     tour_j_tmp = tour_i_tmp
     move_success = False
@@ -280,7 +280,7 @@ def move7(individual, tour_i, tour_j, i, j, u, v, x, y):
         
     return move_success, temp_tours
 
-def move8(individual, tour_i, tour_j, i, j, u, v, x, y):
+def move8(tours, tour_i, tour_j, i, j, u, v, x, y):
     '''
     move 8: if (u,x) and (v,y) are in distinct trips, replace them by (u,v) and (x,y)
     @param individual: individual for move opterator
@@ -293,7 +293,7 @@ def move8(individual, tour_i, tour_j, i, j, u, v, x, y):
     @param x: is the successor of u
     @param y: is the successor of v
     '''
-    temp_tours = deepcopy(individual.tours)
+    temp_tours = deepcopy(tours)
     tour_i_tmp = [0] + temp_tours[tour_i] + [0]
     tour_j_tmp = [0] + temp_tours[tour_j] + [0]
     move_success = False
@@ -309,7 +309,7 @@ def move8(individual, tour_i, tour_j, i, j, u, v, x, y):
     
     return move_success, temp_tours
 
-def move9(individual, tour_i, tour_j, i, j, u, v, x, y):
+def move9(tours, tour_i, tour_j, i, j, u, v, x, y):
     '''
     move 8: if (u,x) and (v,y) are in distinct trips, replace them by (u,y) and (x,v)
     @param individual: individual for move opterator
@@ -322,7 +322,7 @@ def move9(individual, tour_i, tour_j, i, j, u, v, x, y):
     @param x: is the successor of u
     @param y: is the successor of v
     '''
-    temp_tours = deepcopy(individual.tours)
+    temp_tours = deepcopy(tours)
     tour_i_tmp = [0] + temp_tours[tour_i] + [0]
     tour_j_tmp = [0] + temp_tours[tour_j] + [0]
     move_success = False

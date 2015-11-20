@@ -38,6 +38,66 @@ import gcsp
 from ga_vrp import GA_VRP
 from hoang import ELS
 from copy import deepcopy
+from ls_moves import *
+from ls import LS4
+
+def LSPrins(problem, giant_tour, tours, cost):
+    '''
+    A Simple and Effective Evolutionary Algorithm for the Vehicle Routing Problem, Prins, 2001
+    '''
+#     move_operators = [move1, move2, move3, move4, move5, move6, move7, move8, move9]
+    move_operators=[move1, move8, move9]
+    
+    tours_len = len(tours)
+    best_cost = cost
+    best_tours = deepcopy(tours)
+    improvement = False
+    
+    for tour_i in xrange(tours_len):
+        tour1_tmp = [0] + tours[tour_i] + [0]
+        for i in xrange(len(tour1_tmp) -1):
+            u, x = tour1_tmp[i], tour1_tmp[i+1]
+            for tour_j in xrange(tours_len):
+                tour2_tmp = [0] + tours[tour_j] +  [0]
+                for j in xrange(len(tour2_tmp) - 1):
+                    v, y = tour2_tmp[j], tour2_tmp[j+1]
+                    # move operators
+                    for move in move_operators:
+                                                
+                        move_success, temp_tours = move(tours, tour_i, tour_j, i, j, u, v, x, y)
+                        
+                        
+                        if move_success and problem.isFeasibleSolution(temp_tours):
+#                             print tour_i, tour_j, i, j, temp_tours
+                            cost = problem.get_solution_cost(temp_tours)
+                            # if improvement
+                            if cost < best_cost:
+                                best_cost = cost
+                                best_tours = temp_tours[:]
+                                improvement = True
+                                
+                                # update move frequency
+                                
+                                if problem.moves_freq.has_key(move.__name__):
+                                    problem.moves_freq[move.__name__] += 1
+                                else:
+                                    problem.moves_freq[move.__name__] = 1
+                                
+                                break
+#                 if improvement:
+#                     break
+#             if improvement:
+#                 break
+#         if improvement:
+#             break
+    # try LS4
+    
+    if improvement:
+        giant_tour = problem.concat(best_tours)
+    
+    new_tours, new_cost = LS4(problem, giant_tour, best_tours, best_cost)
+        
+    return problem.concat(new_tours), new_tours, new_cost
 
 
 class GA_GT:
@@ -45,11 +105,13 @@ class GA_GT:
     GA for CTP with individual = giant tour
     '''
     
-    def __init__(self, problem):
+    def __init__(self, problem, seed):
         '''
         @param problem: problem
         @param nodes: list of nodes
         '''
+        random.seed(1000+seed)
+
         self.toolbox = base.Toolbox()
         creator.create("FitnessMin1", base.Fitness, weights=(-1.0,))
         creator.create("Individual", array.array, typecode='i', fitness=creator.FitnessMin1, tours=list)
@@ -57,8 +119,8 @@ class GA_GT:
         current_gen = 0
         self.problem = problem
         
-        self.POPSIZE=20
-        self.NUMGEN=20
+        self.POPSIZE=100
+        self.NUMGEN=50
         self.INDSIZE = self.problem.num_of_nodes + len(self.problem.obligatory_nodes)
         self.cxP=0.6
         self.mutP=0.3
@@ -242,11 +304,12 @@ class GA_GT:
         
 #         return individual.fitness.values[0],
     
-        new_giant_tour, new_tours, new_cost = ELS(self.problem, giant_tour, individual.tours, individual.fitness.values[0])
+#         new_giant_tour, new_tours, new_cost = ELS(self.problem, giant_tour, individual.tours, individual.fitness.values[0])
+        new_giant_tour, new_tours, new_cost = LSPrins(self.problem, giant_tour, individual.tours, individual.fitness.values[0])
                                 
         if new_cost < self.best_cost:
             self.best_cost = new_cost
-        print new_cost, self.best_cost
+#         print new_cost, self.best_cost
            
         individual.tours = new_tours
            
@@ -393,19 +456,36 @@ class GA_GT:
             fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
             for ind, fit in zip(invalid_ind, fitnesses):
                 ind.fitness.values = fit
-            
-            # Update the hall of fame with the generated individuals
-            if halloffame is not None:
-                halloffame.update(offspring)
-                
+                            
             # Replace the current population by the offspring
             population[:] = offspring
             
              # elitism
-            t = random.randint(0, len(population)-1)
+#             t = random.randint(0, len(population)-1)
     #         t = 0
-            population[t] = halloffame[0]
+            idxs = []
+            if random.random() < 0.5:
+                idxs = random.sample(range(len(population)), 5)
             
+            for t in idxs:
+                # apply ELS for the best individual
+                new_ind = deepcopy(population[t])
+                giant_tour = [node for node in new_ind]
+                new_giant_tour, new_tours, new_cost = ELS(self.problem, giant_tour, new_ind.tours, new_ind.fitness.values[0])
+                                    
+                if new_cost < new_ind.fitness.values[0]:
+                    del new_ind[:]
+                    for node in new_giant_tour:
+                        new_ind.append(node)
+                    new_ind.fitness.values = new_cost,
+                    new_ind.tours = new_tours
+    
+                population[t] = new_ind
+            
+            # Update the hall of fame with the generated individuals
+            if halloffame is not None:
+                halloffame.update(population)
+
             # Append the current generation statistics to the logbook
             record = stats.compile(population) if stats else {}
 #             record.update(sizeStats.compile(population) if sizeStats else {})
@@ -420,7 +500,6 @@ class GA_GT:
     
     
     def run(self, job=0):
-        random.seed(1000+job)
     
 #         POPSIZE= 200 #len(self.lines)/2
         
@@ -496,8 +575,8 @@ if __name__ == "__main__":
         best_cost = 10**10
         
         for job in xrange(JOBS):
-            ga = GA_GT(problem)
-            solution = ga.run(0)
+            ga = GA_GT(problem, job)
+            solution = ga.run()
             
             if solution.fitness.values[0] < best_cost:
                 best_cost = solution.fitness.values[0]
