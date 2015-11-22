@@ -124,7 +124,7 @@ class GA_GT:
         self.NUMGEN=100
         self.INDSIZE = self.problem.num_of_nodes + len(self.problem.obligatory_nodes)
         self.cxP=0.5
-        self.mutP=0.4
+        self.mutP=0.5
         self.init_popsize=0
         
         self.initialize(problem.name)
@@ -290,8 +290,8 @@ class GA_GT:
         self.toolbox.register("select", tools.selTournament, tournsize=3)
         self.toolbox.register("evaluate", self.eval)
         
-        mip_data_dir = 'SubSet'
-        self.lines = open(join(mip_data_dir, problem_name),'r').readlines()
+#         mip_data_dir = 'SubSet'
+#         self.lines = open(join(mip_data_dir, problem_name),'r').readlines()
 
                                     
     # evaluate solution
@@ -313,7 +313,7 @@ class GA_GT:
             new_giant_tour, new_tours, new_cost = LSPrins(self.problem, giant_tour, individual.tours, new_cost)
             
             num_trails = 0
-            while num_trails < 10 and new_cost < old_cost:
+            while num_trails < 12 and new_cost < old_cost:
                 num_trails += 1
                 old_cost = new_cost
                 new_giant_tour, new_tours, new_cost = LSPrins(self.problem, new_giant_tour, new_tours, new_cost)
@@ -479,9 +479,11 @@ class GA_GT:
             # Replace the current population by the offspring
             population[:] = offspring
 
-             # elitism
-            t = random.randint(0, len(population)-1)
-            population[t]=halloffame[0]
+             # elitism k best individuals
+             
+            idxs = random.sample(range(len(population)),len(halloffame))
+            for idx, ind in zip(idxs, halloffame):
+                population[idx]=ind
             
             # Update the hall of fame with the generated individuals
             if halloffame is not None:
@@ -542,7 +544,7 @@ class GA_GT:
         
         pop = self.toolbox.population(n=self.POPSIZE)
     
-        hof = tools.HallOfFame(5)
+        hof = tools.HallOfFame(2)
         stats = tools.Statistics(lambda ind: ind.fitness.values)
         stats.register("avg", numpy.mean)
         stats.register("std", numpy.std)
@@ -585,11 +587,11 @@ if __name__ == "__main__":
 #             os.path.join(data_dir, 'A2-20-100-100-4.ctp'),
 #             os.path.join(data_dir, 'A2-20-100-100-5.ctp'),
 #             os.path.join(data_dir, 'A2-20-100-100-6.ctp'),
-            os.path.join(data_dir, 'A2-20-100-100-8.ctp'),
+#             os.path.join(data_dir, 'A2-20-100-100-8.ctp'),
 #             os.path.join(data_dir, 'B2-20-100-100-4.ctp'),
 #             os.path.join(data_dir, 'B2-20-100-100-5.ctp'),
 #             os.path.join(data_dir, 'B2-20-100-100-6.ctp'),
-#             os.path.join(data_dir, 'B2-20-100-100-8.ctp'),
+            os.path.join(data_dir, 'B2-20-100-100-8.ctp'),
             ]
 #     files = [os.path.join(data_dir, 'A-50-50-6.ctp')]
     moves_freq = {}
