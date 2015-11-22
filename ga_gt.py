@@ -45,8 +45,8 @@ def LSPrins(problem, giant_tour, tours, cost):
     '''
     A Simple and Effective Evolutionary Algorithm for the Vehicle Routing Problem, Prins, 2001
     '''
-#     move_operators = [move1, move2, move3, move4, move5, move6, move7, move8, move9]
-    move_operators=[move1, move8, move9]
+    move_operators = [move1, move2, move3, move4, move5, move6, move7, move8, move9]
+#     move_operators=[move1, move8, move9]
     
     tours_len = len(tours)
     best_cost = cost
@@ -84,12 +84,12 @@ def LSPrins(problem, giant_tour, tours, cost):
                                     problem.moves_freq[move.__name__] = 1
                                 
                                 break
-#                 if improvement:
-#                     break
-#             if improvement:
-#                 break
-#         if improvement:
-#             break
+                if improvement:
+                    break
+            if improvement:
+                break
+        if improvement:
+            break
     # try LS4
     
     if improvement:
@@ -119,11 +119,11 @@ class GA_GT:
         current_gen = 0
         self.problem = problem
         
-        self.POPSIZE=100
-        self.NUMGEN=50
+        self.POPSIZE=50
+        self.NUMGEN=1000
         self.INDSIZE = self.problem.num_of_nodes + len(self.problem.obligatory_nodes)
-        self.cxP=0.6
-        self.mutP=0.3
+        self.cxP=0.5
+        self.mutP=0.6
         self.init_popsize=0
         
         self.initialize(problem.name)
@@ -301,26 +301,29 @@ class GA_GT:
             cost, backtrack = problem.split(giant_tour)
             individual.fitness.values = cost,
             individual.tours = problem.extract_tours(giant_tour, backtrack)
-        
+                                
 #         return individual.fitness.values[0],
     
 #         new_giant_tour, new_tours, new_cost = ELS(self.problem, giant_tour, individual.tours, individual.fitness.values[0])
-        new_giant_tour, new_tours, new_cost = LSPrins(self.problem, giant_tour, individual.tours, individual.fitness.values[0])
-                                
-        if new_cost < self.best_cost:
-            self.best_cost = new_cost
-#         print new_cost, self.best_cost
-           
-        individual.tours = new_tours
-           
-        N = len(new_giant_tour)
-        if N < len(individual):
-            del individual[len(new_giant_tour):]
-               
-        assert len(individual)==N, 'len individual is not equal N'
-        for i in xrange(N):
-            individual[i]=new_giant_tour[i]
-           
+
+        new_cost = individual.fitness.values[0]
+        if random.random() < 0.1:
+            new_giant_tour, new_tours, new_cost = LSPrins(self.problem, giant_tour, individual.tours, individual.fitness.values[0])
+                                     
+            if new_cost < self.best_cost:
+                self.best_cost = new_cost
+    #         print new_cost, self.best_cost
+                
+            individual.tours = new_tours
+                
+            N = len(new_giant_tour)
+            if N < len(individual):
+                del individual[len(new_giant_tour):]
+                    
+            assert len(individual)==N, 'len individual is not equal N'
+            for i in xrange(N):
+                individual[i]=new_giant_tour[i]
+            
         return new_cost,
     
     def repair_ind(self, ind):
@@ -402,17 +405,20 @@ class GA_GT:
                 del offspring[i-1].fitness.values, offspring[i].fitness.values
                 
                 # repair
-#                 offspring[i-1] = self.repair_ind(offspring[i-1])
-#                 offspring[i] = self.repair_ind(offspring[i])
+                offspring[i-1] = self.repair_ind(offspring[i-1])
+                offspring[i] = self.repair_ind(offspring[i])
         
         for i in range(len(offspring)):
             if random.random() < self.mutP:
                 offspring[i] = self.toolbox.mutate(offspring[i])
-                del offspring[i].fitness.values
                 
-        for i in range(len(offspring)):
-            if not offspring[i].fitness.valid:
+                del offspring[i].fitness.values
                 offspring[i] = self.repair_ind(offspring[i])
+                
+                
+#         for i in range(len(offspring)):
+#             if not offspring[i].fitness.valid:
+#                 offspring[i] = self.repair_ind(offspring[i])
         
             
         return offspring
@@ -423,7 +429,7 @@ class GA_GT:
         global current_gen
         
         logbook = tools.Logbook()
-        logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+        logbook.header = ['gen', 'bestCost', 'nevals'] + (stats.fields if stats else [])
     
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in population if not ind.fitness.valid]
@@ -436,11 +442,15 @@ class GA_GT:
     
         record = stats.compile(population) if stats else {}
 #         record.update(sizeStats.compile(population) if sizeStats else {})
+        best_cost = halloffame[0].fitness.values[0]
+        best_tours = halloffame[0].tours
+        best_giant_tour = [node for node in halloffame[0]]
         
-        logbook.record(gen=0, nevals=len(invalid_ind),**record)
+        logbook.record(gen=0, bestCost=best_cost, nevals=len(invalid_ind),**record)
         
         if verbose:
             print logbook.stream
+        
         
         # Begin the generational process
         for gen in range(1, ngen+1):
@@ -460,43 +470,61 @@ class GA_GT:
             # Replace the current population by the offspring
             population[:] = offspring
 
+             # elitism
+            t = random.randint(0, len(population)-1)
+            population[t]=halloffame[0]
+            
             # Update the hall of fame with the generated individuals
             if halloffame is not None:
                 halloffame.update(population)
             
-             # elitism
-#             t = random.randint(0, len(population)-1)
     #         t = 0
             
-            for t in xrange(len(halloffame)):
-                # apply ELS for the best individual
-                new_ind = deepcopy(halloffame[t])
-                giant_tour = [node for node in new_ind]
-                new_giant_tour, new_tours, new_cost = ELS(self.problem, giant_tour, new_ind.tours, new_ind.fitness.values[0])
-                                    
-                if new_cost < new_ind.fitness.values[0]:
-                    del new_ind[:]
-                    for node in new_giant_tour:
-                        new_ind.append(node)
-                    new_ind.fitness.values = new_cost,
-                    new_ind.tours = new_tours
-                
-#                 halloffame[t] = new_ind
-                idx = random.randint(0, len(population)-1)
-                population[idx] = new_ind
-            
-            halloffame.update(population)
+#             for t in xrange(len(halloffame)):
+#                 # apply ELS for the best individual
+#                 new_ind = deepcopy(halloffame[t])
+#                 giant_tour = [node for node in new_ind]
+#                 new_giant_tour, new_tours, new_cost = LSPrins(self.problem, giant_tour, new_ind.tours, new_ind.fitness.values[0])
+#                                      
+#                 if new_cost < best_cost:
+#                     best_cost = new_cost
+#                     best_tours = new_tours
+#                     best_giant_tour = new_giant_tour
+#                     
+#                 if new_cost < new_ind.fitness.values[0]:
+#                     del new_ind[:]
+#                     for node in new_giant_tour:
+#                         new_ind.append(node)
+#                     new_ind.fitness.values = new_cost,
+#                     new_ind.tours = new_tours
+#                   
+# #                 halloffame[t] = new_ind
+#                 idx = random.randint(0, len(population)-1)
+#                 population[idx] = new_ind
+#               
+#             halloffame.update(population)
+
             # Append the current generation statistics to the logbook
             record = stats.compile(population) if stats else {}
 #             record.update(sizeStats.compile(population) if sizeStats else {})
             
-            logbook.record(gen=gen, nevals=len(invalid_ind), **record)
+            logbook.record(gen=gen, bestCost=best_cost, nevals=len(invalid_ind), **record)
             if verbose:
                 print logbook.stream        
     
 #             print halloffame[0].tours
-            
-        return population, logbook
+#         print 'best cost before ELS: ', best_cost
+#         print 'run ELS...'
+#         for ind in halloffame:
+#             giant_tour=[node for node in ind]
+#             giant_tour, tours,  cost = ELS(self.problem, giant_tour, ind.tours, ind.fitness.values[0])
+#             if cost < best_cost:
+#                 best_cost = cost
+#                 best_giant_tour = giant_tour
+#                 best_tours = tours
+                
+#         return best_cost, best_tours
+        return halloffame[0].fitness.values[0], halloffame[0].tours
     
     
     def run(self, job=0):
@@ -505,7 +533,7 @@ class GA_GT:
         
         pop = self.toolbox.population(n=self.POPSIZE)
     
-        hof = tools.HallOfFame(5)
+        hof = tools.HallOfFame(20)
         stats = tools.Statistics(lambda ind: ind.fitness.values)
         stats.register("avg", numpy.mean)
         stats.register("std", numpy.std)
@@ -515,17 +543,17 @@ class GA_GT:
 #         sizeStats = tools.Statistics(lambda ind: len(ind.giant_tour))
 #         sizeStats.register('size_avg', numpy.mean)
         
-        self.evolve(population=pop, 
+        best_cost, best_tours = self.evolve(population=pop, 
                toolbox=self.toolbox, cxpb=self.cxP, mutpb=0.3, 
                ngen=self.NUMGEN, stats=stats, halloffame=hof, verbose=VERBOSE)
         
-        print 'run ', job, ': ', hof[0].fitness.values[0], ': ', problem.best_cost, ': ', problem.n_same_giant_tour
-    
+#         print 'run ', job, ': ', hof[0].fitness.values[0], ': ', problem.best_cost, ': ', problem.n_same_giant_tour
+        print 'best cost of run: ', best_cost
     #     print hof[0].giant_tour
     #     print hof[0].tours
     #     calculate_tours_cost(problem, hof[0].tours, job)
     
-        return hof[0]
+        return best_cost, best_tours
 
 import glob, os, datetime
 if __name__ == "__main__":
@@ -540,19 +568,19 @@ if __name__ == "__main__":
     
     files = [
              
-            os.path.join(data_dir, 'A1-1-25-75-4.ctp'),
-            os.path.join(data_dir, 'A1-1-25-75-5.ctp'),
-            os.path.join(data_dir, 'A1-1-25-75-6.ctp'),
-            os.path.join(data_dir, 'A1-1-25-75-8.ctp'),
- 
-            os.path.join(data_dir, 'A2-20-100-100-4.ctp'),
-            os.path.join(data_dir, 'A2-20-100-100-5.ctp'),
-            os.path.join(data_dir, 'A2-20-100-100-6.ctp'),
+#             os.path.join(data_dir, 'A1-1-25-75-4.ctp'),
+#             os.path.join(data_dir, 'A1-1-25-75-5.ctp'),
+#             os.path.join(data_dir, 'A1-1-25-75-6.ctp'),
+#             os.path.join(data_dir, 'A1-1-25-75-8.ctp'),
+#  
+#             os.path.join(data_dir, 'A2-20-100-100-4.ctp'),
+#             os.path.join(data_dir, 'A2-20-100-100-5.ctp'),
+#             os.path.join(data_dir, 'A2-20-100-100-6.ctp'),
             os.path.join(data_dir, 'A2-20-100-100-8.ctp'),
-            os.path.join(data_dir, 'B2-20-100-100-4.ctp'),
-            os.path.join(data_dir, 'B2-20-100-100-5.ctp'),
-            os.path.join(data_dir, 'B2-20-100-100-6.ctp'),
-            os.path.join(data_dir, 'B2-20-100-100-8.ctp'),
+#             os.path.join(data_dir, 'B2-20-100-100-4.ctp'),
+#             os.path.join(data_dir, 'B2-20-100-100-5.ctp'),
+#             os.path.join(data_dir, 'B2-20-100-100-6.ctp'),
+#             os.path.join(data_dir, 'B2-20-100-100-8.ctp'),
             ]
 #     files = [os.path.join(data_dir, 'A-50-50-6.ctp')]
     moves_freq = {}
@@ -576,20 +604,19 @@ if __name__ == "__main__":
         
         for job in xrange(JOBS):
             ga = GA_GT(problem, job)
-            solution = ga.run()
+            cost, tours = ga.run()
             
-            if solution.fitness.values[0] < best_cost:
-                best_cost = solution.fitness.values[0]
-                best_solution = deepcopy(solution)
+            if cost < best_cost:
+                best_cost = cost
+                best_solution = deepcopy(tours)
                 
-        lines.append('%s %.2f %.2f %d %d %s %s\n' %(file_name, 
+        lines.append('%s %.2f %.2f %d %s \n' %(file_name, 
                                                  problem.best_cost,
-                                                 best_solution.fitness.values[0], 
-                                                 len(best_solution), 
-                                                 len(best_solution.tours),
+                                                 best_cost, 
+                                                 len(best_solution),
 #                                                  d.seconds, 
                                                  str(best_solution),
-                                                 str(best_solution.tours)
+#                                                  str(best_solution.tours)
                                                  ))
 
         print best_cost, best_solution
