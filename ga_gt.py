@@ -45,8 +45,8 @@ def LSPrins(problem, giant_tour, tours, cost):
     '''
     A Simple and Effective Evolutionary Algorithm for the Vehicle Routing Problem, Prins, 2001
     '''
-    move_operators = [move1, move2, move3, move4, move5, move6, move7, move8, move9]
-#     move_operators=[move1, move8, move9]
+#     move_operators = [move1, move2, move3, move4, move5, move6, move7, move8, move9]
+    move_operators=[move1, move4, move8, move9]
     
     tours_len = len(tours)
     best_cost = cost
@@ -105,12 +105,13 @@ class GA_GT:
     GA for CTP with individual = giant tour
     '''
     
-    def __init__(self, problem, seed):
+    def __init__(self, problem, job):
         '''
         @param problem: problem
         @param nodes: list of nodes
         '''
-        random.seed(1000+seed)
+        self.job = job
+        random.seed(1000+job)
 
         self.toolbox = base.Toolbox()
         creator.create("FitnessMin1", base.Fitness, weights=(-1.0,))
@@ -120,10 +121,10 @@ class GA_GT:
         self.problem = problem
         
         self.POPSIZE=50
-        self.NUMGEN=1000
+        self.NUMGEN=100
         self.INDSIZE = self.problem.num_of_nodes + len(self.problem.obligatory_nodes)
         self.cxP=0.5
-        self.mutP=0.6
+        self.mutP=0.4
         self.init_popsize=0
         
         self.initialize(problem.name)
@@ -308,8 +309,16 @@ class GA_GT:
 
         new_cost = individual.fitness.values[0]
         if random.random() < 0.1:
-            new_giant_tour, new_tours, new_cost = LSPrins(self.problem, giant_tour, individual.tours, individual.fitness.values[0])
-                                     
+            old_cost = new_cost
+            new_giant_tour, new_tours, new_cost = LSPrins(self.problem, giant_tour, individual.tours, new_cost)
+            
+            num_trails = 0
+            while num_trails < 10 and new_cost < old_cost:
+                num_trails += 1
+                old_cost = new_cost
+                new_giant_tour, new_tours, new_cost = LSPrins(self.problem, new_giant_tour, new_tours, new_cost)
+                      
+            
             if new_cost < self.best_cost:
                 self.best_cost = new_cost
     #         print new_cost, self.best_cost
@@ -429,7 +438,7 @@ class GA_GT:
         global current_gen
         
         logbook = tools.Logbook()
-        logbook.header = ['gen', 'bestCost', 'nevals'] + (stats.fields if stats else [])
+        logbook.header = ['gen', 'best_of_gen', 'nevals'] + (stats.fields if stats else [])
     
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in population if not ind.fitness.valid]
@@ -446,7 +455,7 @@ class GA_GT:
         best_tours = halloffame[0].tours
         best_giant_tour = [node for node in halloffame[0]]
         
-        logbook.record(gen=0, bestCost=best_cost, nevals=len(invalid_ind),**record)
+        logbook.record(gen=0, best_of_gen=best_cost, nevals=len(invalid_ind),**record)
         
         if verbose:
             print logbook.stream
@@ -508,7 +517,7 @@ class GA_GT:
             record = stats.compile(population) if stats else {}
 #             record.update(sizeStats.compile(population) if sizeStats else {})
             
-            logbook.record(gen=gen, bestCost=best_cost, nevals=len(invalid_ind), **record)
+            logbook.record(gen=gen, best_of_gen=halloffame[0].fitness.values[0], nevals=len(invalid_ind), **record)
             if verbose:
                 print logbook.stream        
     
@@ -527,13 +536,13 @@ class GA_GT:
         return halloffame[0].fitness.values[0], halloffame[0].tours
     
     
-    def run(self, job=0):
+    def run(self):
     
 #         POPSIZE= 200 #len(self.lines)/2
         
         pop = self.toolbox.population(n=self.POPSIZE)
     
-        hof = tools.HallOfFame(20)
+        hof = tools.HallOfFame(5)
         stats = tools.Statistics(lambda ind: ind.fitness.values)
         stats.register("avg", numpy.mean)
         stats.register("std", numpy.std)
@@ -548,7 +557,7 @@ class GA_GT:
                ngen=self.NUMGEN, stats=stats, halloffame=hof, verbose=VERBOSE)
         
 #         print 'run ', job, ': ', hof[0].fitness.values[0], ': ', problem.best_cost, ': ', problem.n_same_giant_tour
-        print 'best cost of run: ', best_cost
+        print 'run %d: %.2f ' %(self.job, best_cost)
     #     print hof[0].giant_tour
     #     print hof[0].tours
     #     calculate_tours_cost(problem, hof[0].tours, job)

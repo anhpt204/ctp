@@ -3,7 +3,7 @@ Created on Aug 21, 2015
 
 @author: pta
 '''
-JOBS = 30
+JOBS = 3
 NUM_GEN = 30
 POPSIZE = 10
 PCROSS = 0.1
