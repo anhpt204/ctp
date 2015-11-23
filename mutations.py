@@ -5,9 +5,10 @@ Created on Sep 8, 2015
 '''
 import random
 
-from ls import ls_prins, ls_move14, ls_prins_vrp
+from ls import ls_prins, ls_move14, ls_prins_vrp, LS3, LS2, LS1
 from genetic import computeFitness
 from ls_moves import move10, move10_vrp
+from ga_gt import LSPrins
 
 def mutShuffleIndexesCTP(individual, indpb):
     """Shuffle the attributes of the input individual and return the mutant.
@@ -152,9 +153,9 @@ def mutLSVRP(individual, problem, gen):
 #     print individual
 #     individual = ls_prins_vrp(problem, individual, gen)
     for i in xrange(10):
-        individual = removeShortRoute(problem, individual)
-        individual = vrpRelocation(problem=problem, individual=individual)
-        individual = swap(problem=problem, individual=individual)
+        individual = LS1(problem, individual)
+        individual = LS3(problem=problem, individual=individual)
+        individual = LS2(problem=problem, individual=individual)
     
     ls4_improvement, individual = move10_vrp(problem, individual)
 #     individual = ls_move14(problem, individual, num_ls, gen)
@@ -184,7 +185,7 @@ def mutLS4(individual, problem, num_ls, gen):
 
 def mutShaking(individual, problem, k):
     '''
-    remove k node and try to insert new nodes to make feasible giant tour
+    remove k node
     '''
     candidate_removed_nodes = [node for node in individual if not problem.obligatory_nodes.issuperset(set([node]))]
     
@@ -196,4 +197,41 @@ def mutShaking(individual, problem, k):
     for node in removed_nodes:
         individual.remove(node)
         
+    return individual
+
+def mutLSPrins(individual, problem, max_trails=12):
+    
+    giant_tour = [node for node in individual]
+    
+    if not individual.fitness.valid:
+        cost, backtrack = problem.split(giant_tour)
+        individual.fitness.values = cost,
+        individual.tours = problem.extract_tours(giant_tour, backtrack)
+    
+    old_cost = individual.fitness.values[0]
+    
+    new_giant_tour, new_tours, new_cost = LSPrins(problem, giant_tour, individual.tours, old_cost)
+    
+    num_trails = 0
+    while num_trails < max_trails and new_cost < old_cost:
+        num_trails += 1
+        old_cost = new_cost
+        new_giant_tour, new_tours, new_cost = LSPrins(problem, new_giant_tour, new_tours, new_cost)
+              
+    
+#         if new_cost < self.best_cost:
+#             self.best_cost = new_cost
+#         print new_cost, self.best_cost
+        
+    # re construct individual
+    individual.tours = new_tours
+        
+    N = len(new_giant_tour)
+    if N < len(individual):
+        del individual[len(new_giant_tour):]
+            
+    assert len(individual)==N, 'len individual is not equal N'
+    for i in xrange(N):
+        individual[i]=new_giant_tour[i]
+            
     return individual

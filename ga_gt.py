@@ -32,10 +32,10 @@ from setting import *
 from deap.algorithms import varAnd
 from crossovers import PMX, vrpPMX, scpOnePointCX
 from genetic import varAndLS, varAndVRP, varAndSCP
-from mutations import mutLS, mutLS4, mutLSVRP, mutShaking
+from mutations import *
 from datetime import timedelta
 import gcsp
-from ga_vrp import GA_VRP
+# from ga_vrp import GA_VRP
 from hoang import ELS
 from copy import deepcopy
 from ls_moves import *
@@ -114,17 +114,14 @@ class GA_GT:
         random.seed(1000+job)
 
         self.toolbox = base.Toolbox()
-        creator.create("FitnessMin1", base.Fitness, weights=(-1.0,))
-        creator.create("Individual", array.array, typecode='i', fitness=creator.FitnessMin1, tours=list)
+        creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+        creator.create("Individual", array.array, typecode='i', fitness=creator.FitnessMin, tours=list)
         
         current_gen = 0
         self.problem = problem
         
-        self.POPSIZE=50
-        self.NUMGEN=100
         self.INDSIZE = self.problem.num_of_nodes + len(self.problem.obligatory_nodes)
-        self.cxP=0.5
-        self.mutP=0.5
+        
         self.init_popsize=0
         
         self.initialize(problem.name)
@@ -285,8 +282,8 @@ class GA_GT:
         self.toolbox.register("mate", tools.cxTwoPoint)
 #         tools.cxPartialyMatched(ind1, ind2)
 #         self.toolbox.register("ls", mutLSVRP, problem=problem)
-#         self.toolbox.register("ls4", mutLS4, problem=problem)
-        self.toolbox.register("mutate", mutShaking, problem=self.problem, k=3)
+        self.toolbox.register("mutateLSPrins", mutLSPrins, problem=self.problem, max_trails=MAX_TRAILS)
+        self.toolbox.register("mutate", mutShaking, problem=self.problem, k=2)
         self.toolbox.register("select", tools.selTournament, tournsize=3)
         self.toolbox.register("evaluate", self.eval)
         
@@ -298,42 +295,17 @@ class GA_GT:
     def eval(self, individual):
         giant_tour = [node for node in individual]
                 
-        if not individual.fitness.valid:
-            cost, backtrack = problem.split(giant_tour)
-            individual.fitness.values = cost,
-            individual.tours = problem.extract_tours(giant_tour, backtrack)
+#         if not individual.fitness.valid:
+        cost, backtrack = problem.split(giant_tour)
+#         individual.fitness.values = cost,
+        individual.tours = problem.extract_tours(giant_tour, backtrack)
                                 
-#         return individual.fitness.values[0],
+        return cost,
     
 #         new_giant_tour, new_tours, new_cost = ELS(self.problem, giant_tour, individual.tours, individual.fitness.values[0])
 
-        new_cost = individual.fitness.values[0]
-        if random.random() < 0.1:
-            old_cost = new_cost
-            new_giant_tour, new_tours, new_cost = LSPrins(self.problem, giant_tour, individual.tours, new_cost)
             
-            num_trails = 0
-            while num_trails < 12 and new_cost < old_cost:
-                num_trails += 1
-                old_cost = new_cost
-                new_giant_tour, new_tours, new_cost = LSPrins(self.problem, new_giant_tour, new_tours, new_cost)
-                      
-            
-            if new_cost < self.best_cost:
-                self.best_cost = new_cost
-    #         print new_cost, self.best_cost
-                
-            individual.tours = new_tours
-                
-            N = len(new_giant_tour)
-            if N < len(individual):
-                del individual[len(new_giant_tour):]
-                    
-            assert len(individual)==N, 'len individual is not equal N'
-            for i in xrange(N):
-                individual[i]=new_giant_tour[i]
-            
-        return new_cost,
+#         return new_cost,
     
     def repair_ind(self, ind):
                 
@@ -409,7 +381,7 @@ class GA_GT:
         
         # Apply crossover and mutation on the offspring
         for i in range(1, len(offspring), 2):
-            if random.random() < self.cxP:
+            if random.random() < PCROSS:
                 offspring[i-1], offspring[i] = self.toolbox.mate(offspring[i-1], offspring[i])
                 del offspring[i-1].fitness.values, offspring[i].fitness.values
                 
@@ -418,16 +390,16 @@ class GA_GT:
                 offspring[i] = self.repair_ind(offspring[i])
         
         for i in range(len(offspring)):
-            if random.random() < self.mutP:
+            if random.random() < PMUTATION:
                 offspring[i] = self.toolbox.mutate(offspring[i])
                 
                 del offspring[i].fitness.values
                 offspring[i] = self.repair_ind(offspring[i])
                 
                 
-#         for i in range(len(offspring)):
-#             if not offspring[i].fitness.valid:
-#                 offspring[i] = self.repair_ind(offspring[i])
+        for i in range(len(offspring)):
+            if random.random() < PLSPRINS:
+                offspring[i] = self.toolbox.mutateLSPrins(offspring[i])
         
             
         return offspring
@@ -542,7 +514,7 @@ class GA_GT:
     
 #         POPSIZE= 200 #len(self.lines)/2
         
-        pop = self.toolbox.population(n=self.POPSIZE)
+        pop = self.toolbox.population(n=POPSIZE)
     
         hof = tools.HallOfFame(2)
         stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -555,8 +527,8 @@ class GA_GT:
 #         sizeStats.register('size_avg', numpy.mean)
         
         best_cost, best_tours = self.evolve(population=pop, 
-               toolbox=self.toolbox, cxpb=self.cxP, mutpb=0.3, 
-               ngen=self.NUMGEN, stats=stats, halloffame=hof, verbose=VERBOSE)
+               toolbox=self.toolbox, cxpb=PCROSS, mutpb=PMUTATION, 
+               ngen=NUM_GEN, stats=stats, halloffame=hof, verbose=VERBOSE)
         
 #         print 'run ', job, ': ', hof[0].fitness.values[0], ': ', problem.best_cost, ': ', problem.n_same_giant_tour
         print 'run %d: %.2f ' %(self.job, best_cost)
