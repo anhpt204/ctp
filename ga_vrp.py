@@ -57,11 +57,11 @@ class GA_VRP:
         self.nodes = nodes
         
         self.POPSIZE=20
-        self.NUMGEN=100
+        self.NUMGEN=50
         self.INDSIZE = len(nodes)
-        self.VERBOSE=False
+        self.VERBOSE=True
         self.PMUTATION = 0.3
-        self.PCROSS = 0.6
+        self.PCROSS = 1.0
         self.init_pop={}
         
         self.initialize()

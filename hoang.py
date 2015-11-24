@@ -17,7 +17,10 @@ def ELS(problem, giant_tour, tours, cost):
     best_giant_tour = problem.concat(best_tours)
     new_tours = deepcopy(tours)
     new_giant_tour = deepcopy(best_giant_tour)
+    
+    num_trails = 0
     while True:
+        num_trails += 1
         for i in xrange(N):
             f_min = 10**10
             giant_tour_min = None
