@@ -3,7 +3,7 @@ Created on Aug 21, 2015
 
 @author: pta
 '''
-JOBS = 20
+JOBS = 5
 NUM_GEN = 100
 POPSIZE = 50
 PCROSS = 0.5
@@ -12,6 +12,6 @@ INDPB = 0.2
 PLSPRINS = 0.1
 PLS4 = 0.1
 VERBOSE = True
-MAX_TRAILS = 10
+MAX_TRAILS = 5
 MAX_TRAILS_LS=20
 MAX_NEIGHBORS = 3

@@ -131,6 +131,10 @@ class GA_GT:
         # job, gen
         self.stats = []
         
+        self.sharking=False
+        self.num_sharking_redundant_nodes = 0
+        self.num_of_sharking = 0
+        
     def pop_ctp_init(self):
         '''
         khoi tao individual cho bai m-CTP-p cua Hoang
@@ -220,6 +224,8 @@ class GA_GT:
         return binary_ind
     
     def LS_initialInd(self, giant_tour):
+        if random.random() > 0.1:
+            return giant_tour
         
         cost, backtrack = self.problem.split(giant_tour)
         tours = problem.extract_tours(giant_tour, backtrack)
@@ -364,15 +370,15 @@ class GA_GT:
         return nodes
         
     def hybird_init(self):
-        if random.random() < 0.5:
-            return self.ind_init()
+        if random.random() < 0.2:
+            return self.random_init()
         else:
-            return self.distance_init()
+            return self.ind_init()
         
     def initialize(self, problem_name):
         
         self.toolbox.register("indices", self.ind_init)
-        self.toolbox.register("indices", self.random_init)
+#         self.toolbox.register("indices", self.random_init)
         
 #         self.toolbox.register("indices", self.hybird_init)
         
@@ -382,12 +388,12 @@ class GA_GT:
         # Structure initializers
         self.toolbox.register("individual", tools.initIterate, creator.Individual, self.toolbox.indices)
         self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
-        self.toolbox.register("mate", tools.cxTwoPoint)
+        self.toolbox.register("mate", tools.cxUniform, indpb=0.03)
 #         tools.cxPartialyMatched(ind1, ind2)
 #         self.toolbox.register("ls", mutLSVRP, problem=problem)
         self.toolbox.register("mutateLSPrins", mutLSPrins, problem=self.problem, max_trails=MAX_TRAILS)
         self.toolbox.register("mutate", mutShaking, problem=self.problem, k=3)
-        self.toolbox.register("select", tools.selTournament, tournsize=3)
+        self.toolbox.register("select", tools.selTournament, tournsize=7)
         self.toolbox.register("evaluate", self.eval)
         
 #         mip_data_dir = 'SubSet'
@@ -455,8 +461,11 @@ class GA_GT:
                     break
 #         print giant_tour
         # remove redundent nodes
+        old_len = len(giant_tour)
         giant_tour = problem.remove_node(giant_tour)
-
+        
+        if self.sharking:
+            self.num_sharking_redundant_nodes += old_len - len(giant_tour)
         # insert nodes in T
         nodes_set = set(giant_tour)
         self.problem.obligatory_nodes
@@ -479,6 +488,7 @@ class GA_GT:
         return new_ind
         
     def varAndPTA(self, population):
+        self.sharking=False
         
         offspring = [self.toolbox.clone(ind) for ind in population]
         
@@ -497,11 +507,15 @@ class GA_GT:
                 offspring[i] = self.repair_ind(offspring[i])
         
         for i in range(len(offspring)):
+            
             if random.random() < PMUTATION:
                 offspring[i] = self.toolbox.mutate(offspring[i])
                 
                 del offspring[i].fitness.values
+                self.num_of_sharking += 1
+                self.sharking=True
                 offspring[i] = self.repair_ind(offspring[i])
+                self.sharking=False
                 
                 
         
@@ -636,7 +650,7 @@ class GA_GT:
                ngen=NUM_GEN, stats=stats, halloffame=hof, verbose=VERBOSE)
         
 #         print 'run ', job, ': ', hof[0].fitness.values[0], ': ', problem.best_cost, ': ', problem.n_same_giant_tour
-        print 'run %d: %.2f ' %(self.job, best_cost)
+        print 'run %d: %.2f %d %d' %(self.job, best_cost, self.num_sharking_redundant_nodes, self.num_of_sharking)
     #     print hof[0].giant_tour
     #     print hof[0].tours
     #     calculate_tours_cost(problem, hof[0].tours, job)
@@ -659,16 +673,16 @@ if __name__ == "__main__":
 #             os.path.join(data_dir, 'A1-1-25-75-4.ctp'),
 #             os.path.join(data_dir, 'A1-1-25-75-5.ctp'),
 #             os.path.join(data_dir, 'A1-1-25-75-6.ctp'),
-#             os.path.join(data_dir, 'A1-1-25-75-8.ctp'),
+#             os.path.join(data_dir, 'D1-10-50-50-6.ctp'),
 #  
 #             os.path.join(data_dir, 'A2-20-100-100-4.ctp'),
 #             os.path.join(data_dir, 'A2-20-100-100-5.ctp'),
-#             os.path.join(data_dir, 'A2-20-100-100-6.ctp'),
-             os.path.join(data_dir, 'A2-20-100-100-8.ctp'),
-#             os.path.join(data_dir, 'B2-20-100-100-4.ctp'),
-#             os.path.join(data_dir, 'B2-20-100-100-5.ctp'),
-#             os.path.join(data_dir, 'B2-20-100-100-6.ctp'),
-#            os.path.join(data_dir, 'B2-20-100-100-8.ctp'),
+#             os.path.join(data_dir, 'A2-10-50-150-6.ctp'),
+            os.path.join(data_dir, 'A2-20-100-100-8.ctp'),
+#             os.path.join(data_dir, 'B2-10-50-150-4.ctp'),
+#             os.path.join(data_dir, 'B2-10-50-150-5.ctp'),
+#             os.path.join(data_dir, 'B2-10-50-150-6.ctp'),
+#             os.path.join(data_dir, 'B2-10-50-150-8.ctp'),
             ]
 #     files = [os.path.join(data_dir, 'A-50-50-6.ctp')]
     moves_freq = {}
