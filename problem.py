@@ -5,6 +5,7 @@ Created on Aug 17, 2015
 '''
 from os.path import basename
 from copy import deepcopy
+from setting import MAX_VALUE
 
 class CTPNode():
     '''
@@ -33,14 +34,14 @@ class CTPNode():
         
         
 class CTPProblem():
-    def __init__(self, data_path, vehicle_capacity=100000):
+    def __init__(self, data_path, max_tour_length=100000):
         self.nodes = []
         self.num_of_vehicles = 1
         self.max_nodes_per_route=0
         self.obligatory_nodes = set([])
         self.num_of_nodes = None 
         self.num_of_customers = None
-        self.vehicle_capacity = vehicle_capacity
+        self.max_tour_length = max_tour_length
         self.best_cost = 0
         self.giant_tour_cost={}
         self.n_same_giant_tour = 0
@@ -184,7 +185,7 @@ class CTPProblem():
         # initialize
         V.append(None)
         for _ in xrange(t):
-            V.append(10**10)
+            V.append(MAX_VALUE)
         
         V[0] = 0
         predec[0] = 0
@@ -205,6 +206,9 @@ class CTPProblem():
                     cost = self.nodes[0].cost_dict[node_i] \
                     + self.nodes[node_i].visited_cost \
                     + self.nodes[node_i].cost_dict[0]
+                    
+                    if cost > self.max_tour_length:
+                        return MAX_VALUE, predec
                 
                 else:
                     cost = cost - self.nodes[tour[j-2]].cost_dict[0] \
@@ -212,7 +216,7 @@ class CTPProblem():
                     + self.nodes[node_j].visited_cost \
                     + self.nodes[node_j].cost_dict[0]
                     
-                if cost <= self.vehicle_capacity \
+                if cost <= self.max_tour_length \
                     and load <= self.max_nodes_per_route \
                     and V[i-1] + cost < V[j]:
                 
@@ -221,7 +225,7 @@ class CTPProblem():
                     
                 j += 1
                 
-                if j > t or load > self.max_nodes_per_route or cost > self.vehicle_capacity:
+                if j > t or load > self.max_nodes_per_route or cost > self.max_tour_length:
                     break
                   
         return V[t], predec

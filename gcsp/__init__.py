@@ -5,14 +5,14 @@ from problem import CTPProblem, CTPNode
 from os.path import split, basename
 
 class GCSPProblem(CTPProblem):
-    def __init__(self, data_path, vehicle_capacity=100000):
+    def __init__(self, data_path, max_tour_length=100000):
         # the number of nodes that cover a customer 
         self.covering_freq = {}
         
         # list of nodes that cover a customer
         self.nodes_covering_customer={}
         
-        CTPProblem.__init__(self, data_path, vehicle_capacity)
+        CTPProblem.__init__(self, data_path, max_tour_length)
         
     def load_data(self, data_path):        
 
