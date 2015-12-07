@@ -3,15 +3,9 @@ Created on Aug 21, 2015
 
 @author: pta
 '''
-<<<<<<< HEAD
 JOBS = 20
 NUM_GEN = 100
 POPSIZE = 500
-=======
-JOBS = 1
-NUM_GEN = 50
-POPSIZE = 50
->>>>>>> 7f1efebe7aa3d6ba077bd6f416da6abbc4011ac5
 PCROSS = 0.5
 PMUTATION = 0.5
 INDPB = 0.03
