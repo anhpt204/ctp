@@ -675,14 +675,14 @@ if __name__ == "__main__":
 #             os.path.join(data_dir, 'A1-1-25-75-6.ctp'),
 #             os.path.join(data_dir, 'D1-10-50-50-6.ctp'),
 #  
-#             os.path.join(data_dir, 'A2-20-100-100-4.ctp'),
-#             os.path.join(data_dir, 'A2-20-100-100-5.ctp'),
-#             os.path.join(data_dir, 'A2-10-50-150-6.ctp'),
+             os.path.join(data_dir, 'A2-20-100-100-4.ctp'),
+             os.path.join(data_dir, 'A2-20-100-100-5.ctp'),
+             os.path.join(data_dir, 'A2-20-100-100-6.ctp'),
             os.path.join(data_dir, 'A2-20-100-100-8.ctp'),
-#             os.path.join(data_dir, 'B2-10-50-150-4.ctp'),
-#             os.path.join(data_dir, 'B2-10-50-150-5.ctp'),
-#             os.path.join(data_dir, 'B2-10-50-150-6.ctp'),
-#             os.path.join(data_dir, 'B2-10-50-150-8.ctp'),
+             os.path.join(data_dir, 'B2-20-100-100-4.ctp'),
+             os.path.join(data_dir, 'B2-20-100-100-5.ctp'),
+             os.path.join(data_dir, 'B2-20-100-100-6.ctp'),
+             os.path.join(data_dir, 'B2-20-100-100-8.ctp'),
             ]
 #     files = [os.path.join(data_dir, 'A-50-50-6.ctp')]
     moves_freq = {}

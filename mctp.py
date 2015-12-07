@@ -305,6 +305,7 @@ class GA_MCTP:
             index = random.randint(0, len(ind)-1)
             ind.insert(index, i+1)
             
+#        return ind
         return self.LS_initialInd(ind)
         
     
@@ -336,7 +337,7 @@ class GA_MCTP:
         # Structure initializers
         self.toolbox.register("individual", tools.initIterate, creator.Individual, self.toolbox.indices)
         self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
-        self.toolbox.register("mate", tools.cxUniform, indpb=0.03)
+        self.toolbox.register("mate", tools.cxUniform, indpb=INDPB)
 #         self.toolbox.register('mate', tools.cxTwoPoint)
 #         tools.cxPartialyMatched(ind1, ind2)
 #         self.toolbox.register("ls", mutLSVRP, problem=problem)
@@ -626,27 +627,35 @@ if __name__ == "__main__":
 #  
 #             os.path.join(data_dir, 'A2-20-100-100-4.ctp'),
 #             os.path.join(data_dir, 'A2-20-100-100-5.ctp'),
-#             os.path.join(data_dir, 'A2-10-50-150-6.ctp'),
-            os.path.join(data_dir, 'A2-1-50-150-8.ctp'),
-#             os.path.join(data_dir, 'B2-10-50-150-4.ctp'),
-#             os.path.join(data_dir, 'B2-10-50-150-5.ctp'),
+
+#             os.path.join(data_dir, 'A2-1-50-150-6.ctp'),
+#             os.path.join(data_dir, 'A2-1-50-150-8.ctp'),
+#             os.path.join(data_dir, 'B2-1-50-150-4.ctp'),
+            os.path.join(data_dir, 'B2-1-50-150-5.ctp'),
+            
+            
 #             os.path.join(data_dir, 'B2-10-50-150-6.ctp'),
 #             os.path.join(data_dir, 'B2-10-50-150-8.ctp'),
             ]
 #     files = [os.path.join(data_dir, 'A-50-50-6.ctp')]
     moves_freq = {}
+#     lengths = [250,500,250,500]
+    lengths = [500]
     
-    for file in files:
+    for file, ro in zip(files,lengths):
         time1 = datetime.datetime.now()
         file_name = os.path.basename(file)
-        print file_name
+        print file_name, ro
         
         problem = CTPProblem(data_path=file, max_tour_length=250)
         
         max_cost_from_depot = max([problem.nodes[0].cost_dict[node] \
                                    for node in range(1, problem.num_of_nodes)])
         
-        problem.max_tour_length = 2*max_cost_from_depot + 250
+        problem.max_tour_length = 2*max_cost_from_depot + ro
+        problem.max_nodes_per_route = 1000
+        
+        print problem.max_tour_length
         
 #         problem = gcsp.GCSPProblem(data_path=file)
         
