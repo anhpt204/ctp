@@ -171,6 +171,16 @@ class CTPProblem():
             return False
         return True
     
+    def isSatisfyTourLength(self, tours):
+        '''
+        check tour length constraint
+        '''
+        for tour in tours:
+            cost = self.cal_tour_cost(tour)
+            if cost > self.max_tour_length:
+                return False
+        return True
+    
     def split(self, tour):
         '''
         basic splitting algorithm 'tour splitting algorithms for vehicle routing problem' - Prins

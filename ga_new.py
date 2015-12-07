@@ -312,8 +312,8 @@ if __name__ == "__main__":
     files = glob.glob(data_dir + '*.ctp')
     lines = []
     
-#     files = [os.path.join(data_dir, 'A1-1-25-75-6.ctp')]
-    files = [os.path.join(data_dir, 'A2-20-100-100-5.ctp')]
+    files = [os.path.join(data_dir, 'A2-1-50-150-8.ctp')]
+#     files = [os.path.join(data_dir, 'A2-20-100-100-5.ctp')]
     moves_freq = {}
     
     for file in files:
@@ -326,8 +326,8 @@ if __name__ == "__main__":
 #         problem = gcsp.GCSPProblem(data_path=file)
         
         # calculate solution cost
-        tours = [[3, 13, 35, 9, 18], [85, 4, 87, 16, 7], [6, 8, 15, 10, 83], [26, 12, 19, 14], [28, 17, 11], [30, 5, 1, 67, 2]]
-
+#         tours = [[28, 47, 9]]#, [40, 34, 4, 37, 21, 14]]
+        tours =[[34, 4, 37, 21, 14]]
         cost = problem.get_solution_cost(tours)
         print problem.is_tours_satisfy_covering_constraint(tours)
         print cost

@@ -530,6 +530,7 @@ class GA_MCTP:
             if halloffame is not None:
                 halloffame.update(population)
             
+            print halloffame[0].tours
     #         t = 0
             
 #             for t in xrange(len(halloffame)):
@@ -652,18 +653,26 @@ if __name__ == "__main__":
         max_cost_from_depot = max([problem.nodes[0].cost_dict[node] \
                                    for node in range(1, problem.num_of_nodes)])
         
+<<<<<<< HEAD
         problem.max_tour_length = 2*max_cost_from_depot + ro
         problem.max_nodes_per_route = 1000
         
         print problem.max_tour_length
+=======
+        problem.max_tour_length = 2*max_cost_from_depot + 250
+        problem.max_nodes_per_route = 1000
+>>>>>>> 7f1efebe7aa3d6ba077bd6f416da6abbc4011ac5
         
+        print problem.max_tour_length
 #         problem = gcsp.GCSPProblem(data_path=file)
         
         # calculate solution cost
-#         tours = [[72,67,28,24], [5,48,52,18]]
+#         tours = [[40, 34, 4, 37, 21, 14]]
 #         cost = problem.get_solution_cost(tours)
 #         print cost
 #         break
+
+
         best_solution = None
         best_cost = MAX_VALUE
         
