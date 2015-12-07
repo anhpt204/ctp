@@ -3,9 +3,9 @@ Created on Aug 21, 2015
 
 @author: pta
 '''
-JOBS = 20
+JOBS = 1
 NUM_GEN = 50
-POPSIZE = 200
+POPSIZE = 50
 PCROSS = 0.5
 PMUTATION = 0.5
 INDPB = 0.2
