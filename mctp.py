@@ -25,7 +25,7 @@ from deap import base
 from deap import creator
 from deap import tools
 
-from problem import CTPProblem
+from problem import CTPProblem, MCTPProblem
 from os.path import join
 
 from setting import *
@@ -612,7 +612,7 @@ import glob, os, datetime
 if __name__ == "__main__":
     # load problem
     folder = 'A'
-    data_dir = 'data_ctp/' # + folder + '/'
+    data_dir = 'data_gmctp/' # + folder + '/'
     print data_dir
 #     Jobs = 10
     
@@ -631,7 +631,7 @@ if __name__ == "__main__":
 
 #             os.path.join(data_dir, 'A2-1-50-150-6.ctp'),
 #             os.path.join(data_dir, 'A2-1-50-150-8.ctp'),
-#             os.path.join(data_dir, 'B2-1-50-150-4.ctp'),
+            os.path.join(data_dir, 'B2-1-50-150-4.ctp'),
             os.path.join(data_dir, 'B2-1-50-150-5.ctp'),
             
             
@@ -639,54 +639,64 @@ if __name__ == "__main__":
 #             os.path.join(data_dir, 'B2-10-50-150-8.ctp'),
             ]
 #     files = [os.path.join(data_dir, 'A-50-50-6.ctp')]
+    files = glob.glob(data_dir + '*.ctp')
+
     moves_freq = {}
 #     lengths = [250,500,250,500]
-    lengths = [500]
+    lengths = [250]
     
-    for file, ro in zip(files,lengths):
-        time1 = datetime.datetime.now()
-        file_name = os.path.basename(file)
-        print file_name, ro
-        
-        problem = CTPProblem(data_path=file, max_tour_length=250)
-        
-        max_cost_from_depot = max([problem.nodes[0].cost_dict[node] \
-                                   for node in range(1, problem.num_of_nodes)])
-        
-        problem.max_tour_length = 2*max_cost_from_depot + ro
-        problem.max_nodes_per_route = 1000
-        
-        print problem.max_tour_length
-#         problem = gcsp.GCSPProblem(data_path=file)
-        
-        # calculate solution cost
-#         tours = [[40, 34, 4, 37, 21, 14]]
-#         cost = problem.get_solution_cost(tours)
-#         print cost
-#         break
-
-
-        best_solution = None
-        best_cost = MAX_VALUE
-        
-        for job in xrange(JOBS):
-            ga = GA_MCTP(problem, job)
-            cost, tours = ga.run()
+    for file in files:
+        for ro in lengths:
+            time1 = datetime.datetime.now()
+            file_name = os.path.basename(file)
+            print file_name, ro
             
-            if cost < best_cost:
-                best_cost = cost
-                best_solution = deepcopy(tours)
+            problem = MCTPProblem(data_path=file, max_tour_length=250)
+            
+            max_cost_from_depot = max([problem.nodes[0].cost_dict[node] \
+                                       for node in range(1, problem.num_of_nodes)])
+            
+            problem.max_tour_length = 2*max_cost_from_depot + ro
+    #         problem.max_nodes_per_route = 1000
+            
+            print problem.max_tour_length
+    #         problem = gcsp.GCSPProblem(data_path=file)
+            
+#             problem.export_gmctp(ro)
+            
+            # calculate solution cost
+    #         tours = [[40, 34, 4, 37, 21, 14]]
+    #         cost = problem.get_solution_cost(tours)
+    #         print cost
+    #         break
+    
+    
+            best_solution = None
+            best_cost = MAX_VALUE
+             
+            best_runs =[]
+            
+            for job in xrange(JOBS):
+                ga = GA_MCTP(problem, job)
+                cost, tours = ga.run()
                 
-        lines.append('%s %.2f %.2f %d %s \n' %(file_name, 
-                                                 problem.best_cost,
-                                                 best_cost, 
-                                                 len(best_solution),
-#                                                  d.seconds, 
-                                                 str(best_solution),
-#                                                  str(best_solution.tours)
-                                                 ))
-
-        print best_cost, best_solution
-        
-    f = open('ga_gt.out', 'w')
+                best_runs.append(cost)
+                 
+                if cost < best_cost:
+                    best_cost = cost
+                    best_solution = deepcopy(tours)
+                     
+            lines.append('%s %.2f %.2f %d [%s] %s\n' %(file_name, 
+                                                     problem.best_cost,
+                                                     best_cost, 
+                                                     len(best_solution),
+    #                                                  d.seconds, 
+                                                     ' '.join([str(v) for v in best_runs]),
+                                                     str(best_solution),
+    #                                                  str(best_solution.tours)
+                                                     ))
+     
+            print best_cost, best_solution
+         
+    f = open('out/mctp.out', 'w')
     f.writelines(lines)

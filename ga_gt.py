@@ -46,7 +46,7 @@ def LSPrins(problem, giant_tour, tours, cost):
     A Simple and Effective Evolutionary Algorithm for the Vehicle Routing Problem, Prins, 2001
     '''
 #     move_operators = [move1, move2, move3, move4, move5, move6, move7, move8, move9]
-    move_operators=[move1, move4, move8, move9]
+    move_operators=random.sample([move1, move4, move8, move9],4)
     
     tours_len = len(tours)
     best_cost = cost

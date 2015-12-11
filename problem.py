@@ -3,9 +3,10 @@ Created on Aug 17, 2015
 
 @author: pta
 '''
-from os.path import basename
+from os.path import basename, join
 from copy import deepcopy
 from setting import MAX_VALUE
+import random
 
 class CTPNode():
     '''
@@ -53,6 +54,7 @@ class CTPProblem():
         self.load_data(data_path)
         
     def load_data(self, data_path):
+        self.data_path = data_path
         self.name = basename(data_path)
         
         lines = open(data_path, 'r').readlines()
@@ -383,6 +385,95 @@ class CTPProblem():
                 
         f.write(str(cost))
         f.close()
+        
+        
+    def export_gmctp(self, max_tour_length_type):
+        '''
+        export generalized m-ctp
+        '''
+        # make new file name
+        t = self.name.split('.')[0]
+        file_name = "%s-%d.ctp" %(t, max_tour_length_type)
+        
+        # generate covering constraint
+        # how many nodes cover each customer
+        cover_count = {}
+        for node in xrange(1, self.num_of_nodes+len(self.obligatory_nodes)+1):
+            for c in self.nodes[node].cover_list:
+                if cover_count.has_key(c):
+                    cover_count[c]+=1
+                else:
+                    cover_count[c]=1
+                    
+        node_cover =[]
+        for c in xrange(self.num_of_customers):
+            t = random.randint(1, min(3,cover_count[c]))
+            node_cover.append(t)
+        
+        lines = open(self.data_path).readlines()
+        lines[0] = '%d %d %d %d %.2f \n' %(self.num_of_nodes, self.num_of_customers, 
+                            len(self.obligatory_nodes)+1, 
+                            self.max_nodes_per_route,
+                            self.max_tour_length)
+        lines.append(' '.join(str(v) for v in node_cover))
+        
+        open(join('data_gmctp', file_name), 'w').writelines(lines)
+        
+            
+class MCTPProblem(CTPProblem):
+    def load_data(self, data_path):
+        self.data_path = data_path
+        self.name = basename(data_path)
+        
+        lines = open(data_path, 'r').readlines()
+        
+        xs = [x for x in lines[0].split()]
+        self.num_of_nodes = int(xs[0])
+        self.num_of_customers = int(xs[1])
+        obligatory_node = int(xs[2])
+        
+        self.max_nodes_per_route=int(xs[3])
+        self.max_tour_length = float(xs[4])
+        
+        
+        if len(xs)>5:
+            self.best_cost = float(xs[5])
+        else:
+            self.best_cost = 0
+        
+        self.obligatory_nodes = set(range(1,obligatory_node))
+        
+        # init    
+        for l in xrange(self.num_of_customers):
+            self.nodes_covering_customer[l]=set()
+
+        # initialize nodes
+        self.nodes = []
+        for i in xrange(self.num_of_nodes + obligatory_node):
+            node = CTPNode(id=i, visited_cost=0, coverage_demand=0)
+            self.nodes.append(node)
+            
+        # load cost matrix
+        i = 1
+        line = lines[i]
+        while not line.isspace():
+            xs = line.split()
+            id1, id2 = [int(x) for x in xs[:2]]
+            distance = float(xs[-1])
+            self.nodes[id1].cost_dict[id2] = distance
+            self.nodes[id2].cost_dict[id1] = distance
+            
+            i += 1
+            line = lines[i]
+        
+        # load covering matrix
+        i += 1
+        for line in lines[i:-1]:
+            xs = [int(x) for x in line.split()]
+            for i in xrange(self.num_of_customers):
+                if xs[i+1] == 1:
+                    self.nodes[xs[0]].cover_list.append(i)
+                    self.nodes_covering_customer[i].update([xs[0]])
         
 if __name__ == '__main__':
     data_path = '/home/pta/projects/ctp/data_ctp/kroA-13-12-75-1.ctp'
