@@ -305,8 +305,8 @@ class GA_MCTP:
             index = random.randint(0, len(ind)-1)
             ind.insert(index, i+1)
             
-#        return ind
-        return self.LS_initialInd(ind)
+        return ind
+#         return self.LS_initialInd(ind)
         
     
     def init_mip(self):
@@ -629,17 +629,17 @@ if __name__ == "__main__":
 #             os.path.join(data_dir, 'A2-20-100-100-4.ctp'),
 #             os.path.join(data_dir, 'A2-20-100-100-5.ctp'),
 
-#             os.path.join(data_dir, 'A2-1-50-150-6.ctp'),
-#             os.path.join(data_dir, 'A2-1-50-150-8.ctp'),
-            os.path.join(data_dir, 'B2-1-50-150-4.ctp'),
-            os.path.join(data_dir, 'B2-1-50-150-5.ctp'),
+            os.path.join(data_dir, 'A2-1-50-150-5-250.ctp'),
+            os.path.join(data_dir, 'A2-1-50-150-5-500.ctp'),
+            os.path.join(data_dir, 'B2-1-50-150-5-250.ctp'),
+            os.path.join(data_dir, 'B2-1-50-150-5-500.ctp'),
             
             
-#             os.path.join(data_dir, 'B2-10-50-150-6.ctp'),
+#             os.path.join(data_dir, 'B2-10-50-150-6-250.ctp'),
 #             os.path.join(data_dir, 'B2-10-50-150-8.ctp'),
             ]
 #     files = [os.path.join(data_dir, 'A-50-50-6.ctp')]
-    files = glob.glob(data_dir + '*.ctp')
+#     files = glob.glob(data_dir + '*.ctp')
 
     moves_freq = {}
 #     lengths = [250,500,250,500]
@@ -656,7 +656,7 @@ if __name__ == "__main__":
 #                                    for node in range(1, problem.num_of_nodes)])
         
 #         problem.max_tour_length = 2*max_cost_from_depot + ro
-#         problem.max_nodes_per_route = 1000
+        problem.max_nodes_per_route = 1000
         
         print problem.max_tour_length
 #         problem = gcsp.GCSPProblem(data_path=file)

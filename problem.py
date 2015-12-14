@@ -219,8 +219,8 @@ class CTPProblem():
                     + self.nodes[node_i].visited_cost \
                     + self.nodes[node_i].cost_dict[0]
                     
-                    if cost > self.max_tour_length:
-                        return MAX_VALUE, predec
+#                     if cost > self.max_tour_length:
+#                         return MAX_VALUE, predec
                 
                 else:
                     cost = cost - self.nodes[tour[j-2]].cost_dict[0] \
