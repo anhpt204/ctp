@@ -183,6 +183,8 @@ class CTPProblem():
                 return False
         return True
     
+    
+    
     def split(self, tour):
         '''
         basic splitting algorithm 'tour splitting algorithms for vehicle routing problem' - Prins
@@ -259,6 +261,49 @@ class CTPProblem():
                 break
         tours.reverse()
         return tours
+    
+    def new_split(self, tour):
+        giant_tour = [0] + tour
+        
+        t = len(giant_tour)
+        V=[10**10]*t
+        P = [-1]*t
+        V[0] = 0
+        P[0] = 0
+        
+        for i in xrange(1, t):
+            j = i 
+#             load = 0
+            num_node_per_tour = 0
+            node_i = giant_tour[i] 
+            while True:
+                node_j = giant_tour[j]
+#                 load += self.nodes[j].load
+                num_node_per_tour += 1
+                
+                if i == j:
+                    cost = self.nodes[0].cost_dict[node_i] + self.nodes[node_i].visited_cost + self.nodes[node_i].cost_dict[0]
+                else:
+                    node_pre_j = giant_tour[j-1] 
+                    cost = cost - self.nodes[node_pre_j].cost_dict[0] \
+                        + self.nodes[node_pre_j].cost_dict[node_j] + self.nodes[node_j].visited_cost \
+                        + self.nodes[node_j].cost_dict[0]
+                        
+                if cost <= self.max_tour_length \
+                    and V[i-1] + cost < V[j] \
+                    and num_node_per_tour <= self.max_nodes_per_route :
+                    
+                    V[j] = V[i-1]+cost
+                    P[j] = i-1
+                
+                j += 1
+                
+                if j == t or cost > self.max_tour_length \
+                    or num_node_per_tour > self.max_nodes_per_route:
+                    break
+                
+        return V[t-1],P
+                
         
     def concat(self, tours):
         '''
@@ -537,5 +582,55 @@ def GMCTPProblem(CTPProblem):
             
 if __name__ == '__main__':
     data_path = '/home/pta/projects/ctp/data_ctp/kroA-13-12-75-1.ctp'
-    problem = CTPProblem()
-    problem.load_data(data_path)
+    problem = CTPProblem(data_path=data_path)
+#     problem.load_data(data_path)
+
+    # build test split alg from prins' paper
+    for i in xrange(6):
+        node = CTPNode(0, visited_cost=5)
+        if i == 5:
+            node.visited_cost = 6
+                        
+        problem.nodes.append(node)
+        
+    #demand
+    problem.nodes[1].load = 4
+    problem.nodes[2].load = 3
+    problem.nodes[3].load = 5
+    problem.nodes[4].load = 1
+    problem.nodes[5].load = 6
+    
+        
+    problem.nodes[0].cost_dict[1] = 20
+    problem.nodes[1].cost_dict[0] = 12
+    
+    problem.nodes[0].cost_dict[2] = 11
+    problem.nodes[2].cost_dict[0] = 11
+    
+    problem.nodes[0].cost_dict[3] = 20
+    problem.nodes[3].cost_dict[0] = 15
+    
+    problem.nodes[0].cost_dict[4] = 13
+    problem.nodes[4].cost_dict[0] = 14
+
+    problem.nodes[0].cost_dict[5] = 10
+    problem.nodes[5].cost_dict[0] = 16
+
+    problem.nodes[1].cost_dict[2] = 10
+    problem.nodes[2].cost_dict[1] = 10
+
+    problem.nodes[2].cost_dict[3] = 20
+    problem.nodes[3].cost_dict[2] = 20
+
+    problem.nodes[3].cost_dict[4] = 20
+    problem.nodes[4].cost_dict[3] = 20
+    
+    problem.nodes[4].cost_dict[5] = 9
+    problem.nodes[5].cost_dict[4] = 9
+    
+    giant_tour = [1,2,3,4,5]
+    cost,p = problem.new_split(giant_tour)
+    
+    tour = problem.extract_tours(giant_tour, p)
+
+    print cost

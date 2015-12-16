@@ -355,7 +355,7 @@ class GA_MCTP:
         giant_tour = [node for node in individual]
                 
 #         if not individual.fitness.valid:
-        cost, backtrack = problem.split(giant_tour)
+        cost, backtrack = problem.new_split(giant_tour)
 #         individual.fitness.values = cost,
         individual.tours = problem.extract_tours(giant_tour, backtrack)
                                 
@@ -612,7 +612,7 @@ import glob, os, datetime
 if __name__ == "__main__":
     # load problem
     folder = 'A'
-    data_dir = 'data_gmctp/' # + folder + '/'
+    data_dir = 'data_mctp/' # + folder + '/'
     print data_dir
 #     Jobs = 10
     
@@ -629,10 +629,10 @@ if __name__ == "__main__":
 #             os.path.join(data_dir, 'A2-20-100-100-4.ctp'),
 #             os.path.join(data_dir, 'A2-20-100-100-5.ctp'),
 
-            os.path.join(data_dir, 'A2-1-50-150-5-250.ctp'),
-            os.path.join(data_dir, 'A2-1-50-150-5-500.ctp'),
-            os.path.join(data_dir, 'B2-1-50-150-5-250.ctp'),
-            os.path.join(data_dir, 'B2-1-50-150-5-500.ctp'),
+            os.path.join(data_dir, 'A2-10-50-150-4-250.ctp'),
+#             os.path.join(data_dir, 'A2-1-50-150-5-500.ctp'),
+#             os.path.join(data_dir, 'B2-1-50-150-5-250.ctp'),
+#             os.path.join(data_dir, 'B2-1-50-150-5-500.ctp'),
             
             
 #             os.path.join(data_dir, 'B2-10-50-150-6-250.ctp'),
@@ -644,6 +644,7 @@ if __name__ == "__main__":
     moves_freq = {}
 #     lengths = [250,500,250,500]
 #     lengths = [250]
+    ro = 500
     
     for file in files:
         time1 = datetime.datetime.now()
@@ -652,16 +653,18 @@ if __name__ == "__main__":
         
         problem = MCTPProblem(data_path=file, max_tour_length=250)
         
-#         max_cost_from_depot = max([problem.nodes[0].cost_dict[node] \
-#                                    for node in range(1, problem.num_of_nodes)])
-        
+#         n = problem.num_of_nodes + len(problem.obligatory_nodes) + 1
+#         
+#         cost_from_depot = [problem.nodes[0].cost_dict[node] for node in range(1, n)]
+#         max_cost_from_depot = max(cost_from_depot)
+#          
 #         problem.max_tour_length = 2*max_cost_from_depot + ro
         problem.max_nodes_per_route = 1000
         
         print problem.max_tour_length
 #         problem = gcsp.GCSPProblem(data_path=file)
         
-#             problem.export_gmctp(ro)
+#         problem.export_gmctp(ro)
         
         # calculate solution cost
 #         tours = [[40, 34, 4, 37, 21, 14]]
@@ -672,19 +675,19 @@ if __name__ == "__main__":
 
         best_solution = None
         best_cost = MAX_VALUE
-         
+          
         best_runs =[]
-        
+         
         for job in xrange(JOBS):
             ga = GA_MCTP(problem, job)
             cost, tours = ga.run()
-            
-            best_runs.append(cost)
              
+            best_runs.append(cost)
+              
             if cost < best_cost:
                 best_cost = cost
                 best_solution = deepcopy(tours)
-                 
+                  
         lines.append('%s %.2f %.2f %d [%s] %s\n' %(file_name, 
                                                  problem.best_cost,
                                                  best_cost, 
@@ -694,8 +697,8 @@ if __name__ == "__main__":
                                                  str(best_solution),
 #                                                  str(best_solution.tours)
                                                  ))
- 
+  
 #         print best_cost, best_solution
-         
+          
     f = open('out/mctp.out', 'w')
     f.writelines(lines)
