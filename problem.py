@@ -431,6 +431,14 @@ class CTPProblem():
         f.write(str(cost))
         f.close()
         
+    def export(self, max_length_type=250):
+        p = self.name.split('-')[0]
+        T = len(self.obligatory_nodes)+1
+        N = T + self.num_of_nodes
+                
+        file_name = '%s-%d-%d-%d-%d-%d.ctp' %(p, T, N, self.num_of_customers, self.max_nodes_per_route, max_length_type)
+        
+        
         
     def export_gmctp(self, max_tour_length_type):
         '''
@@ -579,6 +587,66 @@ def GMCTPProblem(CTPProblem):
         # load customer covering constraint
         self.customer_covering = [int(x) for x in lines[-1].split()]
         
+    def convert_to_ctp(self):
+        ctp = CTPProblem(data_path="", max_tour_length=self.max_tour_length
+                         , load_data_from_file=False)
+        # copy depot
+        depot = self.nodes[0].clone()
+        depot.cost_dict.clear()
+        ctp.nodes.append(depot)
+
+        id = 1
+        nodes_copy_from_node = [[0]]
+        for i in xrange(1, self.num_of_nodes + len(self.obligatory_nodes) + 1):
+            if self.obligatory_nodes.issuperset(set([i])):
+                node = self.nodes[i].clone()
+                node.id = id
+                ctp.nodes.append(node)
+                id += 1
+                continue
+            
+            num_of_copies = max([self.customer_covering[c] for c in self.nodes[i].cover_list])
+            nodes_copy_from_node.append([])
+            
+            for _ in xrange(num_of_copies):
+                node = self.nodes[i].clone()
+                node.cost_dict.clear()
+                node.id = id
+                ctp.nodes.append(node)
+                nodes_copy_from_node[i].append(id)
+                
+                id += 1
+        
+        ctp.num_of_nodes = len(ctp.nodes)
+        
+        # cost matrix and cover list and nodes covering a customer
+        n = self.num_of_nodes + len(self.obligatory_nodes)+1
+        for i in xrange(n):
+            copy_nodes_i = nodes_copy_from_node[i]
+            
+            # cost between nodes that are copied from one node
+            for t in copy_nodes_i:
+                for k in copy_nodes_i:
+                    if t != k:
+                        ctp.nodes[t].cost_dict[k] = 0
+            
+            # cost from each copies with other copy from other nodes
+            for j in xrange(n):
+                if j == i:
+                    continue
+                copy_nodes_j = nodes_copy_from_node[j]
+                
+                cost = self.nodes[i].cost_dict[j] 
+                
+                for copy_node_i in copy_nodes_i:
+                    # cost
+                    for copy_node_j in copy_nodes_j:
+                        ctp.nodes[copy_node_i].cost_dict[copy_node_j] = cost
+                    # nodes covering a customer
+                    for c in ctp.nodes[copy_node_i].cover_list:
+                        ctp.nodes_covering_customer[c].update([copy_node_i])
+        return ctp    
+
             
 if __name__ == '__main__':
     data_path = '/home/pta/projects/ctp/data_ctp/kroA-13-12-75-1.ctp'
