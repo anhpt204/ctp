@@ -3,8 +3,8 @@ Created on Aug 21, 2015
 
 @author: pta
 '''
-JOBS = 50
-NUM_GEN = 100
+JOBS = 2
+NUM_GEN = 10
 POPSIZE = 50
 PCROSS = 0.5
 PMUTATION = 0.5

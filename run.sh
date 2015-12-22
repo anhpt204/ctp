@@ -9,4 +9,4 @@
 
 python mctp.py
 
-/home/pta/git/ctp/run $@
+/home/hanu.nxhoai/pta/ctp/run.sh $@
