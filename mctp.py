@@ -355,9 +355,9 @@ class GA_MCTP:
         giant_tour = [node for node in individual]
                 
 #         if not individual.fitness.valid:
-        cost, backtrack = problem.new_split(giant_tour)
+        cost, backtrack = self.problem.new_split(giant_tour)
 #         individual.fitness.values = cost,
-        individual.tours = problem.extract_tours(giant_tour, backtrack)
+        individual.tours = self.problem.extract_tours(giant_tour, backtrack)
                                 
         return cost,
     
@@ -387,17 +387,17 @@ class GA_MCTP:
             # try until find feasible giant tour
             while True:
                 nodes_in_giant_tour = set(giant_tour)
-                nodes_not_in_giant_tour = set(range(1, len(problem.nodes))).difference(nodes_in_giant_tour)
+                nodes_not_in_giant_tour = set(range(1, len(self.problem.nodes))).difference(nodes_in_giant_tour)
                 
                 nodes_not_in_giant_tour = list(nodes_not_in_giant_tour)
                 
-                covering_set = problem.get_set_of_customers_covered_by_giant_tour(giant_tour)
+                covering_set = self.problem.get_set_of_customers_covered_by_giant_tour(giant_tour)
                 
                 max_node = nodes_not_in_giant_tour[0]
-                new_covering_set = covering_set.union(problem.get_set_of_customers_covered_by(max_node))
+                new_covering_set = covering_set.union(self.problem.get_set_of_customers_covered_by(max_node))
                 max_covered = len(new_covering_set)
                 for node in nodes_not_in_giant_tour[1:]:
-                    new_covering_set = covering_set.union(problem.get_set_of_customers_covered_by(node))
+                    new_covering_set = covering_set.union(self.problem.get_set_of_customers_covered_by(node))
                     if len(new_covering_set) > max_covered:
                         max_covered = len(new_covering_set)
                         max_node = node
@@ -407,12 +407,12 @@ class GA_MCTP:
                 giant_tour.insert(idx, max_node)
                 
                 # if is feasible giant tour then break while loop
-                if problem.is_giant_tour_satisfy_covering_constraint(giant_tour):
+                if self.problem.is_giant_tour_satisfy_covering_constraint(giant_tour):
                     break
 #         print giant_tour
         # remove redundent nodes
         old_len = len(giant_tour)
-        giant_tour = problem.remove_node(giant_tour)
+        giant_tour = self.problem.remove_node(giant_tour)
         
         if self.sharking:
             self.num_sharking_redundant_nodes += old_len - len(giant_tour)
@@ -431,9 +431,9 @@ class GA_MCTP:
         for node in giant_tour:
             new_ind.append(node)
         
-        cost, backtrack = problem.split(giant_tour)
+        cost, backtrack = self.problem.split(giant_tour)
 #         new_ind.fitness.values = cost,
-        new_ind.tours = problem.extract_tours(giant_tour, backtrack)
+        new_ind.tours = self.problem.extract_tours(giant_tour, backtrack)
                                                 
         return new_ind
         
