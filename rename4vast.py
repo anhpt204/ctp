@@ -6,7 +6,7 @@ Created on Dec 22, 2015
 from os.path import join
 import glob 
 
-dir_input = 'data_gmctp'
+dir_input = 'data_gmctp_cv'
 dir_output = 'gmctp_vast_input'
 
 files = glob.glob(join(dir_input, "*.ctp"))
