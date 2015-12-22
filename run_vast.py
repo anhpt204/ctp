@@ -13,7 +13,7 @@ import sys
 
 def run_mctp(input_file, output_file):
     time1 = datetime.datetime.now()
-    file = join('/home/anhpt4/git/ctp/mctp_vast_input', input_file)
+    file = join('/home/hanu.nxhoai/pta/ctp/mctp_vast_input', input_file)
     problem = MCTPProblem(data_path=file, max_tour_length=250)
         
     problem.max_nodes_per_route = 1000
