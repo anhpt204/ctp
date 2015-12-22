@@ -51,7 +51,7 @@ def run_mctp(input_file, output_file):
     
     lines.append(str(duration))
     
-    f = open(join('out', output_file), 'w')
+    f = open(join('mctp_out', output_file), 'w')
     f.writelines(lines)
 
 
