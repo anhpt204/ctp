@@ -25,7 +25,7 @@ from deap import base
 from deap import creator
 from deap import tools
 
-from problem import CTPProblem, MCTPProblem
+from problem import CTPProblem, MCTPProblem, GMCTPProblem
 from os.path import join
 
 from setting import *
@@ -612,7 +612,11 @@ import glob, os, datetime
 if __name__ == "__main__":
     # load problem
     folder = 'A'
+<<<<<<< HEAD
+    data_dir = 'data_gmctp/' # + folder + '/'
+=======
     data_dir = '/home/hanu.nxhoai/pta/ctp/data_mctp/' # + folder + '/'
+>>>>>>> 58b4baaeff0210eaf0cbb18bc360c819b951ed80
     print data_dir
 #     Jobs = 10
     
@@ -639,7 +643,7 @@ if __name__ == "__main__":
 #             os.path.join(data_dir, 'B2-10-50-150-8.ctp'),
             ]
 #     files = [os.path.join(data_dir, 'A-50-50-6.ctp')]
-#     files = glob.glob(data_dir + '*.ctp')
+    files = glob.glob(data_dir + '*.ctp')
 
     moves_freq = {}
 #     lengths = [250,500,250,500]
@@ -651,7 +655,9 @@ if __name__ == "__main__":
         file_name = os.path.basename(file)
         print file_name, 
         
-        problem = MCTPProblem(data_path=file, max_tour_length=250)
+        problem = GMCTPProblem(data_path=file, max_tour_length=250)
+        
+        problem.convert_to_gmctp1()
         
 #         n = problem.num_of_nodes + len(problem.obligatory_nodes) + 1
 #         
@@ -659,9 +665,9 @@ if __name__ == "__main__":
 #         max_cost_from_depot = max(cost_from_depot)
 #          
 #         problem.max_tour_length = 2*max_cost_from_depot + ro
-        problem.max_nodes_per_route = 1000
-        
-        print problem.max_tour_length
+#         problem.max_nodes_per_route = 1000
+#         
+#         print problem.max_tour_length
 #         problem = gcsp.GCSPProblem(data_path=file)
         
 #         problem.export_gmctp(ro)
@@ -673,32 +679,32 @@ if __name__ == "__main__":
 #         break
 
 
-        best_solution = None
-        best_cost = MAX_VALUE
-          
-        best_runs =[]
-         
-        for job in xrange(JOBS):
-            ga = GA_MCTP(problem, job)
-            cost, tours = ga.run()
-             
-            best_runs.append(cost)
-              
-            if cost < best_cost:
-                best_cost = cost
-                best_solution = deepcopy(tours)
-                  
-        lines.append('%s %.2f %.2f %d [%s] %s\n' %(file_name, 
-                                                 problem.best_cost,
-                                                 best_cost, 
-                                                 len(best_solution),
-#                                                  d.seconds, 
-                                                 ' '.join([str(v) for v in best_runs]),
-                                                 str(best_solution),
-#                                                  str(best_solution.tours)
-                                                 ))
-  
-#         print best_cost, best_solution
-          
-    f = open('out/mctp.out', 'w')
-    f.writelines(lines)
+#         best_solution = None
+#         best_cost = MAX_VALUE
+#           
+#         best_runs =[]
+#          
+#         for job in xrange(JOBS):
+#             ga = GA_MCTP(problem, job)
+#             cost, tours = ga.run()
+#              
+#             best_runs.append(cost)
+#               
+#             if cost < best_cost:
+#                 best_cost = cost
+#                 best_solution = deepcopy(tours)
+#                   
+#         lines.append('%s %.2f %.2f %d [%s] %s\n' %(file_name, 
+#                                                  problem.best_cost,
+#                                                  best_cost, 
+#                                                  len(best_solution),
+# #                                                  d.seconds, 
+#                                                  ' '.join([str(v) for v in best_runs]),
+#                                                  str(best_solution),
+# #                                                  str(best_solution.tours)
+#                                                  ))
+#   
+# #         print best_cost, best_solution
+#           
+#     f = open('out/mctp.out', 'w')
+#     f.writelines(lines)

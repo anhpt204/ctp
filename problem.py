@@ -32,10 +32,14 @@ class CTPNode():
         
         self.load = load
         
-        
+    def clone(self):
+        node = CTPNode(self.id, self.x, self.y, self.visited_cost, self.coverage_demand, self.load)
+        node.cover_list = deepcopy(self.cover_list)
+        node.cost_dict = deepcopy(self.cost_dict)
+        return node 
         
 class CTPProblem():
-    def __init__(self, data_path, max_tour_length=100000):
+    def __init__(self, data_path, max_tour_length=100000, load_data_from_file=True):
         self.nodes = []
         self.num_of_vehicles = 1
         self.max_nodes_per_route=0
@@ -50,8 +54,8 @@ class CTPProblem():
         self.moves_freq = {}
         
         self.nodes_covering_customer={}
-        
-        self.load_data(data_path)
+        if load_data_from_file:
+            self.load_data(data_path)
         
     def load_data(self, data_path):
         self.data_path = data_path
@@ -431,15 +435,6 @@ class CTPProblem():
         f.write(str(cost))
         f.close()
         
-    def export(self, max_length_type=250):
-        p = self.name.split('-')[0]
-        T = len(self.obligatory_nodes)+1
-        N = T + self.num_of_nodes
-                
-        file_name = '%s-%d-%d-%d-%d-%d.ctp' %(p, T, N, self.num_of_customers, self.max_nodes_per_route, max_length_type)
-        
-        
-        
     def export_gmctp(self, max_tour_length_type):
         '''
         export generalized m-ctp
@@ -528,12 +523,12 @@ class MCTPProblem(CTPProblem):
                     self.nodes[xs[0]].cover_list.append(i)
                     self.nodes_covering_customer[i].update([xs[0]])
                     
-def GMCTPProblem(CTPProblem):
+class GMCTPProblem(CTPProblem):
     def load_data(self, data_path):
         self.data_path = data_path
         self.name = basename(data_path)
         
-        lines = open(data_path, 'r').readlines()
+        lines = open(data_path, 'r').readlines()[1:]
         
         xs = [x for x in lines[0].split()]
         self.num_of_nodes = int(xs[0])
@@ -587,13 +582,89 @@ def GMCTPProblem(CTPProblem):
         # load customer covering constraint
         self.customer_covering = [int(x) for x in lines[-1].split()]
         
-    def convert_to_ctp(self):
-        ctp = CTPProblem(data_path="", max_tour_length=self.max_tour_length
+    def is_giant_tour_satisfy_covering_constraint(self, giant_tour):
+        
+        # get covering set of all remaining nodes:
+        covering_dict={}
+        
+        for node in giant_tour:
+            # if it is a node in obligatory nodes, then jump to a next node
+            if self.obligatory_nodes.issuperset(set([node])):
+                continue
+        
+            for c in self.nodes[node].cover_list:
+                if covering_dict.has_key(c):
+                    covering_dict[c] += 1
+                else:
+                    covering_dict[c] = 1
+                    
+                
+        if len(covering_dict) != self.num_of_customers:
+            return False
+        else:
+            for c in xrange(self.num_of_customers):
+                if covering_dict[c] < self.customer_covering[c]:
+                    return False
+        
+        return True
+
+    def is_tours_satisfy_covering_constraint(self, tours):
+        
+        giant_tour = self.concat(tours)
+        return self.is_giant_tour_satisfy_covering_constraint(giant_tour)
+    
+        
+    def export_to_file(self):
+        ps = self.name.split('-')
+        p = ps[0]
+        max_length_type = int(ps[-1].split('.')[0])
+        
+        T = len(self.obligatory_nodes)+1
+        N = T + self.num_of_nodes
+                
+        lines = []
+        file_name = '%s-%d-%d-%d-%d-%d.ctp' %(p, T, N, self.num_of_customers, self.max_nodes_per_route, max_length_type)
+        lines.append(self.name + "\n")
+        lines.append('%d %d %d %d %.2f\n' %(self.num_of_nodes, self.num_of_customers, T, self.max_nodes_per_route, self.max_tour_length))
+        
+        # write cost
+        for i in xrange(N-1):
+            for j in xrange(i+1, N):
+#                 print i, j
+                lines.append('%d %d %.2f\n' %(i, j, self.nodes[i].cost_dict[j]))
+                
+        lines.append('\n')
+        # covering
+        for i in xrange(T, N):
+            line = [i] + [0]*self.num_of_customers
+            for c in self.nodes[i].cover_list:
+                line[c+1] = 1
+            line = ' '.join(str(v) for v in line) + "\n"
+            
+            lines.append(line)
+            
+        # covering constraint
+        line = ' '.join([str(v) for v in self.customer_covering])
+        
+        lines.append(line)
+        
+        open(join('data_gmctp_cv', file_name), 'w').writelines(lines)
+         
+
+    def convert_to_gmctp1(self):
+        gmctp = GMCTPProblem(data_path="", max_tour_length=self.max_tour_length
                          , load_data_from_file=False)
+        gmctp.name = self.name
+        gmctp.num_of_customers = self.num_of_customers
+        gmctp.customer_covering = deepcopy(self.customer_covering)
+        gmctp.obligatory_nodes = deepcopy(self.obligatory_nodes)
+        gmctp.max_nodes_per_route = self.max_nodes_per_route
+        gmctp.max_tour_length = self.max_tour_length
+        
         # copy depot
         depot = self.nodes[0].clone()
         depot.cost_dict.clear()
-        ctp.nodes.append(depot)
+        gmctp.nodes.append(depot)
 
         id = 1
         nodes_copy_from_node = [[0]]
@@ -601,24 +672,30 @@ def GMCTPProblem(CTPProblem):
             if self.obligatory_nodes.issuperset(set([i])):
                 node = self.nodes[i].clone()
                 node.id = id
-                ctp.nodes.append(node)
+                gmctp.nodes.append(node)
+                nodes_copy_from_node.append([id])
+
                 id += 1
                 continue
             
             num_of_copies = max([self.customer_covering[c] for c in self.nodes[i].cover_list])
             nodes_copy_from_node.append([])
-            
+
+
             for _ in xrange(num_of_copies):
                 node = self.nodes[i].clone()
                 node.cost_dict.clear()
                 node.id = id
-                ctp.nodes.append(node)
+                gmctp.nodes.append(node)
                 nodes_copy_from_node[i].append(id)
                 
                 id += 1
         
-        ctp.num_of_nodes = len(ctp.nodes)
+        gmctp.num_of_nodes = len(gmctp.nodes)-len(gmctp.obligatory_nodes)-1
         
+        # init    
+        for l in xrange(self.num_of_customers):
+            gmctp.nodes_covering_customer[l]=set()
         # cost matrix and cover list and nodes covering a customer
         n = self.num_of_nodes + len(self.obligatory_nodes)+1
         for i in xrange(n):
@@ -628,7 +705,7 @@ def GMCTPProblem(CTPProblem):
             for t in copy_nodes_i:
                 for k in copy_nodes_i:
                     if t != k:
-                        ctp.nodes[t].cost_dict[k] = 0
+                        gmctp.nodes[t].cost_dict[k] = 0
             
             # cost from each copies with other copy from other nodes
             for j in xrange(n):
@@ -641,12 +718,12 @@ def GMCTPProblem(CTPProblem):
                 for copy_node_i in copy_nodes_i:
                     # cost
                     for copy_node_j in copy_nodes_j:
-                        ctp.nodes[copy_node_i].cost_dict[copy_node_j] = cost
+                        gmctp.nodes[copy_node_i].cost_dict[copy_node_j] = cost
                     # nodes covering a customer
-                    for c in ctp.nodes[copy_node_i].cover_list:
-                        ctp.nodes_covering_customer[c].update([copy_node_i])
-        return ctp    
-
+                    for c in gmctp.nodes[copy_node_i].cover_list:
+                        gmctp.nodes_covering_customer[c].update([copy_node_i])
+        
+        gmctp.export_to_file()
             
 if __name__ == '__main__':
     data_path = '/home/pta/projects/ctp/data_ctp/kroA-13-12-75-1.ctp'
