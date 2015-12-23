@@ -4,9 +4,11 @@
 #$ -j y
 #$ -S /bin/bash
 #$ -pe orte 8
-#$ -o program.out
-#$ -e program.err
+#$ -o mctp.out
+#$ -e mctp.err
 
-python mctp.py
+#$ -t 1-72
 
-/home/pta/git/ctp/run $@
+python run_vast.py mctp input.$SGE_TASK_ID output.$SGE_TASK_ID
+
+

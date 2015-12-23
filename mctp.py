@@ -612,7 +612,11 @@ import glob, os, datetime
 if __name__ == "__main__":
     # load problem
     folder = 'A'
+<<<<<<< HEAD
     data_dir = 'data_gmctp/' # + folder + '/'
+=======
+    data_dir = '/home/hanu.nxhoai/pta/ctp/data_mctp/' # + folder + '/'
+>>>>>>> 58b4baaeff0210eaf0cbb18bc360c819b951ed80
     print data_dir
 #     Jobs = 10
     
@@ -629,8 +633,8 @@ if __name__ == "__main__":
 #             os.path.join(data_dir, 'A2-20-100-100-4.ctp'),
 #             os.path.join(data_dir, 'A2-20-100-100-5.ctp'),
 
-            os.path.join(data_dir, 'A2-10-50-150-4-250.ctp'),
-#             os.path.join(data_dir, 'A2-1-50-150-5-500.ctp'),
+#            os.path.join(data_dir, 'A2-10-50-150-4-250.ctp'),
+            os.path.join(data_dir, 'A2-1-50-150-4-250.ctp'),
 #             os.path.join(data_dir, 'B2-1-50-150-5-250.ctp'),
 #             os.path.join(data_dir, 'B2-1-50-150-5-500.ctp'),
             
