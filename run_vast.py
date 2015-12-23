@@ -16,9 +16,10 @@ def run_mctp(input_file, output_file):
     file = join('/home/hanu.nxhoai/pta/ctp/mctp_vast_input', input_file)
     problem = MCTPProblem(data_path=file, max_tour_length=250)
         
-    problem.max_nodes_per_route = 1000
+#    problem.max_nodes_per_route = 1000
+#    problem.max_tour_length=MAX_VALUE
         
-    print problem.max_tour_length
+#    print problem.max_tour_length
 
     best_solution = None
     best_cost = MAX_VALUE
