@@ -11,9 +11,11 @@ from mctp import GA_MCTP
 from copy import deepcopy
 import sys
 
+data_dir = '/home/hanu.nxhoai/pta/ctp'
+
 def run_mctp(input_file, output_file):
     time1 = datetime.datetime.now()
-    file = join('/home/pta/git/ctp/data_mctp_vast', input_file)
+    file = join(data_dir, 'data_mctp_vast', input_file)
     problem = MCTPProblem(data_path=file)
         
 #    problem.max_nodes_per_route = 1000
@@ -57,7 +59,7 @@ def run_mctp(input_file, output_file):
     
 def run_mctp1(input_file, output_file):
     time1 = datetime.datetime.now()
-    file = join('/home/pta/git/ctp/data_mctp1_vast', input_file)
+    file = join(data_dir, 'data_mctp1_vast', input_file)
     problem = MCTPProblem(data_path=file)
         
 #    problem.max_nodes_per_route = 1000
@@ -101,7 +103,7 @@ def run_mctp1(input_file, output_file):
 
 def run_mctp2(input_file, output_file):
     time1 = datetime.datetime.now()
-    file = join('/home/pta/git/ctp/data_mctp2_vast', input_file)
+    file = join(data_dir, 'data_mctp2_vast', input_file)
     problem = MCTPProblem(data_path=file)
         
 #    problem.max_nodes_per_route = 1000

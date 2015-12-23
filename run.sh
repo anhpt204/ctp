@@ -7,8 +7,8 @@
 #$ -o mctp.out
 #$ -e mctp.err
 
-#$ -t 1-72
+#$ -t 1-48
 
-python run_vast.py mctp input.$SGE_TASK_ID output.$SGE_TASK_ID
+python run_vast.py mctp1 input.$SGE_TASK_ID output.$SGE_TASK_ID
 
 
