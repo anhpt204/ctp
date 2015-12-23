@@ -1,0 +1,6 @@
+data_ctp: dữ liệu gốc của Hoàng 
+data_mctp1: dữ liệu cho bài mctp với ràng buộc về độ dài route, bỏ qua ràng buộc về số nodes mỗi route 
+data_mctp2: dữ liệu cho bài mctp với ràng buộc số nodes mỗi route, bỏ qua ràng buộc độ dài route 
+data_mctp: dữ liệu mctp với đủ 2 ràng buộc về độ dài vào số nodes mỗi route 
+
+<data_name>_vast: đổi tên file từ <data_name> để chạy trên vast 

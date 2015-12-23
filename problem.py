@@ -435,13 +435,14 @@ class CTPProblem():
         f.write(str(cost))
         f.close()
         
-    def export_gmctp(self, max_tour_length_type):
+    def export_gmctp(self):
         '''
         export generalized m-ctp
         '''
         # make new file name
-        t = self.name.split('.')[0]
-        file_name = "%s-%d.ctp" %(t, max_tour_length_type)
+#         t = self.name.split('.')[0]
+#         file_name = "%s-%d.ctp" %(t, max_tour_length_type)
+        file_name = self.name
         
         # generate covering constraint
         # how many nodes cover each customer
@@ -465,7 +466,7 @@ class CTPProblem():
                             self.max_tour_length)
         lines.append(' '.join(str(v) for v in node_cover))
         
-        open(join('data_gmctp', file_name), 'w').writelines(lines)
+        open(join('data_gmctp2', file_name), 'w').writelines(lines)
         
             
 class MCTPProblem(CTPProblem):
@@ -623,7 +624,7 @@ class GMCTPProblem(CTPProblem):
         N = T + self.num_of_nodes
                 
         lines = []
-        file_name = '%s-%d-%d-%d-%d-%d.ctp' %(p, T, N, self.num_of_customers, self.max_nodes_per_route, max_length_type)
+        file_name = '%s-%d-%d-%d-%d.ctp' %(p, T, N, self.num_of_customers, self.max_nodes_per_route)
         lines.append(self.name + "\n")
         lines.append('%d %d %d %d %.2f\n' %(self.num_of_nodes, self.num_of_customers, T, self.max_nodes_per_route, self.max_tour_length))
         
@@ -648,7 +649,7 @@ class GMCTPProblem(CTPProblem):
         
         lines.append(line)
         
-        open(join('data_gmctp_cv', file_name), 'w').writelines(lines)
+        open(join('data_gmctp_cv_full', file_name), 'w').writelines(lines)
          
 
     def convert_to_gmctp1(self):

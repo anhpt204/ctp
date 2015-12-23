@@ -611,16 +611,10 @@ class GA_MCTP:
 import glob, os, datetime
 if __name__ == "__main__":
     # load problem
-    folder = 'A'
-<<<<<<< HEAD
-    data_dir = 'data_gmctp/' # + folder + '/'
-=======
-    data_dir = '/home/hanu.nxhoai/pta/ctp/data_mctp/' # + folder + '/'
->>>>>>> 58b4baaeff0210eaf0cbb18bc360c819b951ed80
+    data_dir = 'data_gmctp2/' # + folder + '/'
     print data_dir
 #     Jobs = 10
     
-    files = glob.glob(data_dir + '*.ctp')
     lines = []
     
     files = [
@@ -655,10 +649,15 @@ if __name__ == "__main__":
         file_name = os.path.basename(file)
         print file_name, 
         
-        problem = GMCTPProblem(data_path=file, max_tour_length=250)
-        
+        # convert gmctp visit moi node nhieu lan sang visit moi node 1 lan
+        problem = GMCTPProblem(data_path=file)        
         problem.convert_to_gmctp1()
         
+        # generate gmctp problem
+#         problem = CTPProblem(data_path=file)
+#         problem.export_gmctp()
+        
+        # export gmctp voi rang buoc do dai moi route
 #         n = problem.num_of_nodes + len(problem.obligatory_nodes) + 1
 #         
 #         cost_from_depot = [problem.nodes[0].cost_dict[node] for node in range(1, n)]

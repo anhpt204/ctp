@@ -9,6 +9,9 @@ from math import sqrt
 import operator
 import random
 from copy import deepcopy
+from os.path import join, basename
+import glob
+from problem import CTPProblem, GMCTPProblem
 
 # random.seed(1000)
 
@@ -218,11 +221,71 @@ def gen_ctp_data_generalized(conf, data_file):
 #                 out.writelines(new_lines)
 #                 out.close()
     
+def gen_ctp_max_node_per_route():
+    data_files = glob.glob(join('data_gmctp_cv_full', '*.ctp'))
+    dir_out = 'data_gmctp2'
+    max_nodes = [4,5,6,8]
+    for file in data_files:
+        lines = open(file).readlines()
+        vs = lines[1].split()
+        
+        for max_node in max_nodes:
+            ns = basename(file).split('-')
+            ns[-1] = str(max_node) + '.ctp'
+            file_name = '-'.join(ns)
+            vs[3] = str(max_node)
+            lines[1] = ' '.join(vs)
+            
+            open(join(dir_out, file_name), 'w').writelines(lines)
+            
+def gen_ctp_full_constraints():
+    '''
+    max node per route and max tour length
+    '''
+    data_files = glob.glob(join('data_gmctp_cv_full', '*.ctp'))
+    dir_out = 'data_gmctp'
+    max_nodes = [4,5,6,8]
+    tour_length_types = [250, 500]
+    
+    for file in data_files:
+        print file
+#         file = 'data_gmctp_cv_full/A1-1-145-50-4.ctp'
+        problem = GMCTPProblem(data_path=file)
+        
+        lines = open(file).readlines()
+        vs = lines[1].split()        
+        for max_node in max_nodes:
+            ns = basename(file).split('-')
+            ns[-1] = str(max_node)
+            ns.append('')
+            for tour_length_type in tour_length_types:
+                ns[-1] = str(tour_length_type) + ".ctp"
+                file_name = '-'.join(ns)
+                
+                vs[3] = str(max_node)
+                
+                n = problem.num_of_nodes + len(problem.obligatory_nodes) + 1
+                cost_from_depot = [problem.nodes[0].cost_dict[node] for node in range(1, n)]
+                max_cost_from_depot = max(cost_from_depot)#          
+                
+                max_tour_length = 2*max_cost_from_depot + tour_length_type        
+                
+                vs.insert(4, str(max_tour_length))
+                del vs[5:]
+                lines[1] = ' '.join(vs) + "\n"
+            
+                open(join(dir_out, file_name), 'w').writelines(lines)
+            
+
 if __name__ == '__main__':
     
-#     for job in (1,2,3,4,5):
-#         gen_ctp_data_generalized(job)
-    data_file='/home/pta/git/ctp/tsplib/kroD100.tsp'
-    conf=((50,50), (25,75))
-    gen_ctp_data_generalized(conf, data_file)
+#     gen_ctp_max_node_per_route()
+
+    gen_ctp_full_constraints()
+    
+# #     for job in (1,2,3,4,5):
+# #         gen_ctp_data_generalized(job)
+#     data_file='/home/pta/git/ctp/tsplib/kroD100.tsp'
+#     conf=((50,50), (25,75))
+#     gen_ctp_data_generalized(conf, data_file)
     print 'DONE'
