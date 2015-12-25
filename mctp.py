@@ -342,7 +342,7 @@ class GA_MCTP:
 #         tools.cxPartialyMatched(ind1, ind2)
 #         self.toolbox.register("ls", mutLSVRP, problem=problem)
         self.toolbox.register("mutateLSPrins", mutLSPrins, problem=self.problem, max_trails=MAX_TRAILS)
-        self.toolbox.register("mutate", mutShaking, problem=self.problem, k=3)
+        self.toolbox.register("mutate", mutShaking, problem=self.problem, k=2)
         self.toolbox.register("select", tools.selTournament, tournsize=3)
         self.toolbox.register("evaluate", self.eval)
         
@@ -583,8 +583,16 @@ class GA_MCTP:
     def run(self):
     
 #         POPSIZE= 200 #len(self.lines)/2
+        popsize = 50
+        ngen = 20
+        T = len(self.problem.obligatory_nodes)+1
         
-        pop = self.toolbox.population(n=POPSIZE)
+        if T == 10:
+            ngen = 50
+        elif T == 20:
+            ngen = 100
+            
+        pop = self.toolbox.population(n=popsize)
     
         hof = tools.HallOfFame(2)
         stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -598,7 +606,7 @@ class GA_MCTP:
         
         best_cost, best_tours = self.evolve(population=pop, 
                toolbox=self.toolbox, cxpb=PCROSS, mutpb=PMUTATION, 
-               ngen=NUM_GEN, stats=stats, halloffame=hof, verbose=VERBOSE)
+               ngen=ngen, stats=stats, halloffame=hof, verbose=VERBOSE)
         
 #         print 'run ', job, ': ', hof[0].fitness.values[0], ': ', problem.best_cost, ': ', problem.n_same_giant_tour
         print 'run %d: %.2f %d %d' %(self.job, best_cost, self.num_sharking_redundant_nodes, self.num_of_sharking)

@@ -46,7 +46,7 @@ def LSPrins(problem, giant_tour, tours, cost):
     A Simple and Effective Evolutionary Algorithm for the Vehicle Routing Problem, Prins, 2001
     '''
 #     move_operators = [move1, move2, move3, move4, move5, move6, move7, move8, move9]
-    move_operators=random.sample([move1, move4, move8, move9],4)
+    move_operators=[move1, move4, move8, move9]
     
     tours_len = len(tours)
     best_cost = cost
@@ -517,11 +517,7 @@ class GA_GT:
                 self.sharking=True
                 offspring[i] = self.repair_ind(offspring[i])
                 self.sharking=False
-                
-                
-        
-        
-            
+                            
         return offspring
             
         
@@ -662,7 +658,7 @@ import glob, os, datetime
 if __name__ == "__main__":
     # load problem
     folder = 'A'
-    data_dir = 'data_ctp/' # + folder + '/'
+    data_dir = 'data_mctp2/' # + folder + '/'
     print data_dir
 #     Jobs = 10
     
@@ -671,19 +667,19 @@ if __name__ == "__main__":
     
     files = [
              
-#             os.path.join(data_dir, 'A1-1-25-75-4.ctp'),
+            os.path.join(data_dir, 'A1-10-50-50-4.ctp'),
 #             os.path.join(data_dir, 'A1-1-25-75-5.ctp'),
 #             os.path.join(data_dir, 'A1-1-25-75-6.ctp'),
 #             os.path.join(data_dir, 'D1-10-50-50-6.ctp'),
 #  
-             os.path.join(data_dir, 'A2-20-100-100-4.ctp'),
-             os.path.join(data_dir, 'A2-20-100-100-5.ctp'),
-             os.path.join(data_dir, 'A2-20-100-100-6.ctp'),
-            os.path.join(data_dir, 'A2-20-100-100-8.ctp'),
-             os.path.join(data_dir, 'B2-20-100-100-4.ctp'),
-             os.path.join(data_dir, 'B2-20-100-100-5.ctp'),
-             os.path.join(data_dir, 'B2-20-100-100-6.ctp'),
-             os.path.join(data_dir, 'B2-20-100-100-8.ctp'),
+#              os.path.join(data_dir, 'A2-20-100-100-4.ctp'),
+#              os.path.join(data_dir, 'A2-20-100-100-5.ctp'),
+#              os.path.join(data_dir, 'A2-20-100-100-6.ctp'),
+#             os.path.join(data_dir, 'A2-20-100-100-8.ctp'),
+#              os.path.join(data_dir, 'B2-20-100-100-4.ctp'),
+#              os.path.join(data_dir, 'B2-20-100-100-5.ctp'),
+#              os.path.join(data_dir, 'B2-20-100-100-6.ctp'),
+#              os.path.join(data_dir, 'B2-20-100-100-8.ctp'),
             ]
 #     files = [os.path.join(data_dir, 'A-50-50-6.ctp')]
     moves_freq = {}
