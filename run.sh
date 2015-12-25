@@ -3,9 +3,9 @@
 #$ -cwd
 #$ -j y
 #$ -S /bin/bash
-#$ -pe orte 8
-#$ -o mctp.out
-#$ -e mctp.err
+#$ -pe orte 48
+#$ -o mctp1.out
+#$ -e mctp1.err
 
 #$ -t 1-48
 

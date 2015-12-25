@@ -11,20 +11,20 @@ from mctp import GA_MCTP
 from copy import deepcopy
 import sys
 
-# data_dir = '/home/hanu.nxhoai/pta/ctp'
-data_dir = '/home/anhpt4/git/ctp'
+data_dir = '/home/hanu.nxhoai/pta/ctp'
+#data_dir = '/home/anhpt4/git/ctp'
 
-# data_mctp = 'data_mctp_vast'
-# data_mctp1 = 'data_mctp1_vast'
-# data_mctp2 = 'data_mctp2_vast'
+data_mctp = 'data_mctp_vast'
+data_mctp1 = 'data_mctp1_vast'
+data_mctp2 = 'data_mctp2_vast'
 
 # data_gmctp = 'data_gmctp_vast'
 # data_gmctp1 = 'data_gmctp1_vast'
 # data_gmctp2 = 'data_gmctp2_vast'
 
-data_mctp = 'data_mctp'
-data_mctp1 = 'data_mctp1'
-data_mctp2 = 'data_mctp2'
+#data_mctp = 'data_mctp'
+#data_mctp1 = 'data_mctp1'
+#data_mctp2 = 'data_mctp2'
 
 data_gmctp = 'data_gmctp'
 data_gmctp1 = 'data_gmctp1'
