@@ -79,7 +79,7 @@ def run_mctp1(input_file, output_file):
     file = join(data_dir, data_mctp1, input_file)
     problem = MCTPProblem(data_path=file)
         
-#    problem.max_nodes_per_route = 1000
+    problem.max_nodes_per_route = 1000
 #    problem.max_tour_length=MAX_VALUE
         
 #    print problem.max_tour_length
