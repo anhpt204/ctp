@@ -95,10 +95,12 @@ def LSPrins(problem, giant_tour, tours, cost):
     
     if improvement:
         giant_tour = problem.concat(best_tours)
+
+    return giant_tour, best_tours, best_cost
     
-    new_tours, new_cost = LS4(problem, giant_tour, best_tours, best_cost)
+#    new_tours, new_cost = LS4(problem, giant_tour, best_tours, best_cost)
         
-    return problem.concat(new_tours), new_tours, new_cost
+#    return problem.concat(new_tours), new_tours, new_cost
 
 
 class GA_GT:
