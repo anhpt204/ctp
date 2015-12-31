@@ -34,7 +34,7 @@ from crossovers import PMX, vrpPMX, scpOnePointCX
 from genetic import varAndLS, varAndVRP, varAndSCP
 from mutations import *
 from datetime import timedelta
-import gcsp
+# import gcsp
 # from ga_vrp import GA_VRP
 from hoang import ELS
 from copy import deepcopy

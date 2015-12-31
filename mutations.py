@@ -200,6 +200,17 @@ def mutShaking(individual, problem, k):
         
     return individual
 
+def new_mutation(individual, problem, remove_prob):
+    '''
+    remove k node
+    '''
+    #k = random.randint(2,4)
+    for node in individual:
+        if random.random() < remove_prob:
+            individual.remove(node)
+                    
+    return individual
+
 def mutLSPrins(individual, problem, max_trails=12):
     
     giant_tour = [node for node in individual]
