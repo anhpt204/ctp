@@ -336,13 +336,13 @@ class GA_MCTP:
         # Structure initializers
         self.toolbox.register("individual", tools.initIterate, creator.Individual, self.toolbox.indices)
         self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
-        self.toolbox.register("mate", tools.cxUniform, indpb=INDPB)
-#         self.toolbox.register('mate', tools.cxTwoPoint)
+#         self.toolbox.register("mate", tools.cxUniform, indpb=INDPB)
+        self.toolbox.register('mate', tools.cxTwoPoint)
 #         tools.cxPartialyMatched(ind1, ind2)
 #         self.toolbox.register("ls", mutLSVRP, problem=problem)
         self.toolbox.register("mutateLSPrins", mutLSPrins, problem=self.problem, max_trails=MAX_TRAILS)
-#         self.toolbox.register("mutate", mutShaking, problem=self.problem, k=2)
-        self.toolbox.register("mutate", new_mutation, problem=self.problem, remove_prob=REMOVE_PROB)        
+        self.toolbox.register("mutate", mutShaking, problem=self.problem, k=3)
+#         self.toolbox.register("mutate", new_mutation, problem=self.problem, remove_prob=REMOVE_PROB)        
         self.toolbox.register("select", tools.selTournament, tournsize=3)
         self.toolbox.register("evaluate", self.eval)
         
@@ -439,12 +439,13 @@ class GA_MCTP:
         
     def varAndPTA(self, population):
         self.sharking=False
+
+        for i in range(len(population)):
+            if random.random() < PLSPRINS:
+                population[i] = self.toolbox.mutateLSPrins(population[i])
         
         offspring = [self.toolbox.clone(ind) for ind in population]
         
-        for i in range(len(offspring)):
-            if random.random() < PLSPRINS:
-                offspring[i] = self.toolbox.mutateLSPrins(offspring[i])
                 
         # Apply crossover and mutation on the offspring
         for i in range(1, len(offspring), 2):
@@ -584,13 +585,14 @@ class GA_MCTP:
     
 #         POPSIZE= 200 #len(self.lines)/2
         popsize = 50
-        ngen = 20
-        T = len(self.problem.obligatory_nodes)+1
-        
-        if T == 10:
-            ngen = 50
-        elif T == 20:
-            ngen = 100
+        ngen = NUM_GEN
+#         ngen = 20
+#         T = len(self.problem.obligatory_nodes)+1
+#         
+#         if T == 10:
+#             ngen = 50
+#         elif T == 20:
+#             ngen = 100
             
         pop = self.toolbox.population(n=popsize)
     

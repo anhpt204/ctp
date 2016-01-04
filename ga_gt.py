@@ -96,11 +96,11 @@ def LSPrins(problem, giant_tour, tours, cost):
     if improvement:
         giant_tour = problem.concat(best_tours)
 
-    return giant_tour, best_tours, best_cost
+#     return giant_tour, best_tours, best_cost
     
-#    new_tours, new_cost = LS4(problem, giant_tour, best_tours, best_cost)
+    new_tours, new_cost = LS4(problem, giant_tour, best_tours, best_cost)
         
-#    return problem.concat(new_tours), new_tours, new_cost
+    return problem.concat(new_tours), new_tours, new_cost
 
 
 class GA_GT:
@@ -360,7 +360,8 @@ class GA_GT:
             index = random.randint(0, len(ind)-1)
             ind.insert(index, i+1)
             
-        return self.LS_initialInd(ind)
+        return ind 
+#         return self.LS_initialInd(ind)
         
     
     def init_mip(self):
@@ -391,12 +392,13 @@ class GA_GT:
         # Structure initializers
         self.toolbox.register("individual", tools.initIterate, creator.Individual, self.toolbox.indices)
         self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
-        self.toolbox.register("mate", tools.cxUniform, indpb=0.03)
+#         self.toolbox.register("mate", tools.cxUniform, indpb=0.03)
+        self.toolbox.register("mate", tools.cxTwoPoint)
 #         tools.cxPartialyMatched(ind1, ind2)
 #         self.toolbox.register("ls", mutLSVRP, problem=problem)
         self.toolbox.register("mutateLSPrins", mutLSPrins, problem=self.problem, max_trails=MAX_TRAILS)
         self.toolbox.register("mutate", mutShaking, problem=self.problem, k=3)
-        self.toolbox.register("select", tools.selTournament, tournsize=7)
+        self.toolbox.register("select", tools.selTournament, tournsize=3)
         self.toolbox.register("evaluate", self.eval)
         
 #         mip_data_dir = 'SubSet'
@@ -493,11 +495,13 @@ class GA_GT:
     def varAndPTA(self, population):
         self.sharking=False
         
+        for i in range(len(population)):
+            if random.random() < PLSPRINS:
+                population[i] = self.toolbox.mutateLSPrins(population[i])
+        
         offspring = [self.toolbox.clone(ind) for ind in population]
         
-        for i in range(len(offspring)):
-            if random.random() < PLSPRINS:
-                offspring[i] = self.toolbox.mutateLSPrins(offspring[i])
+        
                 
         # Apply crossover and mutation on the offspring
         for i in range(1, len(offspring), 2):
