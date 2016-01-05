@@ -585,14 +585,14 @@ class GA_MCTP:
     
 #         POPSIZE= 200 #len(self.lines)/2
         popsize = 50
-        ngen = NUM_GEN
-#         ngen = 20
-#         T = len(self.problem.obligatory_nodes)+1
-#         
-#         if T == 10:
-#             ngen = 50
-#         elif T == 20:
-#             ngen = 100
+#        ngen = NUM_GEN
+        ngen = 20
+        T = len(self.problem.obligatory_nodes)+1
+        
+        if T == 10:
+            ngen = 50
+        elif T == 20:
+            ngen = 100
             
         pop = self.toolbox.population(n=popsize)
     
