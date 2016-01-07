@@ -664,7 +664,7 @@ import glob, os, datetime
 if __name__ == "__main__":
     # load problem
     folder = 'A'
-    data_dir = 'data_mctp2/' # + folder + '/'
+    data_dir = 'data_test/' # + folder + '/'
     print data_dir
 #     Jobs = 10
     
@@ -673,12 +673,12 @@ if __name__ == "__main__":
     
     files = [
              
-            os.path.join(data_dir, 'A1-10-50-50-4.ctp'),
+#             os.path.join(data_dir, 'A1-10-50-50-4.ctp'),
 #             os.path.join(data_dir, 'A1-1-25-75-5.ctp'),
 #             os.path.join(data_dir, 'A1-1-25-75-6.ctp'),
 #             os.path.join(data_dir, 'D1-10-50-50-6.ctp'),
 #  
-#              os.path.join(data_dir, 'A2-20-100-100-4.ctp'),
+            os.path.join(data_dir, 'A2-20-100-100-4.ctp'),
 #              os.path.join(data_dir, 'A2-20-100-100-5.ctp'),
 #              os.path.join(data_dir, 'A2-20-100-100-6.ctp'),
 #             os.path.join(data_dir, 'A2-20-100-100-8.ctp'),

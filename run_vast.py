@@ -10,22 +10,21 @@ from setting import *
 from mctp import GA_MCTP
 from copy import deepcopy
 import sys
-import glob
 
-# data_dir = '/home/hanu.nxhoai/pta/ctp'
-data_dir = '/home/pta/git/ctp'
+data_dir = '/home/hanu.nxhoai/pta/ctp'
+#data_dir = '/home/anhpt4/git/ctp'
 
-# data_mctp = 'data_mctp_vast'
-# data_mctp1 = 'data_mctp1_vast'
-# data_mctp2 = 'data_mctp2_vast'
+data_mctp = 'data_mctp_vast'
+data_mctp1 = 'data_mctp1_vast'
+data_mctp2 = 'data_mctp2_vast'
 
 # data_gmctp = 'data_gmctp_vast'
 # data_gmctp1 = 'data_gmctp1_vast'
 # data_gmctp2 = 'data_gmctp2_vast'
 
-data_mctp = 'data_mctp'
-data_mctp1 = 'data_mctp1'
-data_mctp2 = 'data_mctp2'
+#data_mctp = 'data_mctp'
+#data_mctp1 = 'data_mctp1'
+#data_mctp2 = 'data_mctp2'
 
 data_gmctp = 'data_gmctp'
 data_gmctp1 = 'data_gmctp1'
@@ -301,20 +300,17 @@ if __name__ == '__main__':
 #     run_gmctp('input.108', 'output.108')
     
 #     run_mctp2('A1-1-25-75-4.ctp', 'A1-1-25-75-4.out')
-    files = glob.glob1('data_test', '*.ctp')
-    for file in files:
-        run_mctp2(file, file + '.out')
 
-#     if sys.argv[1] == 'mctp':
-#         run_mctp(sys.argv[2], sys.argv[3])
-#     elif sys.argv[1] == 'mctp1':
-#         run_mctp1(sys.argv[2], sys.argv[3])
-#     elif sys.argv[1] == 'mctp2':
-#         run_mctp2(sys.argv[2], sys.argv[3])
-#     elif sys.argv[1] == 'gmctp':
-#         run_gmctp(sys.argv[2], sys.argv[3])
-#     elif sys.argv[1] == 'gmctp1':
-#         run_gmctp1(sys.argv[2], sys.argv[3])
-#     elif sys.argv[1] == 'gmctp2':
-#         run_gmctp2(sys.argv[2], sys.argv[3])
+    if sys.argv[1] == 'mctp':
+        run_mctp(sys.argv[2], sys.argv[3])
+    elif sys.argv[1] == 'mctp1':
+        run_mctp1(sys.argv[2], sys.argv[3])
+    elif sys.argv[1] == 'mctp2':
+        run_mctp2(sys.argv[2], sys.argv[3])
+    elif sys.argv[1] == 'gmctp':
+        run_gmctp(sys.argv[2], sys.argv[3])
+    elif sys.argv[1] == 'gmctp1':
+        run_gmctp1(sys.argv[2], sys.argv[3])
+    elif sys.argv[1] == 'gmctp2':
+        run_gmctp2(sys.argv[2], sys.argv[3])
         

@@ -502,7 +502,7 @@ class GA_MCTP:
         if verbose:
             print logbook.stream
         
-        num_gen_no_impove = 0
+        num_gen_no_improve = 0
         # Begin the generational process
         for gen in range(1, ngen+1):
             current_gen = gen
@@ -530,18 +530,18 @@ class GA_MCTP:
             # Update the hall of fame with the generated individuals
             if halloffame is not None:
                 old_best_fitness = halloffame[0].fitness.values[0]
-                
+
                 halloffame.update(population)
                 
                 new_best_fitness = halloffame[0].fitness.values[0]
-                if new_best_fitness == old_best_fitness:
-                    num_gen_no_impove += 1
+            
+                if old_best_fitness == new_best_fitness:
+                    num_gen_no_improve += 1
                 else:
-                    num_gen_no_impove = 0
-                
-            if num_gen_no_impove == MAX_GEN_NO_IMPROVE:
-                break    
-#               
+                    num_gen_no_improve = 0
+                    
+            if num_gen_no_improve == MAX_NUM_GEN_NO_IMPROVE:
+                break
 
             # Append the current generation statistics to the logbook
             record = stats.compile(population) if stats else {}
@@ -551,13 +551,12 @@ class GA_MCTP:
             if verbose:
                 print logbook.stream        
     
-                
 #         return best_cost, best_tours
         return halloffame[0].fitness.values[0], halloffame[0].tours
     
     
     def run(self):
-    
+        print self.problem.name
 #         POPSIZE= 200 #len(self.lines)/2
         popsize = 50
         ngen = NUM_GEN
