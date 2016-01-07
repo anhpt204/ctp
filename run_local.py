@@ -300,7 +300,7 @@ if __name__ == '__main__':
 #     run_gmctp('input.108', 'output.108')
     
 #     run_mctp2('A1-1-25-75-4.ctp', 'A1-1-25-75-4.out')
-    run_mctp2('A1-10-50-50-4.ctp', 'test.out')
+    run_mctp2('A2-20-100-100-4.ctp', 'test.out')
 
 #     if sys.argv[1] == 'mctp':
 #         run_mctp(sys.argv[2], sys.argv[3])

@@ -502,7 +502,7 @@ class GA_MCTP:
         if verbose:
             print logbook.stream
         
-        
+        num_gen_no_impove = 0
         # Begin the generational process
         for gen in range(1, ngen+1):
             current_gen = gen
@@ -529,34 +529,19 @@ class GA_MCTP:
             
             # Update the hall of fame with the generated individuals
             if halloffame is not None:
+                old_best_fitness = halloffame[0].fitness.values[0]
+                
                 halloffame.update(population)
-            
-#             print halloffame[0].tours
-    #         t = 0
-            
-#             for t in xrange(len(halloffame)):
-#                 # apply ELS for the best individual
-#                 new_ind = deepcopy(halloffame[t])
-#                 giant_tour = [node for node in new_ind]
-#                 new_giant_tour, new_tours, new_cost = LSPrins(self.problem, giant_tour, new_ind.tours, new_ind.fitness.values[0])
-#                                      
-#                 if new_cost < best_cost:
-#                     best_cost = new_cost
-#                     best_tours = new_tours
-#                     best_giant_tour = new_giant_tour
-#                     
-#                 if new_cost < new_ind.fitness.values[0]:
-#                     del new_ind[:]
-#                     for node in new_giant_tour:
-#                         new_ind.append(node)
-#                     new_ind.fitness.values = new_cost,
-#                     new_ind.tours = new_tours
-#                   
-# #                 halloffame[t] = new_ind
-#                 idx = random.randint(0, len(population)-1)
-#                 population[idx] = new_ind
+                
+                new_best_fitness = halloffame[0].fitness.values[0]
+                if new_best_fitness == old_best_fitness:
+                    num_gen_no_impove += 1
+                else:
+                    num_gen_no_impove = 0
+                
+            if num_gen_no_impove == MAX_GEN_NO_IMPROVE:
+                break    
 #               
-#             halloffame.update(population)
 
             # Append the current generation statistics to the logbook
             record = stats.compile(population) if stats else {}
@@ -566,16 +551,6 @@ class GA_MCTP:
             if verbose:
                 print logbook.stream        
     
-#             print halloffame[0].tours
-#         print 'best cost before ELS: ', best_cost
-#         print 'run ELS...'
-#         for ind in halloffame:
-#             giant_tour=[node for node in ind]
-#             giant_tour, tours,  cost = ELS(self.problem, giant_tour, ind.tours, ind.fitness.values[0])
-#             if cost < best_cost:
-#                 best_cost = cost
-#                 best_giant_tour = giant_tour
-#                 best_tours = tours
                 
 #         return best_cost, best_tours
         return halloffame[0].fitness.values[0], halloffame[0].tours
@@ -585,14 +560,14 @@ class GA_MCTP:
     
 #         POPSIZE= 200 #len(self.lines)/2
         popsize = 50
-#        ngen = NUM_GEN
-        ngen = 20
-        T = len(self.problem.obligatory_nodes)+1
-        
-        if T == 10:
-            ngen = 50
-        elif T == 20:
-            ngen = 100
+        ngen = NUM_GEN
+#         ngen = 20
+#         T = len(self.problem.obligatory_nodes)+1
+#         
+#         if T == 10:
+#             ngen = 50
+#         elif T == 20:
+#             ngen = 100
             
         pop = self.toolbox.population(n=popsize)
     
