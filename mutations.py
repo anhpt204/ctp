@@ -187,7 +187,7 @@ def mutShaking(individual, problem, k):
     '''
     remove k node
     '''
-    #k = random.randint(2,4)
+#     k = random.randint(2,4)
     candidate_removed_nodes = [node for node in individual if not problem.obligatory_nodes.issuperset(set([node]))]
     
     if k > len(candidate_removed_nodes):
@@ -216,9 +216,7 @@ def mutLSPrins(individual, problem, max_trails=12):
     giant_tour = [node for node in individual]
     
     if not individual.fitness.valid:
-        cost, backtrack = problem.split(giant_tour)
-        individual.fitness.values = cost,
-        individual.tours = problem.extract_tours(giant_tour, backtrack)
+        return individual
     
     old_cost = individual.fitness.values[0]
     

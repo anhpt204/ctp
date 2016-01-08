@@ -34,9 +34,8 @@ from crossovers import PMX, vrpPMX, scpOnePointCX
 from genetic import varAndLS, varAndVRP, varAndSCP
 from mutations import *
 from datetime import timedelta
-# import gcsp
 # from ga_vrp import GA_VRP
-from hoang import ELS
+# from hoang import ELS
 from copy import deepcopy
 from ls_moves import *
 from ls import LS4
@@ -67,8 +66,7 @@ def LSPrins(problem, giant_tour, tours, cost):
                         move_success, temp_tours = move(tours, tour_i, tour_j, i, j, u, v, x, y)
                         
                         
-                        if move_success and problem.isFeasibleSolution(temp_tours)\
-                            and problem.isSatisfyTourLength(temp_tours):
+                        if move_success and problem.isFeasibleSolution(temp_tours):
 #                             print tour_i, tour_j, i, j, temp_tours
                             cost = problem.get_solution_cost(temp_tours)
                             # if improvement
@@ -95,8 +93,6 @@ def LSPrins(problem, giant_tour, tours, cost):
     
     if improvement:
         giant_tour = problem.concat(best_tours)
-
-#     return giant_tour, best_tours, best_cost
     
     new_tours, new_cost = LS4(problem, giant_tour, best_tours, best_cost)
         
@@ -117,14 +113,17 @@ class GA_GT:
         random.seed(1000+job)
 
         self.toolbox = base.Toolbox()
-        creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-        creator.create("Individual", array.array, typecode='i', fitness=creator.FitnessMin, tours=list)
+        creator.create("FitnessMin1", base.Fitness, weights=(-1.0,))
+        creator.create("Individual", array.array, typecode='i', fitness=creator.FitnessMin1, tours=list)
         
         current_gen = 0
         self.problem = problem
         
+        self.POPSIZE=50
+        self.NUMGEN=100
         self.INDSIZE = self.problem.num_of_nodes + len(self.problem.obligatory_nodes)
-        
+        self.cxP=0.5
+        self.mutP=0.5
         self.init_popsize=0
         
         self.initialize(problem.name)
@@ -133,10 +132,6 @@ class GA_GT:
         self.best_cost = 10**10
         # job, gen
         self.stats = []
-        
-        self.sharking=False
-        self.num_sharking_redundant_nodes = 0
-        self.num_of_sharking = 0
         
     def pop_ctp_init(self):
         '''
@@ -225,105 +220,8 @@ class GA_GT:
         for i in self.problem.obligatory_nodes:
             binary_ind[i-1]=1
         return binary_ind
-    
-    def LS_initialInd(self, giant_tour):
-        if random.random() > 0.1:
-            return giant_tour
-        
-        cost, backtrack = self.problem.split(giant_tour)
-        tours = problem.extract_tours(giant_tour, backtrack)
-        
-        old_cost = cost 
-        
-        new_giant_tour, new_tours, new_cost = LSPrins(problem, giant_tour, tours, old_cost)
-        
-        num_trails = 0
-        while num_trails < MAX_TRAILS and new_cost < old_cost:
-            num_trails += 1
-            old_cost = new_cost
-            new_giant_tour, new_tours, new_cost = LSPrins(problem, new_giant_tour, new_tours, new_cost)
-                  
-        return new_giant_tour
-    
-        
-    def random_init(self):
-        '''
-        randomly initialize individuals
-        '''
-        size = self.problem.num_of_nodes + len(self.problem.obligatory_nodes)
-        # khoi tao bang 1 diem ngau nhien
-        sample_ind = random.sample(range(1, size+1), size)
-        
-        ind = []
-        covering_set = set() #self.problem.get_set_of_customers_covered_by(ind[0])
-        
-        for node in sample_ind:
-                       
-            ind.append(node)
-            covering_set.update(self.problem.get_set_of_customers_covered_by(node))
-            
-            if len(covering_set) == self.problem.num_of_customers:
-                break
-            
-        
-        ind = self.problem.remove_node(ind)
-
-        # insert node in T
-        nodes_set = set(ind)
-        obligatory_nodes_not_in_giant_tour = self.problem.obligatory_nodes.difference(nodes_set)
-        for node in list(obligatory_nodes_not_in_giant_tour):
-            idx = random.randint(0, len(ind))
-            ind.insert(idx, node)
-
-        return self.LS_initialInd(ind) 
         
         
-    def distance_init(self):
-        '''
-        select nodes base on distance
-        '''
-        ind_size = self.problem.num_of_nodes + len(self.problem.obligatory_nodes)
-        # khoi tao bang 1 diem ngau nhien
-        ind = [random.randint(1, ind_size)]
-        ind_set = set(ind)
-        covering_set = self.problem.get_set_of_customers_covered_by(ind[0])
-        
-        while len(covering_set) < self.problem.num_of_customers:
-            
-            # get the last node in ind
-            node = ind[-1]
-            
-            # lay tap cac node sap xep theo khoang cach toi node
-            distance_dict = problem.nodes[node].cost_dict
-            
-            sorted_distance = sorted(distance_dict.items(), key=operator.itemgetter(1))
-            
-            valid_neighbors=[]
-            for neighbor_node, cost in sorted_distance:
-                if neighbor_node!= 0 and not ind_set.issuperset(set([neighbor_node])):
-                    valid_neighbors.append(neighbor_node)
-                    
-                if len(valid_neighbors) == MAX_NEIGHBORS:
-                    break
-            # pick one node from valid neighbor nodes
-            next_node = random.sample(valid_neighbors, 1)[0]
-            
-            # update ind and ind_set
-            ind.append(next_node)
-            ind_set.add(next_node)
-            covering_set.update(self.problem.get_set_of_customers_covered_by(next_node))
-            
-        
-        ind = self.problem.remove_node(ind)
-
-        # insert node in T
-        nodes_set = set(ind)
-        obligatory_nodes_not_in_giant_tour = self.problem.obligatory_nodes.difference(nodes_set)
-        for node in list(obligatory_nodes_not_in_giant_tour):
-            idx = random.randint(0, len(ind))
-            ind.insert(idx, node)
-
-        return self.LS_initialInd(ind) 
         
     def ind_init(self):
         '''
@@ -360,8 +258,7 @@ class GA_GT:
             index = random.randint(0, len(ind)-1)
             ind.insert(index, i+1)
             
-        return ind 
-#         return self.LS_initialInd(ind)
+        return ind
         
     
     def init_mip(self):
@@ -373,18 +270,10 @@ class GA_GT:
         
         return nodes
         
-    def hybird_init(self):
-        if random.random() < 0.2:
-            return self.random_init()
-        else:
-            return self.ind_init()
         
     def initialize(self, problem_name):
         
         self.toolbox.register("indices", self.ind_init)
-#         self.toolbox.register("indices", self.random_init)
-        
-#         self.toolbox.register("indices", self.hybird_init)
         
 #         self.toolbox.register("indices", self.init_mip)
         
@@ -392,11 +281,10 @@ class GA_GT:
         # Structure initializers
         self.toolbox.register("individual", tools.initIterate, creator.Individual, self.toolbox.indices)
         self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
-#         self.toolbox.register("mate", tools.cxUniform, indpb=0.03)
         self.toolbox.register("mate", tools.cxTwoPoint)
 #         tools.cxPartialyMatched(ind1, ind2)
 #         self.toolbox.register("ls", mutLSVRP, problem=problem)
-        self.toolbox.register("mutateLSPrins", mutLSPrins, problem=self.problem, max_trails=MAX_TRAILS)
+#         self.toolbox.register("ls4", mutLS4, problem=problem)
         self.toolbox.register("mutate", mutShaking, problem=self.problem, k=3)
         self.toolbox.register("select", tools.selTournament, tournsize=3)
         self.toolbox.register("evaluate", self.eval)
@@ -409,17 +297,42 @@ class GA_GT:
     def eval(self, individual):
         giant_tour = [node for node in individual]
                 
-#         if not individual.fitness.valid:
-        cost, backtrack = problem.split(giant_tour)
-#         individual.fitness.values = cost,
-        individual.tours = problem.extract_tours(giant_tour, backtrack)
+        if not individual.fitness.valid:
+            cost, backtrack = problem.split(giant_tour)
+            individual.fitness.values = cost,
+            individual.tours = problem.extract_tours(giant_tour, backtrack)
                                 
-        return cost,
+#         return individual.fitness.values[0],
     
 #         new_giant_tour, new_tours, new_cost = ELS(self.problem, giant_tour, individual.tours, individual.fitness.values[0])
 
+        new_cost = individual.fitness.values[0]
+        if random.random() < 0.1:
+            old_cost = new_cost
+            new_giant_tour, new_tours, new_cost = LSPrins(self.problem, giant_tour, individual.tours, new_cost)
             
-#         return new_cost,
+            num_trails = 0
+            while num_trails < 12 and new_cost < old_cost:
+                num_trails += 1
+                old_cost = new_cost
+                new_giant_tour, new_tours, new_cost = LSPrins(self.problem, new_giant_tour, new_tours, new_cost)
+                      
+            
+            if new_cost < self.best_cost:
+                self.best_cost = new_cost
+    #         print new_cost, self.best_cost
+                
+            individual.tours = new_tours
+                
+            N = len(new_giant_tour)
+            if N < len(individual):
+                del individual[len(new_giant_tour):]
+                    
+            assert len(individual)==N, 'len individual is not equal N'
+            for i in xrange(N):
+                individual[i]=new_giant_tour[i]
+            
+        return new_cost,
     
     def repair_ind(self, ind):
                 
@@ -466,11 +379,8 @@ class GA_GT:
                     break
 #         print giant_tour
         # remove redundent nodes
-        old_len = len(giant_tour)
         giant_tour = problem.remove_node(giant_tour)
-        
-        if self.sharking:
-            self.num_sharking_redundant_nodes += old_len - len(giant_tour)
+
         # insert nodes in T
         nodes_set = set(giant_tour)
         self.problem.obligatory_nodes
@@ -493,19 +403,12 @@ class GA_GT:
         return new_ind
         
     def varAndPTA(self, population):
-        self.sharking=False
-        
-        for i in range(len(population)):
-            if random.random() < PLSPRINS:
-                population[i] = self.toolbox.mutateLSPrins(population[i])
         
         offspring = [self.toolbox.clone(ind) for ind in population]
         
-        
-                
         # Apply crossover and mutation on the offspring
         for i in range(1, len(offspring), 2):
-            if random.random() < PCROSS:
+            if random.random() < self.cxP:
                 offspring[i-1], offspring[i] = self.toolbox.mate(offspring[i-1], offspring[i])
                 del offspring[i-1].fitness.values, offspring[i].fitness.values
                 
@@ -514,16 +417,18 @@ class GA_GT:
                 offspring[i] = self.repair_ind(offspring[i])
         
         for i in range(len(offspring)):
-            
-            if random.random() < PMUTATION:
+            if random.random() < self.mutP:
                 offspring[i] = self.toolbox.mutate(offspring[i])
                 
                 del offspring[i].fitness.values
-                self.num_of_sharking += 1
-                self.sharking=True
                 offspring[i] = self.repair_ind(offspring[i])
-                self.sharking=False
-                            
+                
+                
+#         for i in range(len(offspring)):
+#             if not offspring[i].fitness.valid:
+#                 offspring[i] = self.repair_ind(offspring[i])
+        
+            
         return offspring
             
         
@@ -636,7 +541,7 @@ class GA_GT:
     
 #         POPSIZE= 200 #len(self.lines)/2
         
-        pop = self.toolbox.population(n=POPSIZE)
+        pop = self.toolbox.population(n=self.POPSIZE)
     
         hof = tools.HallOfFame(2)
         stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -649,11 +554,11 @@ class GA_GT:
 #         sizeStats.register('size_avg', numpy.mean)
         
         best_cost, best_tours = self.evolve(population=pop, 
-               toolbox=self.toolbox, cxpb=PCROSS, mutpb=PMUTATION, 
-               ngen=NUM_GEN, stats=stats, halloffame=hof, verbose=VERBOSE)
+               toolbox=self.toolbox, cxpb=self.cxP, mutpb=0.3, 
+               ngen=self.NUMGEN, stats=stats, halloffame=hof, verbose=VERBOSE)
         
 #         print 'run ', job, ': ', hof[0].fitness.values[0], ': ', problem.best_cost, ': ', problem.n_same_giant_tour
-        print 'run %d: %.2f %d %d' %(self.job, best_cost, self.num_sharking_redundant_nodes, self.num_of_sharking)
+        print 'run %d: %.2f ' %(self.job, best_cost)
     #     print hof[0].giant_tour
     #     print hof[0].tours
     #     calculate_tours_cost(problem, hof[0].tours, job)
@@ -673,19 +578,19 @@ if __name__ == "__main__":
     
     files = [
              
-#             os.path.join(data_dir, 'A1-10-50-50-4.ctp'),
+#             os.path.join(data_dir, 'A1-1-25-75-4.ctp'),
 #             os.path.join(data_dir, 'A1-1-25-75-5.ctp'),
 #             os.path.join(data_dir, 'A1-1-25-75-6.ctp'),
-#             os.path.join(data_dir, 'D1-10-50-50-6.ctp'),
+#             os.path.join(data_dir, 'A1-1-25-75-8.ctp'),
 #  
             os.path.join(data_dir, 'A2-20-100-100-4.ctp'),
-#              os.path.join(data_dir, 'A2-20-100-100-5.ctp'),
-#              os.path.join(data_dir, 'A2-20-100-100-6.ctp'),
+#             os.path.join(data_dir, 'A2-20-100-100-5.ctp'),
+#             os.path.join(data_dir, 'A2-20-100-100-6.ctp'),
 #             os.path.join(data_dir, 'A2-20-100-100-8.ctp'),
-#              os.path.join(data_dir, 'B2-20-100-100-4.ctp'),
-#              os.path.join(data_dir, 'B2-20-100-100-5.ctp'),
-#              os.path.join(data_dir, 'B2-20-100-100-6.ctp'),
-#              os.path.join(data_dir, 'B2-20-100-100-8.ctp'),
+#             os.path.join(data_dir, 'B2-20-100-100-4.ctp'),
+#             os.path.join(data_dir, 'B2-20-100-100-5.ctp'),
+#             os.path.join(data_dir, 'B2-20-100-100-6.ctp'),
+#             os.path.join(data_dir, 'B2-20-100-100-8.ctp'),
             ]
 #     files = [os.path.join(data_dir, 'A-50-50-6.ctp')]
     moves_freq = {}

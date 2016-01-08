@@ -25,7 +25,7 @@ data_dir = '/home/pta/git/ctp'
 
 data_mctp = 'data_mctp'
 data_mctp1 = 'data_mctp1'
-data_mctp2 = 'data_mctp2'
+data_mctp2 = 'data_test'
 
 data_gmctp = 'data_gmctp'
 data_gmctp1 = 'data_gmctp1'
