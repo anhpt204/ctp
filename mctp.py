@@ -434,17 +434,21 @@ class GA_MCTP:
         cost, backtrack = self.problem.split(giant_tour)
 #         new_ind.fitness.values = cost,
         new_ind.tours = self.problem.extract_tours(giant_tour, backtrack)
-                                                
+        
+        new_ind.fitness.values = cost,
+        
         return new_ind
         
     def varAndPTA(self, population):
         self.sharking=False
 
-        for i in range(len(population)):
-            if random.random() < PLSPRINS:
-                population[i] = self.toolbox.mutateLSPrins(population[i])
         
+#         offspring = self.toolbox.select(population, len(population))
         offspring = [self.toolbox.clone(ind) for ind in population]
+
+        for i in range(len(offspring)):
+            if random.random() < PLSPRINS:
+                offspring[i] = self.toolbox.mutateLSPrins(offspring[i])
         
                 
         # Apply crossover and mutation on the offspring
@@ -558,7 +562,7 @@ class GA_MCTP:
     def run(self):
         print self.problem.name
 #         POPSIZE= 200 #len(self.lines)/2
-        popsize = 50
+        popsize = POPSIZE
         ngen = NUM_GEN
 #         ngen = 20
 #         T = len(self.problem.obligatory_nodes)+1

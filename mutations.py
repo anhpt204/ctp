@@ -204,7 +204,7 @@ def new_mutation(individual, problem, remove_prob):
     '''
     remove k node
     '''
-    #k = random.randint(2,4)
+    k = random.randint(2,4)
     for node in individual:
         if random.random() < remove_prob:
             individual.remove(node)
@@ -218,15 +218,15 @@ def mutLSPrins(individual, problem, max_trails=12):
     if not individual.fitness.valid:
         return individual
     
-    old_cost = individual.fitness.values[0]
+    best_cost = individual.fitness.values[0]
     
-    new_giant_tour, new_tours, new_cost = LSPrins(problem, giant_tour, individual.tours, old_cost)
+    new_giant_tour, new_tours, new_cost = LSPrins(problem, giant_tour, individual.tours, best_cost)
     
     num_trails = 0
-    while num_trails < max_trails and new_cost < old_cost:
+    while num_trails < max_trails and new_cost < best_cost:
         num_trails += 1
-        old_cost = new_cost
-        new_giant_tour, new_tours, new_cost = LSPrins(problem, new_giant_tour, new_tours, new_cost)
+        best_cost = new_cost
+        new_giant_tour, new_tours, new_cost = LSPrins(problem, new_giant_tour, new_tours, best_cost)
               
     
 #         if new_cost < self.best_cost:
@@ -244,4 +244,6 @@ def mutLSPrins(individual, problem, max_trails=12):
     for i in xrange(N):
         individual[i]=new_giant_tour[i]
             
+    individual.fitness.values = best_cost,
+    
     return individual

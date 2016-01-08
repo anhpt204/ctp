@@ -119,7 +119,7 @@ class GA_GT:
         current_gen = 0
         self.problem = problem
         
-        self.POPSIZE=50
+        self.POPSIZE=100
         self.NUMGEN=100
         self.INDSIZE = self.problem.num_of_nodes + len(self.problem.obligatory_nodes)
         self.cxP=0.5
@@ -307,7 +307,7 @@ class GA_GT:
 #         new_giant_tour, new_tours, new_cost = ELS(self.problem, giant_tour, individual.tours, individual.fitness.values[0])
 
         new_cost = individual.fitness.values[0]
-        if random.random() < 0.1:
+        if random.random() < 0.05:
             old_cost = new_cost
             new_giant_tour, new_tours, new_cost = LSPrins(self.problem, giant_tour, individual.tours, new_cost)
             
