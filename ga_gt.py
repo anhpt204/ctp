@@ -66,7 +66,7 @@ def LSPrins(problem, giant_tour, tours, cost):
                         move_success, temp_tours = move(tours, tour_i, tour_j, i, j, u, v, x, y)
                         
                         
-                        if move_success and problem.isFeasibleSolution(temp_tours):
+                        if move_success and problem.isFeasibleSolution(temp_tours) and problem.isSatisfyTourLength(temp_tours):
 #                             print tour_i, tour_j, i, j, temp_tours
                             cost = problem.get_solution_cost(temp_tours)
                             # if improvement

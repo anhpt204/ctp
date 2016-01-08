@@ -173,8 +173,10 @@ class CTPProblem():
             if len(tour) > self.max_nodes_per_route:
                 return False
             
+        # check dupblicate nodes
         if len(set_nodes) != solution_len:
             return False
+        # check tour length
         return True
     
     def isSatisfyTourLength(self, tours):
@@ -189,7 +191,7 @@ class CTPProblem():
     
     
     
-    def split(self, tour):
+    def old_split(self, tour):
         '''
         basic splitting algorithm 'tour splitting algorithms for vehicle routing problem' - Prins
         '''
@@ -266,7 +268,7 @@ class CTPProblem():
         tours.reverse()
         return tours
     
-    def new_split(self, tour):
+    def split(self, tour):
         giant_tour = [0] + tour
         
         t = len(giant_tour)

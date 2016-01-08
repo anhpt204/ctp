@@ -355,7 +355,7 @@ class GA_MCTP:
         giant_tour = [node for node in individual]
                 
 #         if not individual.fitness.valid:
-        cost, backtrack = self.problem.new_split(giant_tour)
+        cost, backtrack = self.problem.split(giant_tour)
 #         individual.fitness.values = cost,
         individual.tours = self.problem.extract_tours(giant_tour, backtrack)
                                 
@@ -599,7 +599,7 @@ class GA_MCTP:
 import glob, os, datetime
 if __name__ == "__main__":
     # load problem
-    data_dir = 'data_gmctp2/' # + folder + '/'
+    data_dir = 'data_mctp1/' # + folder + '/'
     print data_dir
 #     Jobs = 10
     
@@ -616,7 +616,7 @@ if __name__ == "__main__":
 #             os.path.join(data_dir, 'A2-20-100-100-5.ctp'),
 
 #            os.path.join(data_dir, 'A2-10-50-150-4-250.ctp'),
-            os.path.join(data_dir, 'A2-1-50-150-4-250.ctp'),
+            os.path.join(data_dir, 'A2-1-100-100-4-250.ctp'),
 #             os.path.join(data_dir, 'B2-1-50-150-5-250.ctp'),
 #             os.path.join(data_dir, 'B2-1-50-150-5-500.ctp'),
             
@@ -625,7 +625,7 @@ if __name__ == "__main__":
 #             os.path.join(data_dir, 'B2-10-50-150-8.ctp'),
             ]
 #     files = [os.path.join(data_dir, 'A-50-50-6.ctp')]
-    files = glob.glob(data_dir + '*.ctp')
+#     files = glob.glob(data_dir + '*.ctp')
 
     moves_freq = {}
 #     lengths = [250,500,250,500]
@@ -638,11 +638,11 @@ if __name__ == "__main__":
         print file_name, 
         
         # convert gmctp visit moi node nhieu lan sang visit moi node 1 lan
-        problem = GMCTPProblem(data_path=file)        
-        problem.convert_to_gmctp1()
+#         problem = GMCTPProblem(data_path=file)        
+#         problem.convert_to_gmctp1()
         
         # generate gmctp problem
-#         problem = CTPProblem(data_path=file)
+        problem = MCTPProblem(data_path=file)
 #         problem.export_gmctp()
         
         # export gmctp voi rang buoc do dai moi route
@@ -660,10 +660,13 @@ if __name__ == "__main__":
 #         problem.export_gmctp(ro)
         
         # calculate solution cost
-#         tours = [[40, 34, 4, 37, 21, 14]]
-#         cost = problem.get_solution_cost(tours)
-#         print cost
-#         break
+#         tours = [[46, 74, 27, 4, 94, 34, 79]]#, 
+#         tours = [[13, 47, 36, 52]]
+        tours = [[13, 47, 36, 52], [46, 74, 27, 4, 94, 34, 79]]
+        cost = problem.get_solution_cost(tours)
+        print cost
+        print problem.is_tours_satisfy_covering_constraint(tours)
+        break
 
 
 #         best_solution = None
