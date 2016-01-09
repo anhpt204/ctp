@@ -341,8 +341,8 @@ class GA_MCTP:
 #         tools.cxPartialyMatched(ind1, ind2)
 #         self.toolbox.register("ls", mutLSVRP, problem=problem)
         self.toolbox.register("mutateLSPrins", mutLSPrins, problem=self.problem, max_trails=MAX_TRAILS)
-        self.toolbox.register("mutate", mutShaking, problem=self.problem, k=3)
-#         self.toolbox.register("mutate", new_mutation, problem=self.problem, remove_prob=REMOVE_PROB)        
+#         self.toolbox.register("mutate", mutShaking, problem=self.problem, k=3)
+        self.toolbox.register("mutate", new_mutation, problem=self.problem, remove_prob=REMOVE_PROB)        
         self.toolbox.register("select", tools.selTournament, tournsize=3)
         self.toolbox.register("evaluate", self.eval)
         
