@@ -25,7 +25,7 @@ data_dir = '/home/pta/git/ctp'
 
 data_mctp = 'data_mctp'
 data_mctp1 = 'data_mctp1'
-data_mctp2 = 'data_mctp2'
+data_mctp2 = 'data_test'
 
 data_gmctp = 'data_gmctp'
 data_gmctp1 = 'data_gmctp1'
@@ -123,7 +123,7 @@ def run_mctp2(input_file, output_file):
     time1 = datetime.datetime.now()
     file = join(data_dir, data_mctp2, input_file)
     problem = CTPProblem(data_path=file)
-        
+    print problem.name        
 #    problem.max_nodes_per_route = 1000
     problem.max_tour_length=MAX_VALUE
         
@@ -302,9 +302,9 @@ if __name__ == '__main__':
     
     run_mctp2('B2-20-100-100-5.ctp', 'test.out')
     
-#     files = glob.glob1(data_mctp2, '*.ctp')
-#     for file in files:
-#         run_mctp2(file, file + '.out')
+#      files = glob.glob1(data_mctp2, '*.ctp')
+#      for file in files:
+#          run_mctp2(file, file + '.out')
 
 #     if sys.argv[1] == 'mctp':
 #         run_mctp(sys.argv[2], sys.argv[3])

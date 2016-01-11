@@ -187,7 +187,7 @@ def mutShaking(individual, problem, k):
     '''
     remove k node
     '''
-#     k = random.randint(2,4)
+    k = random.randint(2,4)
     candidate_removed_nodes = [node for node in individual if not problem.obligatory_nodes.issuperset(set([node]))]
     
     if k > len(candidate_removed_nodes):

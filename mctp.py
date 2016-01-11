@@ -341,8 +341,8 @@ class GA_MCTP:
 #         tools.cxPartialyMatched(ind1, ind2)
 #         self.toolbox.register("ls", mutLSVRP, problem=problem)
         self.toolbox.register("mutateLSPrins", mutLSPrins, problem=self.problem, max_trails=MAX_TRAILS)
-#         self.toolbox.register("mutate", mutShaking, problem=self.problem, k=3)
-        self.toolbox.register("mutate", new_mutation, problem=self.problem, remove_prob=REMOVE_PROB)        
+        self.toolbox.register("mutate", mutShaking, problem=self.problem, k=3)
+#         self.toolbox.register("mutate", new_mutation, problem=self.problem, remove_prob=REMOVE_PROB)        
         self.toolbox.register("select", tools.selTournament, tournsize=3)
         self.toolbox.register("evaluate", self.eval)
         
@@ -440,32 +440,29 @@ class GA_MCTP:
         return new_ind
         
     def varAndPTA(self, population):
-        self.sharking=False
+        self.sharking=False       
 
-        
-#         offspring = self.toolbox.select(population, len(population))
-        offspring = [self.toolbox.clone(ind) for ind in population]
-
-        for i in range(len(offspring)):
+        for i in range(len(population)):
             if random.random() < PLSPRINS:
-                offspring[i] = self.toolbox.mutateLSPrins(offspring[i])
+                population[i] = self.toolbox.mutateLSPrins(population[i])
         
-                
+        selected_pop = self.toolbox.select(population, len(population))
+        offspring = [self.toolbox.clone(ind) for ind in selected_pop]
+#                 
         # Apply crossover and mutation on the offspring
         for i in range(1, len(offspring), 2):
             if random.random() < PCROSS:
                 offspring[i-1], offspring[i] = self.toolbox.mate(offspring[i-1], offspring[i])
                 del offspring[i-1].fitness.values, offspring[i].fitness.values
-                
+                 
                 # repair
                 offspring[i-1] = self.repair_ind(offspring[i-1])
                 offspring[i] = self.repair_ind(offspring[i])
-        
-        for i in range(len(offspring)):
-            
+#         
+        for i in range(len(offspring)):#             
             if random.random() < PMUTATION:
                 offspring[i] = self.toolbox.mutate(offspring[i])
-                
+                 
                 del offspring[i].fitness.values
                 self.num_of_sharking += 1
                 self.sharking=True
@@ -511,10 +508,10 @@ class GA_MCTP:
         for gen in range(1, ngen+1):
             current_gen = gen
             # Select the next generation individuals
-            offspring = toolbox.select(population, len(population))
+#             offspring = toolbox.select(population, len(population))
             
             # Vary the pool of individuals
-            offspring = self.varAndPTA(offspring)
+            offspring = self.varAndPTA(population)
                         
             # Evaluate the individuals with an invalid fitness
             invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
@@ -560,7 +557,7 @@ class GA_MCTP:
     
     
     def run(self):
-        print self.problem.name
+#        print self.problem.name
 #         POPSIZE= 200 #len(self.lines)/2
         popsize = POPSIZE
         ngen = NUM_GEN
