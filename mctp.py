@@ -342,7 +342,7 @@ class GA_MCTP:
 #         self.toolbox.register("ls", mutLSVRP, problem=problem)
         self.toolbox.register("mutateLSPrins", mutLSPrins, problem=self.problem, max_trails=MAX_TRAILS)
         self.toolbox.register("mutate", mutShaking, problem=self.problem, k=3)
-#         self.toolbox.register("mutate", new_mutation, problem=self.problem, remove_prob=REMOVE_PROB)        
+#        self.toolbox.register("mutate", new_mutation, problem=self.problem, remove_prob=REMOVE_PROB)        
         self.toolbox.register("select", tools.selTournament, tournsize=3)
         self.toolbox.register("evaluate", self.eval)
         
@@ -442,9 +442,9 @@ class GA_MCTP:
     def varAndPTA(self, population):
         self.sharking=False       
 
-        for i in range(len(population)):
-            if random.random() < PLSPRINS:
-                population[i] = self.toolbox.mutateLSPrins(population[i])
+#         for i in range(len(population)):
+#             if random.random() < PLSPRINS:
+#                 population[i] = self.toolbox.mutateLSPrins(population[i])
         
         selected_pop = self.toolbox.select(population, len(population))
         offspring = [self.toolbox.clone(ind) for ind in selected_pop]
@@ -457,7 +457,13 @@ class GA_MCTP:
                  
                 # repair
                 offspring[i-1] = self.repair_ind(offspring[i-1])
+#                 if random.random() < PLSPRINS:
+#                     offspring[i-1] = self.toolbox.mutateLSPrins(offspring[i-1])
+
                 offspring[i] = self.repair_ind(offspring[i])
+#                 if random.random() < PLSPRINS:
+#                     offspring[i] = self.toolbox.mutateLSPrins(offspring[i])
+
 #         
         for i in range(len(offspring)):#             
             if random.random() < PMUTATION:
@@ -467,11 +473,11 @@ class GA_MCTP:
                 self.num_of_sharking += 1
                 self.sharking=True
                 offspring[i] = self.repair_ind(offspring[i])
-                self.sharking=False
                 
-                
-        
-        
+#                 if random.random() < PLSPRINS:
+                offspring[i] = self.toolbox.mutateLSPrins(offspring[i])
+
+                self.sharking=False        
             
         return offspring
             
