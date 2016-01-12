@@ -11,7 +11,7 @@ from mctp import GA_MCTP
 from copy import deepcopy
 import sys
 
-data_dir = '/home/hanu.nxhoai/pta/ctp'
+data_dir = '/share_home/hanu.nxhoai/pta/ctp'
 #data_dir = '/home/anhpt4/git/ctp'
 
 data_mctp = 'data_mctp_vast'
