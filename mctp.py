@@ -457,12 +457,12 @@ class GA_MCTP:
                  
                 # repair
                 offspring[i-1] = self.repair_ind(offspring[i-1])
-#                 if random.random() < PLSPRINS:
-#                     offspring[i-1] = self.toolbox.mutateLSPrins(offspring[i-1])
+                if random.random() < 0.05:
+                    offspring[i-1] = self.toolbox.mutateLSPrins(offspring[i-1])
 
                 offspring[i] = self.repair_ind(offspring[i])
-#                 if random.random() < PLSPRINS:
-#                     offspring[i] = self.toolbox.mutateLSPrins(offspring[i])
+                if random.random() < 0.05:
+                    offspring[i] = self.toolbox.mutateLSPrins(offspring[i])
 
 #         
         for i in range(len(offspring)):#             
@@ -474,8 +474,8 @@ class GA_MCTP:
                 self.sharking=True
                 offspring[i] = self.repair_ind(offspring[i])
                 
-#                 if random.random() < PLSPRINS:
-                offspring[i] = self.toolbox.mutateLSPrins(offspring[i])
+                if random.random() < PLSPRINS:
+                    offspring[i] = self.toolbox.mutateLSPrins(offspring[i])
 
                 self.sharking=False        
             
