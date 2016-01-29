@@ -457,11 +457,11 @@ class GA_MCTP:
                  
                 # repair
                 offspring[i-1] = self.repair_ind(offspring[i-1])
-                if random.random() < 0.05:
+                if random.random() < CROSS_PRINS_PROB:
                     offspring[i-1] = self.toolbox.mutateLSPrins(offspring[i-1])
 
                 offspring[i] = self.repair_ind(offspring[i])
-                if random.random() < 0.05:
+                if random.random() < CROSS_PRINS_PROB:
                     offspring[i] = self.toolbox.mutateLSPrins(offspring[i])
 
 #         
@@ -474,7 +474,7 @@ class GA_MCTP:
                 self.sharking=True
                 offspring[i] = self.repair_ind(offspring[i])
                 
-                if random.random() < PLSPRINS:
+                if random.random() < MUT_PRINS_PROB:
                     offspring[i] = self.toolbox.mutateLSPrins(offspring[i])
 
                 self.sharking=False        
@@ -646,7 +646,7 @@ if __name__ == "__main__":
         
         # generate gmctp problem
         problem = MCTPProblem(data_path=file)
-#         problem.export_gmctp()
+        problem.export_gmctp()
         
         # export gmctp voi rang buoc do dai moi route
 #         n = problem.num_of_nodes + len(problem.obligatory_nodes) + 1
