@@ -388,6 +388,8 @@ class GA_MCTP:
 #         tools.cxPartialyMatched(ind1, ind2)
 #         self.toolbox.register("ls", mutLSVRP, problem=problem)
         self.toolbox.register("mutateLSPrins", mutLSPrins, problem=self.problem, max_trails=MAX_TRAILS)
+#         self.toolbox.register("mutateLSPrins", mutLSPrins_Rnd, problem=self.problem, max_trails=MAX_TRAILS)
+
         self.toolbox.register("mutate", mutShaking, problem=self.problem, k=3)
 #        self.toolbox.register("mutate", new_mutation, problem=self.problem, remove_prob=REMOVE_PROB)        
         self.toolbox.register("select", tools.selTournament, tournsize=3)
@@ -669,17 +671,18 @@ class GA_MCTP:
         for i in range(len(offspring)):#             
             if random.random() < PMUTATION:
                 offspring[i] = self.toolbox.mutate(offspring[i])
-                 
+#                  
                 del offspring[i].fitness.values
-                self.num_of_sharking += 1
-                self.sharking=True
-#                 offspring[i] = self.repair_ind(offspring[i])
+#                 self.num_of_sharking += 1
+#                 self.sharking=True
+# #                 offspring[i] = self.repair_ind(offspring[i])
                 offspring[i] = self.repair_ind_rnd(offspring[i])
-                
+#                 
                 if random.random() < MUT_PRINS_PROB:
                     offspring[i] = self.toolbox.mutateLSPrins(offspring[i])
-
-                self.sharking=False        
+# 
+#                 self.sharking=False
+                
             
         return offspring
             

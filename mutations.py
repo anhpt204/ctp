@@ -5,10 +5,12 @@ Created on Sep 8, 2015
 '''
 import random
 
-from ls import ls_prins, ls_move14, ls_prins_vrp, LS3, LS2, LS1
+from ls import ls_prins, ls_move14, ls_prins_vrp, LS3, LS2, LS1, LS4
 from genetic import computeFitness
-from ls_moves import move10, move10_vrp
+from ls_moves import move10, move10_vrp, move1, move4, move8, move9
 from ga_gt import LSPrins
+from copy import deepcopy
+from setting import MAX_TRAILS_PRINS_RND
 
 def mutShuffleIndexesCTP(individual, indpb):
     """Shuffle the attributes of the input individual and return the mutant.
@@ -246,3 +248,101 @@ def mutLSPrins(individual, problem, max_trails=12):
     individual.fitness.values = best_cost,
     
     return individual
+
+
+def LSPrins_Rnd(problem, giant_tour, tours, cost):
+    '''
+    A Simple and Effective Evolutionary Algorithm for the Vehicle Routing Problem, Prins, 2001
+    
+    Chon cac nodes ngau nhien
+    '''
+#     move_operators = [move1, move2, move3, move4, move5, move6, move7, move8, move9]
+    move_operators=[move1, move4, move8, move9]
+    
+    tours_len = len(tours)
+    best_cost = cost
+    best_tours = deepcopy(tours)
+    improvement = False
+    
+    selected_nodes = {}
+    
+    for _ in xrange(MAX_TRAILS_PRINS_RND):
+        tour_i,tour_j = random.sample(range(tours_len),2)
+
+        tour1_tmp = [0] + tours[tour_i] + [0]
+        tour2_tmp = [0] + tours[tour_j] +  [0]
+        
+        i = random.randint(1, len(tour1_tmp)-2)
+        j = random.randint(1, len(tour2_tmp)-2)
+#         print tour2_tmp, j
+        u, x = tour1_tmp[i], tour1_tmp[i+1]
+        v, y = tour2_tmp[j], tour2_tmp[j+1]
+    
+        key = (u,x,v,y)
+        if selected_nodes.has_key(key):
+            continue
+        else:
+            selected_nodes[key]=1
+            
+        # move operators
+        for move in move_operators:
+                                    
+            move_success, temp_tours = move(tours, tour_i, tour_j, i, j, u, v, x, y)
+            
+            
+            if move_success and problem.isFeasibleSolution(temp_tours) and problem.isSatisfyTourLength(temp_tours):
+#                             print tour_i, tour_j, i, j, temp_tours
+                cost = problem.get_solution_cost(temp_tours)
+                # if improvement
+                if cost < best_cost:
+                    best_cost = cost
+                    best_tours = temp_tours[:]
+                    improvement = True
+                    break
+        if improvement:
+            break
+                        
+    if improvement:
+        giant_tour = problem.concat(best_tours)
+
+    return giant_tour, best_tours, best_cost
+#     
+#     new_tours, new_cost = LS4(problem, giant_tour, best_tours, best_cost)
+    
+#     return problem.concat(new_tours), new_tours, new_cost
+
+def mutLSPrins_Rnd(individual, problem, max_trails=12):
+    
+    giant_tour = [node for node in individual]
+    
+    if not individual.fitness.valid:
+        return individual
+    
+    best_cost = individual.fitness.values[0]
+    
+    new_giant_tour, new_tours, new_cost = LSPrins_Rnd(problem, giant_tour, individual.tours, best_cost)
+    
+    num_trails = 0
+    while num_trails < max_trails and new_cost < best_cost:
+        num_trails += 1
+        best_cost = new_cost
+        new_giant_tour, new_tours, new_cost = LSPrins_Rnd(problem, new_giant_tour, new_tours, best_cost)
+              
+    # run LS4
+    new_tours, new_cost = LS4(problem, new_giant_tour, new_tours, new_cost)
+    new_giant_tour = problem.concat(new_tours)        
+    # re construct individual
+    individual.tours = new_tours
+        
+    N = len(new_giant_tour)
+    if N < len(individual):
+        del individual[len(new_giant_tour):]
+            
+    assert len(individual)==N, 'len individual is not equal N'
+    for i in xrange(N):
+        individual[i]=new_giant_tour[i]
+            
+    individual.fitness.values = best_cost,
+    
+    return individual
+

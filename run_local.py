@@ -300,7 +300,7 @@ def run_gmctp2(input_file, output_file):
 if __name__ == '__main__':
 #     run_gmctp('input.108', 'output.108')
     
-    run_mctp2('B2-20-100-100-5.ctp', 'test.out')
+    run_mctp('A2-20-100-100-4-250.ctp', 'test.out')
     
 #      files = glob.glob1(data_mctp2, '*.ctp')
 #      for file in files:
