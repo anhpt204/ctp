@@ -307,6 +307,53 @@ class GA_MCTP:
         return ind
 #         return self.LS_initialInd(ind)
         
+    def ind_init_gmctp(self):
+        '''
+        khoi tao individuals = hoan vi cua cac node trong nodes
+        '''            
+        # get nodes with distance from depot to it is less than max_tour_length
+#         candidate_nodes = [node for node in range(1, self.problem.num_of_nodes) \
+#                            if self.problem.nodes[0].cost_dict[node] * 2 <= self.problem.max_tour_length]
+        ind=[]
+        # w[i]=the number of columms that cover row i
+        w=[0]*self.problem.num_of_customers
+        for c in xrange(self.problem.num_of_customers):
+            if w[c] >= self.problem.customer_covering[c]:
+                continue
+            # randomly select k nodes that covers customer c
+            covered_nodes = self.problem.nodes_covering_customer[c]
+            candidate_nodes = covered_nodes.difference(set(ind))
+            
+            k = self.problem.customer_covering[c]-w[c]
+            
+            nodes = random.sample(candidate_nodes, k)
+            ind = ind + nodes
+            for node in nodes:
+                for i in self.problem.get_set_of_customers_covered_by(node):
+                    w[i]+=1
+            
+        # remove redundant node
+        T = ind[:]
+        while len(T) > 0:
+            j = random.choice(T)
+            T.remove(j)
+            temp=True
+            for c in self.problem.get_set_of_customers_covered_by(j):
+                if w[c]<= self.problem.customer_covering[c]:
+                    temp=False
+                    break
+            if temp:
+                ind.remove(j)
+                for c in self.problem.get_set_of_customers_covered_by(j):
+                    w[c] = w[c]-1
+        
+                    
+        for i in xrange(len(self.problem.obligatory_nodes)):
+            index = random.randint(0, len(ind)-1)
+            ind.insert(index, i+1)
+            
+        return ind
+#         return self.LS_initialInd(ind)
     
     def init_mip(self):
         '''
@@ -325,7 +372,7 @@ class GA_MCTP:
         
     def initialize(self, problem_name):
         
-        self.toolbox.register("indices", self.ind_init)
+        self.toolbox.register("indices", self.ind_init_gmctp)
 #         self.toolbox.register("indices", self.random_init)
         
 #         self.toolbox.register("indices", self.hybird_init)
@@ -354,6 +401,7 @@ class GA_MCTP:
     def eval(self, individual):
         giant_tour = [node for node in individual]
                 
+#         print giant_tour
 #         if not individual.fitness.valid:
         cost, backtrack = self.problem.split(giant_tour)
 #         individual.fitness.values = cost,
@@ -367,7 +415,9 @@ class GA_MCTP:
 #         return new_cost,
     
     def repair_ind(self, ind):
-                
+        '''
+        chon node de tao loi giai phu nhieu nhat
+        '''
         giant_tour = [i for i in ind]
         
         # remove dupblicate node in giant tour
@@ -438,7 +488,156 @@ class GA_MCTP:
         new_ind.fitness.values = cost,
         
         return new_ind
+
+    def repair_ind_rnd(self, ind):
+        '''
+        chon node ngau nhien
+        '''
+                
+        giant_tour = [i for i in ind]
         
+        # remove dupblicate node in giant tour
+        nodes_set = set(giant_tour)
+        if len(nodes_set) < len(giant_tour):
+            new_giant_tour = []
+            for node in giant_tour:
+                if nodes_set.issuperset(set([node])):
+                    new_giant_tour.append(node)
+                    nodes_set.discard(node)
+            
+            giant_tour = new_giant_tour
+            
+#         print giant_tour
+        nodes_in_giant_tour = set(giant_tour)
+        nodes_not_in_giant_tour = set(range(1, len(self.problem.nodes))).difference(nodes_in_giant_tour)
+                
+        nodes_not_in_giant_tour = list(nodes_not_in_giant_tour)
+                        
+        while not self.problem.is_giant_tour_satisfy_covering_constraint(giant_tour):
+            # randomly choice a node                
+            rnd_node = random.choice(nodes_not_in_giant_tour)
+
+            # insert max_node into giant tour at random position
+            idx = random.randint(0, len(giant_tour))
+            giant_tour.insert(idx, rnd_node)
+            
+            # update
+            nodes_not_in_giant_tour.remove(rnd_node)
+
+#         print giant_tour
+
+        # remove redundent nodes
+        old_len = len(giant_tour)
+        giant_tour = self.problem.remove_node(giant_tour)
+        
+        if self.sharking:
+            self.num_sharking_redundant_nodes += old_len - len(giant_tour)
+        # insert nodes in T
+        nodes_set = set(giant_tour)
+        self.problem.obligatory_nodes
+        obligatory_nodes_not_in_giant_tour = self.problem.obligatory_nodes.difference(nodes_set)
+        for node in list(obligatory_nodes_not_in_giant_tour):
+            idx = random.randint(0, len(giant_tour))
+            giant_tour.insert(idx, node)
+            
+        # update individual
+        new_ind = deepcopy(ind)
+        
+        del new_ind[:]
+        for node in giant_tour:
+            new_ind.append(node)
+        
+        cost, backtrack = self.problem.split(giant_tour)
+#         new_ind.fitness.values = cost,
+        new_ind.tours = self.problem.extract_tours(giant_tour, backtrack)
+        
+        new_ind.fitness.values = cost,
+        
+        return new_ind
+
+        
+    def repair_ind_rnd_gmctp(self, individual):
+        '''
+        adap from init_ind
+        
+        khoi tao individuals = hoan vi cua cac node trong nodes
+        '''            
+        ind = [node for node in individual]
+        nodes_set = set(ind)
+        if len(nodes_set) < len(ind):
+            new_giant_tour = []
+            for node in ind:
+                if nodes_set.issuperset(set([node])):
+                    new_giant_tour.append(node)
+                    nodes_set.discard(node)
+            
+            ind = new_giant_tour
+
+#         print 'before repair: ', ind
+        # w[i]=the number of columms that cover row i
+        w=[0]*self.problem.num_of_customers
+        
+        for node in ind:
+            for c in self.problem.get_set_of_customers_covered_by(node):
+                w[c] += 1
+                
+        for c in xrange(self.problem.num_of_customers):
+            if w[c] >= self.problem.customer_covering[c]:
+                continue
+            # randomly select k nodes that covers customer c
+            covered_nodes = self.problem.nodes_covering_customer[c]
+            # accept nodes that not in ind
+            candidate_nodes = covered_nodes.difference(set(ind))
+            
+            k = self.problem.customer_covering[c]-w[c]
+            
+            nodes = random.sample(candidate_nodes, k)
+            for node in nodes:
+                idx = random.randint(0, len(ind)-1)
+                ind.insert(idx, node)
+
+            for node in nodes:
+                for i in self.problem.get_set_of_customers_covered_by(node):
+                    w[i]+=1
+            
+        # remove redundant node
+        T = ind[:]
+        while len(T) > 0:
+            j = random.choice(T)
+            T.remove(j)
+            temp=True
+            for c in self.problem.get_set_of_customers_covered_by(j):
+                if w[c]<= self.problem.customer_covering[c]:
+                    temp=False
+                    break
+            if temp:
+                ind.remove(j)
+                for c in self.problem.get_set_of_customers_covered_by(j):
+                    w[c] = w[c]-1
+        
+                    
+        for i in xrange(len(self.problem.obligatory_nodes)):
+            index = random.randint(0, len(ind)-1)
+            ind.insert(index, i+1)
+            
+        # update individual
+        new_ind = deepcopy(individual)
+        
+        del new_ind[:]
+        for node in ind:
+            new_ind.append(node)
+        
+#         print 'after repair: ', ind
+        
+        cost, backtrack = self.problem.split(ind)
+#         new_ind.fitness.values = cost,
+        new_ind.tours = self.problem.extract_tours(ind, backtrack)
+        
+        new_ind.fitness.values = cost,
+        
+        return new_ind
+#         return self.LS_initialInd(ind)
+
     def varAndPTA(self, population):
         self.sharking=False       
 
@@ -456,12 +655,14 @@ class GA_MCTP:
                 del offspring[i-1].fitness.values, offspring[i].fitness.values
                  
                 # repair
-                offspring[i-1] = self.repair_ind(offspring[i-1])
-                if random.random() < 0.05:
+#                 offspring[i-1] = self.repair_ind(offspring[i-1])
+                offspring[i-1] = self.repair_ind_rnd(offspring[i-1])
+                if random.random() < CROSS_PRINS_PROB:
                     offspring[i-1] = self.toolbox.mutateLSPrins(offspring[i-1])
 
-                offspring[i] = self.repair_ind(offspring[i])
-                if random.random() < 0.05:
+#                 offspring[i] = self.repair_ind(offspring[i])
+                offspring[i] = self.repair_ind_rnd(offspring[i])
+                if random.random() < CROSS_PRINS_PROB:
                     offspring[i] = self.toolbox.mutateLSPrins(offspring[i])
 
 #         
@@ -472,9 +673,10 @@ class GA_MCTP:
                 del offspring[i].fitness.values
                 self.num_of_sharking += 1
                 self.sharking=True
-                offspring[i] = self.repair_ind(offspring[i])
+#                 offspring[i] = self.repair_ind(offspring[i])
+                offspring[i] = self.repair_ind_rnd(offspring[i])
                 
-                if random.random() < PLSPRINS:
+                if random.random() < MUT_PRINS_PROB:
                     offspring[i] = self.toolbox.mutateLSPrins(offspring[i])
 
                 self.sharking=False        
@@ -576,6 +778,9 @@ class GA_MCTP:
 #             ngen = 100
             
         pop = self.toolbox.population(n=popsize)
+        
+#         for i in xrange(popsize):
+#             print i, pop[i]
     
         hof = tools.HallOfFame(2)
         stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -646,7 +851,7 @@ if __name__ == "__main__":
         
         # generate gmctp problem
         problem = MCTPProblem(data_path=file)
-#         problem.export_gmctp()
+        problem.export_gmctp()
         
         # export gmctp voi rang buoc do dai moi route
 #         n = problem.num_of_nodes + len(problem.obligatory_nodes) + 1
