@@ -372,7 +372,9 @@ class GA_MCTP:
         
     def initialize(self, problem_name):
         
-        self.toolbox.register("indices", self.ind_init_gmctp)
+#        self.toolbox.register("indices", self.ind_init_gmctp)
+	self.toolbox.register("indices", self.ind_init)
+
 #         self.toolbox.register("indices", self.random_init)
         
 #         self.toolbox.register("indices", self.hybird_init)
