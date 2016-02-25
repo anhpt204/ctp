@@ -3,7 +3,7 @@
 #$ -cwd
 #$ -j y
 #$ -S /bin/bash
-#$ -pe orte 6
+#$ -pe orte 3
 #$ -o mctp.out
 #$ -e mctp.err
 

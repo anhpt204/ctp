@@ -60,6 +60,8 @@ class GA_MCTP:
         
         current_gen = 0
         self.problem = problem
+	self.mut_prob = 0.0
+	self.cross_prob = 1.0
         
         self.INDSIZE = self.problem.num_of_nodes + len(self.problem.obligatory_nodes)
         
@@ -307,7 +309,7 @@ class GA_MCTP:
         return ind
 #         return self.LS_initialInd(ind)
         
-    def ind_init_gmctp(self):
+    def ind_init_mgctp(self):
         '''
         khoi tao individuals = hoan vi cua cac node trong nodes
         '''            
@@ -372,8 +374,8 @@ class GA_MCTP:
         
     def initialize(self, problem_name):
         
-#        self.toolbox.register("indices", self.ind_init_gmctp)
-	self.toolbox.register("indices", self.ind_init)
+        self.toolbox.register("indices", self.ind_init_mgctp)
+#	self.toolbox.register("indices", self.ind_init)
 
 #         self.toolbox.register("indices", self.random_init)
         
@@ -560,7 +562,7 @@ class GA_MCTP:
         return new_ind
 
         
-    def repair_ind_rnd_gmctp(self, individual):
+    def repair_ind_rnd_mgctp(self, individual):
         '''
         adap from init_ind
         
@@ -654,31 +656,40 @@ class GA_MCTP:
 #                 
         # Apply crossover and mutation on the offspring
         for i in range(1, len(offspring), 2):
-            if random.random() < PCROSS:
+            if random.random() < self.cross_prob:
                 offspring[i-1], offspring[i] = self.toolbox.mate(offspring[i-1], offspring[i])
                 del offspring[i-1].fitness.values, offspring[i].fitness.values
                  
                 # repair
+		# for mctp
 #                 offspring[i-1] = self.repair_ind(offspring[i-1])
                 offspring[i-1] = self.repair_ind_rnd(offspring[i-1])
+		
+		# for mgctp
+		offspring[i-1] = self.repair_ind_rnd_mgctp(offspring[i-1])
                 if random.random() < CROSS_PRINS_PROB:
                     offspring[i-1] = self.toolbox.mutateLSPrins(offspring[i-1])
-
+		
+		# for mctp
 #                 offspring[i] = self.repair_ind(offspring[i])
-                offspring[i] = self.repair_ind_rnd(offspring[i])
+#                offspring[i] = self.repair_ind_rnd(offspring[i])
+		# for mgctp
+                offspring[i] = self.repair_ind_rnd_mgctp(offspring[i])
+		
                 if random.random() < CROSS_PRINS_PROB:
                     offspring[i] = self.toolbox.mutateLSPrins(offspring[i])
 
 #         
         for i in range(len(offspring)):#             
-            if random.random() < PMUTATION:
+            if random.random() < self.mut_prob:
                 offspring[i] = self.toolbox.mutate(offspring[i])
 #                  
                 del offspring[i].fitness.values
 #                 self.num_of_sharking += 1
 #                 self.sharking=True
 # #                 offspring[i] = self.repair_ind(offspring[i])
-                offspring[i] = self.repair_ind_rnd(offspring[i])
+#                offspring[i] = self.repair_ind_rnd(offspring[i])
+                offspring[i] = self.repair_ind_rnd_mgctp(offspring[i])
 #                 
                 if random.random() < MUT_PRINS_PROB:
                     offspring[i] = self.toolbox.mutateLSPrins(offspring[i])
@@ -749,11 +760,14 @@ class GA_MCTP:
                 
                 new_best_fitness = halloffame[0].fitness.values[0]
             
-                if old_best_fitness == new_best_fitness:
+                
+		if old_best_fitness == new_best_fitness:
                     num_gen_no_improve += 1
                 else:
                     num_gen_no_improve = 0
-                    
+            self.mut_prob = float(num_gen_no_improve)/100.0
+	    self.cross_prob = 1.0-self.mut_prob
+    
             if num_gen_no_improve == MAX_NUM_GEN_NO_IMPROVE:
                 break
 
