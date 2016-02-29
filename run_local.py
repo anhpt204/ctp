@@ -27,9 +27,9 @@ data_mctp = 'data_mctp'
 data_mctp1 = 'data_mctp1'
 data_mctp2 = 'data_test'
 
-data_gmctp = 'data_gmctp'
-data_gmctp1 = 'data_gmctp1'
-data_gmctp2 = 'data_gmctp2'
+data_mgctp = 'data_mgctp1.0'
+data_mgctp1 = 'data_gmctp1'
+data_mgctp2 = 'data_gmctp2'
 
 def run_mctp(input_file, output_file):
     time1 = datetime.datetime.now()
@@ -164,9 +164,9 @@ def run_mctp2(input_file, output_file):
     f.writelines(lines)
 
 
-def run_gmctp(input_file, output_file):
+def run_mgctp(input_file, output_file):
     time1 = datetime.datetime.now()
-    file = join(data_dir, data_gmctp, input_file)
+    file = join(data_dir, data_mgctp, input_file)
     problem = GMCTPProblem(data_path=file)
         
 #     problem.max_nodes_per_route = 1000
@@ -298,9 +298,9 @@ def run_gmctp2(input_file, output_file):
 
 
 if __name__ == '__main__':
-#     run_gmctp('input.108', 'output.108')
+     run_mgctp('A2-20-100-100-8-500.ctp', 'A2-20-100-100-8-500.out')
     
-    run_mctp('A2-20-100-100-4-250.ctp', 'test.out')
+#    run_mctp('A2-20-100-100-4-250.ctp', 'test.out')
     
 #      files = glob.glob1(data_mctp2, '*.ctp')
 #      for file in files:
