@@ -60,8 +60,8 @@ class GA_MCTP:
 
         current_gen = 0
         self.problem = problem
-	self.mut_prob = 0.0
-	self.cross_prob = 1.0
+	    self.mut_prob = 0.0
+	    self.cross_prob = 1.0
 
         self.INDSIZE = self.problem.num_of_nodes + len(self.problem.obligatory_nodes)
 
@@ -622,9 +622,13 @@ class GA_MCTP:
                     w[c] = w[c]-1
 
 
-        for i in xrange(len(self.problem.obligatory_nodes)):
-            index = random.randint(0, len(ind)-1)
-            ind.insert(index, i+1)
+        # insert nodes in T
+        nodes_set = set(ind)
+#        self.problem.obligatory_nodes
+        obligatory_nodes_not_in_giant_tour = self.problem.obligatory_nodes.difference(nodes_set)
+        for node in list(obligatory_nodes_not_in_giant_tour):
+            idx = random.randint(0, len(ind))
+            ind.insert(idx, node)
 
         # update individual
         new_ind = deepcopy(individual)
@@ -661,19 +665,19 @@ class GA_MCTP:
                 del offspring[i-1].fitness.values, offspring[i].fitness.values
 
                 # repair
-		# for mctp
+		        # for mctp
 #                 offspring[i-1] = self.repair_ind(offspring[i-1])
  #               offspring[i-1] = self.repair_ind_rnd(offspring[i-1])
 
-		# for mgctp
-		offspring[i-1] = self.repair_ind_rnd_mgctp(offspring[i-1])
+		        # for mgctp
+		        offspring[i-1] = self.repair_ind_rnd_mgctp(offspring[i-1])
                 if random.random() < CROSS_PRINS_PROB:
                     offspring[i-1] = self.toolbox.mutateLSPrins(offspring[i-1])
 
-		# for mctp
+		        # for mctp
 #                 offspring[i] = self.repair_ind(offspring[i])
 #                offspring[i] = self.repair_ind_rnd(offspring[i])
-		# for mgctp
+		        # for mgctp
                 offspring[i] = self.repair_ind_rnd_mgctp(offspring[i])
 
                 if random.random() < CROSS_PRINS_PROB:
@@ -765,7 +769,7 @@ class GA_MCTP:
                     num_gen_no_improve += 1
                 else:
                     num_gen_no_improve = 0
-            self.mut_prob = float(num_gen_no_improve)/100.0
+            self.mut_prob = float(num_gen_no_improve)/50.0
 
 	    if self.mut_prob > 0.5:
 		self.mut_prob = 0.5
